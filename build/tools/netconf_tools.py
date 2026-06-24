@@ -99,9 +99,12 @@ NETCONF_TOOL_DEFINITIONS: list[ToolDefinition] = [
                 "xpath_filter": {
                     "type": "string",
                     "description": (
-                        "XPath expression, used when filter_type=xpath. Example: "
-                        "'/native/router/bgp'. Device must support XPath filtering "
-                        "(IOS-XE 16.6+ and NX-OS 9.x do)."
+                        "XPath expression, used when filter_type=xpath. The XPath runs "
+                        "ON THE DEVICE and must be UNPREFIXED — use element names only, "
+                        "e.g. '/native/router/bgp' or '/native/ip/access-list'. Do NOT add "
+                        "YANG module prefixes like 'Cisco-IOS-XE-native:' — a prefixed "
+                        "XPath causes 'RPCError: invalid namespace prefix'. Device must "
+                        "support XPath filtering (IOS-XE 16.6+ and NX-OS 9.x do)."
                     ),
                 },
             },
@@ -138,7 +141,13 @@ NETCONF_TOOL_DEFINITIONS: list[ToolDefinition] = [
                 },
                 "xpath_filter": {
                     "type": "string",
-                    "description": "XPath expression, used when filter_type=xpath.",
+                    "description": (
+                        "XPath expression, used when filter_type=xpath. Runs ON THE DEVICE "
+                        "and must be UNPREFIXED (element names only), e.g. "
+                        "'/native/ip/access-list' or '/interfaces/interface'. Do NOT use "
+                        "YANG prefixes like 'Cisco-IOS-XE-native:' — prefixed XPath causes "
+                        "'RPCError: invalid namespace prefix'."
+                    ),
                 },
             },
             "required": ["device_name"],

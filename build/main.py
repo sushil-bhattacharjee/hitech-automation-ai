@@ -59,7 +59,7 @@ import agent as agent_mod
 from tools import DeviceContext
 
 # ----------------------------- version ----------------------------- #
-APP_VERSION = "hitech_automation_ai.1.27.0"
+APP_VERSION = "hitech_automation_ai.1.29.0"
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from jinja2 import Environment, StrictUndefined, TemplateSyntaxError
@@ -1673,6 +1673,7 @@ class RestconfExecuteRequest(BaseModel):
     device_name: Optional[str] = None     # for auth_type=inventory
     payload: Optional[str] = None         # JSON body for write methods
     verify_tls: bool = False              # lab default
+    restconf_defaults: bool = False       # v1.28.0 issue-1: if True, add Accept/Content-Type yang-data defaults; default OFF (emit only headers the user set)
 
 
 def _build_export_snippets(method: str, url: str, headers: dict,
@@ -1788,9 +1789,12 @@ async def api_restconf_execute(req: RestconfExecuteRequest):
             base = f"https://{d_match.host}:{d_match.port_restconf}"
             final_uri = base + (final_uri if final_uri.startswith("/") else "/" + final_uri)
 
-    headers_out.setdefault("Accept", "application/yang-data+json")
-    if final_payload:
-        headers_out.setdefault("Content-Type", "application/yang-data+json")
+    # v1.28.0 issue-1: do NOT auto-inject RESTCONF defaults unless explicitly requested.
+    # Emit only the headers the user actually set (matters for APIC/ACI which isn't YANG).
+    if req.restconf_defaults:
+        headers_out.setdefault("Accept", "application/yang-data+json")
+        if final_payload:
+            headers_out.setdefault("Content-Type", "application/yang-data+json")
 
     _audit.log_event("restconf_execute_ui",
                     method=req.method, uri=final_uri,
@@ -1835,6 +1839,7 @@ class CurlExecuteRequest(BaseModel):
     """Paste a curl command and execute it as a subprocess. Output captured."""
     curl_command: str
     timeout_seconds: int = Field(default=30, ge=1, le=300)
+    env_vars: dict = Field(default_factory=dict)   # v1.28.0 issue-2: Environment vars → process env ($VAR)
 
 
 class PythonExecuteRequest(BaseModel):
@@ -1846,6 +1851,7 @@ class PythonExecuteRequest(BaseModel):
     code: str
     env_text: str = ""
     timeout_seconds: int = Field(default=30, ge=1, le=300)
+    env_vars: dict = Field(default_factory=dict)   # v1.28.0 issue-2: Environment vars → os.environ
 
 
 @app.post("/api/curl-execute")
@@ -1895,12 +1901,21 @@ async def api_curl_execute(req: CurlExecuteRequest):
     _audit.log_event("curl_execute_ui", shell="bash -lc", first_token=first_tok,
                      length=len(cmd_text))
 
+    # v1.28.0 issue-2: inject the active Environment's vars into the process env so the
+    # pasted command can reference $APIC_HOST etc. The shell text itself can still export/
+    # override its own vars (those win, since they run inside the shell).
+    _merged_env = dict(_os.environ)
+    for _k, _v in (req.env_vars or {}).items():
+        if _k:
+            _merged_env[str(_k)] = str(_v)
+
     t0 = time.monotonic()
     try:
         proc = await asyncio.create_subprocess_exec(
             "bash", "-lc", instrumented,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
+            env=_merged_env,
         )
         try:
             stdout, stderr = await asyncio.wait_for(
@@ -2022,14 +2037,16 @@ async def api_python_execute(req: PythonExecuteRequest):
         raise HTTPException(400, "code is empty")
 
     user_env = _py_parse_env_text(req.env_text)
+    # v1.28.0 issue-2: layering — service env < Environment vars < pane env-box (most local wins)
+    _env_layer = {str(k): str(v) for k, v in (req.env_vars or {}).items() if k}
     _audit.log_event("python_execute_ui", length=len(code),
-                     env_keys=sorted(user_env.keys()))  # keys only — values never logged
+                     env_keys=sorted(set(list(user_env.keys()) + list(_env_layer.keys()))))  # keys only
 
     t0 = time.monotonic()
     try:
         proc = await asyncio.create_subprocess_exec(
             sys.executable, "-",
-            env={**os.environ, **user_env},  # box overrides service; service is fallback
+            env={**os.environ, **_env_layer, **user_env},  # pane box > Environment > service
             stdin=asyncio.subprocess.PIPE,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,

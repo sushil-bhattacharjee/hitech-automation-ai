@@ -1,5 +1,41 @@
 # CHANGELOG
 
+## hitech_automation_ai.1.29.0 — 2026-06-24
+
+### Changed — better agent tool descriptions (fewer wasted iterations)
+- **`get_state` / `get_running_config` (`xpath_filter`)** now spell out that the XPath runs
+  ON THE DEVICE and must be **UNPREFIXED** (element names only, e.g. `/native/ip/access-list`).
+  Adding a YANG module prefix like `Cisco-IOS-XE-native:` causes `RPCError: invalid namespace
+  prefix`. Previously the agent (e.g. qwen3-coder) would try a prefixed XPath and burn an
+  iteration on the error before correcting.
+- **`restconf_get` (`yang_path`)** now clarifies the opposite: a RESTCONF data path **does** use
+  the module prefix (unlike on-device NETCONF XPath), and that 404s are usually a container-nesting
+  problem (e.g. ACLs live under `Cisco-IOS-XE-native:native/ip/access-list`). 
+
+Text-only description changes — no behavior change to the tools themselves.
+
+
+## hitech_automation_ai.1.28.0 — 2026-06-24
+
+### Fixed (issue-1)
+- **No more auto-injected default headers on https-restconf.** Previously `Accept:
+  application/yang-data+json` (and `Content-Type` on writes) were added automatically to both
+  the sent request and the "Export request → code" output — wrong for APIC/ACI (not YANG) and
+  not matching what you built. Now the request sends **only the headers you set**. A new opt-in
+  checkbox **"Add RESTCONF default headers (IOS-XE)"** re-adds them when you want the IOS-XE
+  convenience default.
+
+### Added (issue-2)
+- **Environment variables on curl-restconf and python-restconf**, matching https. Both panes now
+  have the same **Environment** selector (synced with the https one — one active environment).
+  Before a run:
+  - **`{{VAR}}`** in the curl command / python code is substituted from the active environment.
+  - the active environment's vars are **injected into the process environment**, so curl sees
+    `$APIC_HOST` (via `bash -lc`) and python sees `os.environ['APIC_HOST']`.
+  - On a name clash, each pane's own env-box (`py-env`, or shell `export`s) wins — the
+    Environment is the base layer.
+
+
 ## hitech_automation_ai.1.27.0 — 2026-06-24
 
 ### Changed — full product rename (netconf-sender → hiTech Automation AI)

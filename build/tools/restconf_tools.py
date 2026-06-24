@@ -72,7 +72,13 @@ RESTCONF_TOOLS: list[ToolDefinition] = [
                     "description": (
                         "YANG path relative to restconf_root, e.g. "
                         "'Cisco-IOS-XE-native:native/router/router-bgp/bgp' or "
-                        "'openconfig-bgp:bgp/neighbors'. Do NOT include leading slash."
+                        "'openconfig-bgp:bgp/neighbors'. Do NOT include a leading slash. "
+                        "NOTE: this is a full RESTCONF data path and DOES use the module "
+                        "prefix (unlike on-device NETCONF XPath, which is unprefixed). Get "
+                        "the container nesting right — e.g. ACLs live under "
+                        "'Cisco-IOS-XE-native:native/ip/access-list', not directly under "
+                        "'native/access-list'. If a GET 404s, the path nesting is usually "
+                        "the cause; verify against the device's YANG model."
                     ),
                 },
                 "depth": {

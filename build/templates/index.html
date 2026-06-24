@@ -642,7 +642,7 @@
     </div>
   </div>
   <div class="v18-nav-footer">
-    <span id="v18-version-badge">v1.27.0</span>
+    <span id="v18-version-badge">v1.29.0</span>
   </div>
 </aside>
 <!-- v1.20.1: single drag bar on the merged sidebar's right edge -->
@@ -994,6 +994,7 @@ pre.result-pane.pane-expanded { height: auto !important; }
             </div>
             <textarea id="rc-payload" rows="10" style="width:100%; font-family:monospace; font-size:12px;" placeholder='{"Cisco-IOS-XE-native:hostname": "router1"}'></textarea>
             <label style="font-size:11px;"><input type="checkbox" id="rc-verify-tls"> Verify TLS (default off for labs)</label>
+            <label style="font-size:11px; margin-left:12px;" title="Add Accept/Content-Type: application/yang-data+json automatically (IOS-XE RESTCONF). Off = send only the headers you set (correct for APIC/ACI).""><input type="checkbox" id="rc-restconf-defaults"> Add RESTCONF default headers (IOS-XE)</label>
           </div>
           <div class="rc-subtab-pane" id="rc-pane-response">
             <div id="rc-resp-status" style="font-size:12px; margin-bottom:4px; color:#64748b;">No response yet.</div>
@@ -1039,6 +1040,12 @@ pre.result-pane.pane-expanded { height: auto !important; }
         </div>
 
         <div id="rc-curl-mode" style="display:none;">
+          <div style="display:flex; gap:6px; align-items:center; margin-bottom:6px; font-size:12px;">
+            <strong>Environment</strong>
+            <select id="curl-env-sel" style="font-size:12px; min-width:150px;"><option value="">— none —</option></select>
+            <span id="curl-env-hint" style="color:#64748b;"></span>
+            <span style="color:#64748b;">— substitutes <code>{{VAR}}</code> + injects <code>$VAR</code></span>
+          </div>
           <p style="color:#64748b; font-size:12px;">Paste a shell snippet — it runs through the host shell (<code>bash -lc</code>) on this VM, so <code>| jq</code>, <code>$VAR</code>, <code>export</code>, and <code>$(…)</code> all work like a terminal. Variables persist only within one Run; to do an ACI login → token → call, paste the whole script together. Response headers are captured automatically for each <code>curl</code>. <strong>jq</strong> must be installed on the VM only if you pipe to <code>| jq</code>. (Runs arbitrary shell as the service user — don't expose port 7071.)</p>
           <textarea id="curl-command" rows="8" style="width:100%; font-family:monospace; font-size:12px;" placeholder='curl -k -u expert:&apos;1234QWer!&apos; -H &apos;Accept: application/yang-data+json&apos; https://192.168.89.71/restconf/data/Cisco-IOS-XE-native:native/router/router-ospf | jq .'></textarea>
           <button id="curl-send" class="small" style="background:#2563eb; color:white; border-color:#2563eb;">Run</button>
@@ -1054,6 +1061,12 @@ pre.result-pane.pane-expanded { height: auto !important; }
         </div>
 
         <div id="rc-python-mode" style="display:none;">
+          <div style="display:flex; gap:6px; align-items:center; margin-bottom:6px; font-size:12px;">
+            <strong>Environment</strong>
+            <select id="py-env-sel" style="font-size:12px; min-width:150px;"><option value="">— none —</option></select>
+            <span id="py-env-hint" style="color:#64748b;"></span>
+            <span style="color:#64748b;">— substitutes <code>{{VAR}}</code> + injects <code>os.environ</code></span>
+          </div>
           <p style="color:#64748b; font-size:12px;">Write/paste a Python script — it runs on this VM via <code>python3</code> (program piped to stdin) and stdout/stderr are captured below. Same execution model as curl-restconf: arbitrary code as the service user, single-user localhost only. <strong>requests</strong> must be <code>pip</code>-installed on the VM; the stdlib <code>http.client</code> path needs nothing. Tip: generate a snippet with "Export request → code" on the https tab and paste it here to run/tweak.</p>
           <textarea id="py-code" rows="12" style="width:100%; font-family:monospace; font-size:12px;" placeholder="import requests, urllib3&#10;urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)&#10;r = requests.get('https://192.168.89.71/restconf/data/Cisco-IOS-XE-native:native/hostname',&#10;                 headers={'Accept':'application/yang-data+json'},&#10;                 auth=('expert','1234QWer!'), verify=False)&#10;print(r.status_code)&#10;print(r.text)"></textarea>
           <details style="margin:6px 0;">
@@ -3782,6 +3795,7 @@ function initV18RestconfHttpsPane() {
       device_name: document.getElementById('rc-auth-device').value,
       payload: document.getElementById('rc-payload').value || null,
       verify_tls: document.getElementById('rc-verify-tls').checked,
+      restconf_defaults: (document.getElementById('rc-restconf-defaults')||{}).checked || false,
     };
 
     try {
@@ -4897,23 +4911,35 @@ async function rcLoadEnvs(selectName) {
   let active = selectName;
   if (!active) { try { active = localStorage.getItem('hitech.rcEnv') || ''; } catch (e) { active = ''; } }
   const data = await rcStoreApi('/api/rc-envs');
-  sel.innerHTML = '<option value="">— none —</option>' +
+  const opts = '<option value="">— none —</option>' +
     (data.envs || []).map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
+  sel.innerHTML = opts;
+  // v1.28.0 issue-2: mirror the same options into the curl + python env selectors
+  ['curl-env-sel','py-env-sel'].forEach(id => { const e = document.getElementById(id); if (e) e.innerHTML = opts; });
   if (active && (data.envs || []).includes(active)) { sel.value = active; await rcSelectEnv(active); }
   else { RC_ENV_VARS = {}; rcEnvHint(); }
 }
 async function rcSelectEnv(name) {
   try { localStorage.setItem('hitech.rcEnv', name || ''); } catch (e) {}
+  // keep all three Environment selectors showing the same active env
+  ['rc-env-sel','curl-env-sel','py-env-sel'].forEach(id => { const e = document.getElementById(id); if (e && e.value !== (name||'')) e.value = name || ''; });
   if (!name) { RC_ENV_VARS = {}; rcEnvHint(); return; }
   const data = await rcStoreApi('/api/rc-env?name=' + encodeURIComponent(name));
   RC_ENV_VARS = data.vars || {};
   rcEnvHint();
 }
+
+// v1.28.0 issue-2: substitute {{VAR}} from the active environment into arbitrary text.
+function rcApplyEnvVars(text) {
+  if (!text) return text;
+  const vars = RC_ENV_VARS || {};
+  return text.replace(/\{\{\s*([A-Za-z0-9_]+)\s*\}\}/g, (m, k) =>
+    Object.prototype.hasOwnProperty.call(vars, k) ? vars[k] : m);
+}
 function rcEnvHint() {
-  const el = document.getElementById('rc-env-hint');
-  if (!el) return;
   const keys = Object.keys(RC_ENV_VARS || {});
-  el.textContent = keys.length ? {% raw %}`active vars: {{${keys.join('}}, {{')}}}`{% endraw %} : '';
+  const txt = keys.length ? {% raw %}`active vars: {{${keys.join('}}, {{')}}}`{% endraw %} : '';
+  ['rc-env-hint','curl-env-hint','py-env-hint'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = txt; });
 }
 async function rcOpenEnvEditor() {
   const env = document.getElementById('rc-env-sel').value;
@@ -4961,6 +4987,11 @@ function initV18RcStore() {
   const envSel = document.getElementById('rc-env-sel');
   if (!envSel) return;   // v1.21.0: trees are handled by initV18RcPanel/controllers; this wires environments only
   envSel.addEventListener('change', () => rcSelectEnv(envSel.value));
+  // v1.28.0 issue-2: curl + python env selectors drive the same active environment
+  ['curl-env-sel','py-env-sel'].forEach(id => {
+    const e = document.getElementById(id);
+    if (e) e.addEventListener('change', () => rcSelectEnv(e.value));
+  });
   document.getElementById('rc-env-new').addEventListener('click', async () => {
     const name = prompt('New environment name:'); if (!name || !name.trim()) return;
     await rcStoreApi('/api/rc-env-save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name.trim(), vars: {} }) });
@@ -5528,8 +5559,9 @@ function initV18PythonPane() {
       const r = await fetch('/api/python-execute', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ code: document.getElementById('py-code').value,
+        body: JSON.stringify({ code: rcApplyEnvVars(document.getElementById('py-code').value),
                                env_text: (document.getElementById('py-env') || {}).value || '',
+                               env_vars: RC_ENV_VARS || {},
                                timeout_seconds: 30 }),
       });
       const data = await r.json();
@@ -5567,7 +5599,8 @@ function initV18CurlPane() {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-          curl_command: document.getElementById('curl-command').value,
+          curl_command: rcApplyEnvVars(document.getElementById('curl-command').value),
+          env_vars: RC_ENV_VARS || {},
           timeout_seconds: 30,
         }),
       });
