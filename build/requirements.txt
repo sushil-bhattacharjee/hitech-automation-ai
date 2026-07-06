@@ -12,3 +12,4 @@ anthropic>=0.40
 
 # v1.15.0: optional — static lint for the Python pane (pyflakes also works)
 ruff
+python-multipart>=0.0.9   # v1.30.0: multipart form uploads (YANG .yang upload)
