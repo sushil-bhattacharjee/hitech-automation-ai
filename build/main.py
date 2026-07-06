@@ -40,7 +40,7 @@ from typing import Optional
 
 import httpx
 import yaml
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Form
 
 # RAG (optional — works without the vector DB built)
 import rag_retriever
@@ -59,7 +59,7 @@ import agent as agent_mod
 from tools import DeviceContext
 
 # ----------------------------- version ----------------------------- #
-APP_VERSION = "hitech_automation_ai.1.29.0"
+APP_VERSION = "hitech_automation_ai.1.30.0"
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from jinja2 import Environment, StrictUndefined, TemplateSyntaxError
@@ -2890,6 +2890,85 @@ async def api_netconf_xpath(req: NetconfXpathRequest):
             "elapsed_ms": elapsed_ms,
             "device": d.name,
         }
+
+
+# ----------------------------- v1.30.0: YANG Explorer ----------------------------- #
+# Upload .yang files into a repository, parse a module into a tree, and generate
+# RESTCONF paths + XPath for a selected node. Files on disk (no DB), parsed with pyang.
+from tools import yang_store, yang_parser, yang_generate
+
+
+@app.get("/api/yang/repos")
+def api_yang_repos():
+    return {"ok": True, "repos": yang_store.list_repos()}
+
+
+class YangRepoReq(BaseModel):
+    name: str
+
+@app.post("/api/yang/repos/create")
+def api_yang_repo_create(req: YangRepoReq):
+    try:
+        return {"ok": True, "repo": yang_store.create_repo(req.name)}
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+@app.post("/api/yang/repos/delete")
+def api_yang_repo_delete(req: YangRepoReq):
+    try:
+        yang_store.delete_repo(req.name)
+        return {"ok": True}
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+@app.post("/api/yang/upload")
+async def api_yang_upload(repo: str = Form(...), files: list[UploadFile] = File(...)):
+    """Upload one or more .yang files into a repository."""
+    try:
+        yang_store.create_repo(repo)
+        added = []
+        for f in files:
+            content = (await f.read()).decode("utf-8", errors="replace")
+            added.append(yang_store.add_module(repo, f.filename, content))
+        return {"ok": True, "added": added}
+    except Exception as e:
+        log.exception("yang upload failed")
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+class YangTreeReq(BaseModel):
+    repo: str
+    file: str
+    depth_limit: int = 0
+
+@app.post("/api/yang/tree")
+def api_yang_tree(req: YangTreeReq):
+    """Parse a module in a repo and return its node tree."""
+    try:
+        path = str(yang_store.module_path(req.repo, req.file))
+        search = [str(yang_store.repo_dir(req.repo))]
+        ctx, module, errors = yang_parser.parse_module(path, search_dirs=search)
+        tree = yang_parser.build_tree(module, depth_limit=req.depth_limit)
+        return {"ok": True, "tree": tree, "warnings": errors}
+    except yang_parser.YangParseError as e:
+        return JSONResponse({"ok": False, "error": str(e)}, status_code=200)
+    except Exception as e:
+        log.exception("yang tree failed")
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+class YangGenReq(BaseModel):
+    node: dict
+
+@app.post("/api/yang/generate")
+def api_yang_generate(req: YangGenReq):
+    """Generate RESTCONF path + XPath for a selected node dict."""
+    try:
+        return {"ok": True, "generated": yang_generate.generate(req.node)}
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
 
 
 @app.get("/api/health")

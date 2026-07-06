@@ -575,6 +575,7 @@
     <a href="#" class="v18-nav-item"        data-target="cli"      title="Direct CLI transport">⌨️ CLI</a>
     <a href="#" class="v18-nav-item"        data-target="xpath"    title="NETCONF XPath query">🎯 XPath</a>
     <a href="#" class="v18-nav-item"        data-target="python"   title="Multi-file Python runner (runs on this VM)">🐍 Python</a>
+    <a href="#" class="v18-nav-item"        data-target="yang"     title="YANG Explorer — import models, browse the tree, generate RESTCONF/XPath">🌲 YANG</a>
     <div class="v18-nav-group">Assistant</div>
     <a href="#" class="v18-nav-item"        data-target="aichat"    title="Agentic chat with AI">💬 AI Chat</a>
     <a href="#" class="v18-nav-item"        data-target="docs"      title="Inline docs and references">📖 Docs</a>
@@ -642,7 +643,7 @@
     </div>
   </div>
   <div class="v18-nav-footer">
-    <span id="v18-version-badge">v1.29.0</span>
+    <span id="v18-version-badge">v1.30.0</span>
   </div>
 </aside>
 <!-- v1.20.1: single drag bar on the merged sidebar's right edge -->
@@ -1329,6 +1330,84 @@ out-octets = state/counters/out-octets</textarea>
           <code style="display:block; background:#1e293b; color:#cbd5e1; padding:6px; margin-top:4px;">curl -k -u USER:PASS https://&lt;host&gt;/restconf/data/ietf-yang-library:modules-state</code>
         </p>
       </details>
+    </section>
+  </main>
+</section>
+
+<!-- v1.30.0: YANG Explorer -->
+<section id="v18-yang-section" class="v18-section">
+  <main>
+    <section class="panel">
+      <h2>🌲 YANG Explorer</h2>
+      <p style="color:#64748b; font-size:13px; margin-top:-4px;">
+        Import YANG models, browse the schema tree, and generate a RESTCONF path or XPath for any node.
+        <em>(v1: upload a single .yang file. Git / device import and NETCONF payload generation are coming.)</em>
+      </p>
+
+      <!-- Repository + upload row -->
+      <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-bottom:10px;">
+        <div>
+          <label style="font-size:12px; display:block; color:#475569;">Repository</label>
+          <select id="yang-repo-sel" style="min-width:180px; font-size:13px; padding:6px;"></select>
+        </div>
+        <button id="yang-repo-new" class="small">+ New repo</button>
+        <button id="yang-repo-del" class="small" style="background:#dc2626; color:#fff; border-color:#dc2626;">Delete repo</button>
+        <div style="flex:1;"></div>
+        <div>
+          <label style="font-size:12px; display:block; color:#475569;">Upload .yang file(s)</label>
+          <input type="file" id="yang-file-input" accept=".yang" multiple style="font-size:12px;">
+        </div>
+        <button id="yang-upload-btn" class="small" style="background:#16a34a; color:#fff; border-color:#16a34a;">⬆ Upload</button>
+      </div>
+
+      <!-- Module selector + load -->
+      <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-bottom:8px;">
+        <div>
+          <label style="font-size:12px; display:block; color:#475569;">Module</label>
+          <select id="yang-module-sel" style="min-width:260px; font-size:13px; padding:6px;"></select>
+        </div>
+        <div>
+          <label style="font-size:12px; display:block; color:#475569;">Depth limit</label>
+          <select id="yang-depth-sel" style="font-size:13px; padding:6px;">
+            <option value="0">unlimited</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="6">6</option>
+            <option value="8">8</option>
+          </select>
+        </div>
+        <button id="yang-load-btn" class="small" style="background:#2563eb; color:#fff; border-color:#2563eb;">Load module → tree</button>
+        <input id="yang-tree-search" placeholder="🔎 find node…" style="font-size:13px; padding:6px; min-width:180px;">
+        <span id="yang-status" style="font-size:12px; color:#64748b;"></span>
+      </div>
+
+      <!-- Split: tree | detail+generate -->
+      <div style="display:flex; gap:12px; align-items:stretch;">
+        <div id="yang-tree" style="flex:1; min-height:420px; max-height:640px; overflow:auto; border:1px solid #e2e8f0; border-radius:8px; padding:8px; background:#fafafa; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px;">
+          <span style="color:#94a3b8;">Upload a .yang file, pick a module, and click “Load module → tree”.</span>
+        </div>
+        <div style="width:420px; display:flex; flex-direction:column; gap:10px;">
+          <div style="border:1px solid #e2e8f0; border-radius:8px; padding:10px; background:#fff;">
+            <h3 style="font-size:13px; margin:0 0 6px;">Node detail</h3>
+            <div id="yang-node-detail" style="font-size:12px; color:#475569;">Select a node in the tree.</div>
+          </div>
+          <div style="border:1px solid #e2e8f0; border-radius:8px; padding:10px; background:#fff;">
+            <h3 style="font-size:13px; margin:0 0 6px;">Generated</h3>
+            <label style="font-size:11px; color:#64748b;">RESTCONF path</label>
+            <div style="display:flex; gap:6px; margin-bottom:8px;">
+              <input id="yang-gen-restconf" readonly style="flex:1; font-family:ui-monospace,monospace; font-size:12px; padding:6px; background:#f8fafc;">
+              <button class="small yang-copy" data-src="yang-gen-restconf">📋</button>
+            </div>
+            <label style="font-size:11px; color:#64748b;">XPath (on-device, unprefixed)</label>
+            <div style="display:flex; gap:6px;">
+              <input id="yang-gen-xpath" readonly style="flex:1; font-family:ui-monospace,monospace; font-size:12px; padding:6px; background:#f8fafc;">
+              <button class="small yang-copy" data-src="yang-gen-xpath">📋</button>
+            </div>
+            <div id="yang-warnings" style="margin-top:8px; font-size:11px; color:#b45309;"></div>
+          </div>
+        </div>
+      </div>
     </section>
   </main>
 </section>
@@ -3304,6 +3383,7 @@ function initV18Nav() {
   const sections = {
     aichat:   document.getElementById('v18-aichat-section'),
     docs:     document.getElementById('v18-docs-section'),
+    yang:     document.getElementById('v18-yang-section'),
   };
   const isTransport = (t) => Object.prototype.hasOwnProperty.call(panes, t);
   const valid = (t) => isTransport(t) || Object.prototype.hasOwnProperty.call(sections, t);
@@ -6403,9 +6483,204 @@ function decorateInputCopies() {
   });
 }
 
+/* ===================== v1.30.0: YANG Explorer ===================== */
+function initV18Yang() {
+  const repoSel   = document.getElementById('yang-repo-sel');
+  const modSel    = document.getElementById('yang-module-sel');
+  const treeBox   = document.getElementById('yang-tree');
+  const statusEl  = document.getElementById('yang-status');
+  const detailEl  = document.getElementById('yang-node-detail');
+  const genRc     = document.getElementById('yang-gen-restconf');
+  const genXp     = document.getElementById('yang-gen-xpath');
+  const warnEl    = document.getElementById('yang-warnings');
+  if (!repoSel) return;
+
+  let currentTree = null;
+
+  function setStatus(msg, err) {
+    statusEl.textContent = msg || '';
+    statusEl.style.color = err ? '#dc2626' : '#64748b';
+  }
+
+  async function api(url, opts) {
+    const r = await fetch(url, opts);
+    const text = await r.text();
+    let data = null;
+    try { data = text ? JSON.parse(text) : null; } catch (e) {}
+    if (!data || data.ok === false) {
+      const msg = (data && (data.error || data.detail)) || ('HTTP ' + r.status);
+      throw new Error(msg);
+    }
+    return data;
+  }
+
+  async function loadRepos(selectName) {
+    try {
+      const data = await api('/api/yang/repos');
+      const repos = data.repos || [];
+      repoSel.innerHTML = repos.map(r => `<option value="${escapeHtml(r.name)}">${escapeHtml(r.name)}</option>`).join('') || '<option value="">(no repos)</option>';
+      if (selectName) repoSel.value = selectName;
+      loadModules();
+    } catch (e) { setStatus(e.message, true); }
+  }
+
+  function currentRepo() { return repoSel.value || ''; }
+
+  async function loadModules() {
+    const repo = currentRepo();
+    modSel.innerHTML = '';
+    if (!repo) return;
+    try {
+      const data = await api('/api/yang/repos');
+      const r = (data.repos || []).find(x => x.name === repo);
+      const mods = (r && r.modules) || [];
+      modSel.innerHTML = mods.map(m => `<option value="${escapeHtml(m.file)}">${escapeHtml(m.module)}</option>`).join('') || '<option value="">(no modules — upload a .yang)</option>';
+    } catch (e) { setStatus(e.message, true); }
+  }
+
+  repoSel.addEventListener('change', loadModules);
+
+  document.getElementById('yang-repo-new').addEventListener('click', async () => {
+    const name = prompt('New repository name:', 'ios-xe');
+    if (!name) return;
+    try { await api('/api/yang/repos/create', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name})}); loadRepos(name); setStatus('Repo created'); }
+    catch (e) { setStatus(e.message, true); }
+  });
+
+  document.getElementById('yang-repo-del').addEventListener('click', async () => {
+    const name = currentRepo();
+    if (!name) return;
+    if (!confirm('Delete repository "' + name + '" and all its YANG files?')) return;
+    try { await api('/api/yang/repos/delete', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name})}); loadRepos(); setStatus('Repo deleted'); }
+    catch (e) { setStatus(e.message, true); }
+  });
+
+  document.getElementById('yang-upload-btn').addEventListener('click', async () => {
+    const repo = currentRepo();
+    if (!repo) { setStatus('Create/select a repository first', true); return; }
+    const input = document.getElementById('yang-file-input');
+    if (!input.files.length) { setStatus('Choose .yang file(s) first', true); return; }
+    const fd = new FormData();
+    fd.append('repo', repo);
+    for (const f of input.files) fd.append('files', f);
+    setStatus('Uploading…');
+    try {
+      const data = await api('/api/yang/upload', {method:'POST', body: fd});
+      setStatus('Uploaded ' + (data.added || []).length + ' file(s)');
+      input.value = '';
+      loadModules();
+    } catch (e) { setStatus(e.message, true); }
+  });
+
+  document.getElementById('yang-load-btn').addEventListener('click', async () => {
+    const repo = currentRepo(), file = modSel.value;
+    if (!repo || !file) { setStatus('Pick a module first', true); return; }
+    const depth = parseInt(document.getElementById('yang-depth-sel').value || '0', 10);
+    setStatus('Parsing…');
+    treeBox.innerHTML = '<span style="color:#94a3b8;">parsing…</span>';
+    try {
+      const data = await api('/api/yang/tree', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({repo, file, depth_limit: depth})});
+      currentTree = data.tree;
+      renderTree(data.tree);
+      warnEl.textContent = (data.warnings && data.warnings.length) ? ('⚠ ' + data.warnings.length + ' parser warning(s)') : '';
+      setStatus('Loaded: ' + data.tree.module + (data.tree.revision ? ' @ ' + data.tree.revision : ''));
+    } catch (e) { setStatus(e.message, true); treeBox.innerHTML = '<span style="color:#dc2626;">' + escapeHtml(e.message) + '</span>'; }
+  });
+
+  const KW_ICON = { container:'📁', list:'📋', leaf:'🍃', 'leaf-list':'🍂', choice:'❓', case:'▸' };
+
+  function renderTree(tree) {
+    treeBox.innerHTML = '';
+    const root = document.createElement('div');
+    root.innerHTML = `<div style="font-weight:600; color:#0f172a; margin-bottom:4px;">${escapeHtml(tree.module)} <span style="color:#94a3b8; font-weight:400;">(${escapeHtml(tree.prefix)})</span></div>`;
+    treeBox.appendChild(root);
+    tree.children.forEach(n => root.appendChild(nodeEl(n)));
+  }
+
+  function nodeEl(node) {
+    const wrap = document.createElement('div');
+    wrap.style.marginLeft = '12px';
+    const hasKids = node.children && node.children.length;
+    const row = document.createElement('div');
+    row.style.cssText = 'cursor:pointer; padding:1px 3px; border-radius:3px; white-space:nowrap;';
+    row.dataset.name = node.name;
+    const caret = hasKids ? '<span class="yang-caret" style="display:inline-block; width:12px;">▸</span>' : '<span style="display:inline-block; width:12px;"></span>';
+    const icon = KW_ICON[node.keyword] || '•';
+    const typ = node.datatype ? ` <span style="color:#7c3aed;">${escapeHtml(node.datatype)}</span>` : '';
+    const key = node.key ? ` <span style="color:#0891b2;">[key:${escapeHtml(node.key)}]</span>` : '';
+    const cfg = node.config === false ? ' <span style="color:#dc2626;" title="read-only (config false)">ro</span>' : '';
+    row.innerHTML = `${caret} ${icon} <span style="color:#0f172a;">${escapeHtml(node.name)}</span>${typ}${key}${cfg}`;
+    wrap.appendChild(row);
+
+    let kidsBox = null;
+    if (hasKids) {
+      kidsBox = document.createElement('div');
+      kidsBox.style.display = 'none';
+      node.children.forEach(c => kidsBox.appendChild(nodeEl(c)));
+      wrap.appendChild(kidsBox);
+    }
+    row.addEventListener('click', (e) => {
+      e.stopPropagation();
+      selectNode(node, row);
+      if (kidsBox) {
+        const open = kidsBox.style.display === 'block';
+        kidsBox.style.display = open ? 'none' : 'block';
+        const c = row.querySelector('.yang-caret'); if (c) c.textContent = open ? '▸' : '▾';
+      }
+    });
+    return wrap;
+  }
+
+  let lastSelRow = null;
+  function selectNode(node, row) {
+    if (lastSelRow) lastSelRow.style.background = '';
+    row.style.background = '#dbeafe';
+    lastSelRow = row;
+    // detail
+    const rows = [
+      ['Name', node.name], ['Type', node.keyword], ['Datatype', node.datatype || '—'],
+      ['Key', node.key || '—'], ['Config', node.config === false ? 'false (read-only)' : 'true'],
+      ['Module', node.module], ['Namespace', node.namespace], ['Prefix', node.prefix],
+      ['Description', node.description || '—'],
+    ];
+    detailEl.innerHTML = rows.map(([k,v]) => `<div style="display:flex; gap:6px;"><span style="min-width:90px; color:#94a3b8;">${k}</span><span style="color:#0f172a; word-break:break-all;">${escapeHtml(String(v))}</span></div>`).join('');
+    // generate
+    fetch('/api/yang/generate', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({node})})
+      .then(r => r.json()).then(d => {
+        if (d.ok) { genRc.value = d.generated.restconf_path || ''; genXp.value = d.generated.xpath || ''; }
+      }).catch(()=>{});
+  }
+
+  // find-in-tree
+  document.getElementById('yang-tree-search').addEventListener('input', (e) => {
+    const q = e.target.value.toLowerCase();
+    treeBox.querySelectorAll('[data-name]').forEach(row => {
+      const hit = q && row.dataset.name.toLowerCase().includes(q);
+      row.style.outline = hit ? '2px solid #f59e0b' : '';
+      if (hit) { // reveal ancestors
+        let p = row.parentElement;
+        while (p && p !== treeBox) { if (p.style && p.style.display === 'none') p.style.display = 'block'; p = p.parentElement; }
+        row.scrollIntoView({block:'nearest'});
+      }
+    });
+  });
+
+  // copy buttons
+  document.querySelectorAll('.yang-copy').forEach(b => {
+    b.addEventListener('click', () => {
+      const el = document.getElementById(b.dataset.src);
+      if (el && el.value) { navigator.clipboard.writeText(el.value); b.textContent = '✓'; setTimeout(()=>b.textContent='📋', 900); }
+    });
+  });
+
+  // lazy-load repos when the YANG nav is first shown
+  loadRepos();
+}
+
 // Master bootstrap
 function initV18All() {
   initV18Nav();
+  initV18Yang();          // v1.30.0: YANG Explorer
   initV18StopButton();
   initV18ChatPatch();
   initV18CfgMgmtTabs();
