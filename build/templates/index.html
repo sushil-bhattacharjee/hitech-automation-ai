@@ -585,6 +585,9 @@
 .ico-leaflist  { color:#059669; }   /* leaf-list — teal-green */
 .ico-choice    { color:#9333ea; }   /* choice — purple */
 .ico-case      { color:#7c3aed; }
+.yt-status { margin-left:6px; font-size:9px; padding:1px 4px; border-radius:3px; font-weight:600; }
+.yt-dep { background:#fef3c7; color:#b45309; }   /* deprecated — amber */
+.yt-obs { background:#fee2e2; color:#b91c1c; }   /* obsolete — red */
 </style>
 </head>
 <body data-app-version="{{ app_version }}">
@@ -672,7 +675,7 @@
     </div>
   </div>
   <div class="v18-nav-footer">
-    <span id="v18-version-badge">v1.30.1</span>
+    <span id="v18-version-badge">v1.30.2</span>
   </div>
 </aside>
 <!-- v1.20.1: single drag bar on the merged sidebar's right edge -->
@@ -6681,10 +6684,14 @@ function initV18Yang() {
     const keyBadge = node.is_key ? '<span class="yt-keybadge" title="list key">\u{1F511}key</span>' : '';
     const typeStr = node.datatype ? `<span class="yt-type">${escapeHtml(node.datatype)}</span>` : '';
     const roBadge = node.config === false ? '<span class="yt-ro" title="read-only (config false)">ro</span>' : '';
+    let statusBadge = '';
+    if (node.status === 'deprecated') statusBadge = '<span class="yt-status yt-dep" title="deprecated — avoid using">deprecated</span>';
+    else if (node.status === 'obsolete') statusBadge = '<span class="yt-status yt-obs" title="obsolete — do not use">obsolete</span>';
     const listKey = (node.keyword === 'list' && node.key) ? `<span class="yt-type" style="color:#0891b2;">[keys: ${escapeHtml(node.key)}]</span>` : '';
+    const dim = (node.status === 'deprecated' || node.status === 'obsolete') ? ' style="text-decoration:line-through; opacity:.7;"' : '';
     nodes.innerHTML = rails + caret + iconFor(node.keyword) +
-      `<span class="yt-label">${escapeHtml(node.name)}</span>` +
-      typeStr + listKey + keyBadge + roBadge;
+      `<span class="yt-label"${dim}>${escapeHtml(node.name)}</span>` +
+      typeStr + listKey + keyBadge + roBadge + statusBadge;
 
     // right: value column
     const val = document.createElement('div');
@@ -6725,7 +6732,7 @@ function initV18Yang() {
     const rows = [
       ['Name', node.name], ['Nodetype', node.keyword], ['Datatype', node.datatype || '\u2014'],
       ['Key', node.key || (node.is_key ? '(is a list key)' : '\u2014')],
-      ['Config', node.config === false ? 'false (read-only)' : 'true'],
+      ['Config', node.config === false ? 'false (read-only)' : 'true'], ['Status', node.status || 'current'],
       ['Module', node.module], ['Prefix', node.prefix], ['Namespace', node.namespace],
       ['XPath', node.xpath], ['Description', node.description || '\u2014'],
     ];

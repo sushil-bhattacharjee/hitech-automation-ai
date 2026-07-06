@@ -97,6 +97,12 @@ def build_tree(module, depth_limit: int = 0):
     def walk(stmt, depth, xpath_parts, restconf_parts):
         nodes = []
         for s in stmt.substmts:
+            # expand 'uses <grouping>' inline (pyang keeps it as a separate stmt)
+            if s.keyword == "uses":
+                grp = getattr(s, "i_grouping", None)
+                if grp is not None:
+                    nodes.extend(walk(grp, depth, xpath_parts, restconf_parts))
+                continue
             if s.keyword not in _TREE_KEYWORDS:
                 continue
             is_data = s.keyword in _DATA_KEYWORDS
@@ -107,6 +113,8 @@ def build_tree(module, depth_limit: int = 0):
                 rc = restconf_parts
             key = s.search_one("key")
             cfg = s.search_one("config")
+            status_stmt = s.search_one("status")
+            status = status_stmt.arg if status_stmt else "current"
             node = {
                 "name": s.arg,
                 "keyword": s.keyword,
@@ -115,6 +123,7 @@ def build_tree(module, depth_limit: int = 0):
                 "is_key": False,  # set below when a parent list declares keys
                 "key": key.arg if key else None,
                 "config": (cfg.arg != "false") if cfg else True,
+                "status": status,
                 "description": _desc(s)[:200],
                 "namespace": namespace,
                 "prefix": modprefix,

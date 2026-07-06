@@ -59,7 +59,7 @@ import agent as agent_mod
 from tools import DeviceContext
 
 # ----------------------------- version ----------------------------- #
-APP_VERSION = "hitech_automation_ai.1.30.1"
+APP_VERSION = "hitech_automation_ai.1.30.2"
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from jinja2 import Environment, StrictUndefined, TemplateSyntaxError
