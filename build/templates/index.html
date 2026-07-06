@@ -556,6 +556,35 @@
 
 
   .hide { display: none !important; }
+
+/* v1.30.1: YANG Explorer tree — YANGSuite-style GUI */
+.yt-wrap { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px; }
+.yt-head { display:flex; background:#eef2f7; border-bottom:1px solid #cbd5e1; font-weight:600; color:#334155; position:sticky; top:0; z-index:2; }
+.yt-head .yt-h-nodes { flex:1; padding:5px 8px; }
+.yt-head .yt-h-val { width:230px; padding:5px 8px; border-left:1px solid #cbd5e1; }
+.yt-row { display:flex; align-items:center; border-bottom:1px solid #f1f5f9; min-height:24px; }
+.yt-row:hover { background:#f0f7ff; }
+.yt-row.sel { background:#dbeafe; }
+.yt-nodes { flex:1; display:flex; align-items:center; padding:2px 0; white-space:nowrap; overflow:hidden; }
+.yt-val { width:230px; padding:1px 6px; border-left:1px solid #eef2f7; }
+.yt-caret { width:14px; text-align:center; color:#64748b; cursor:pointer; user-select:none; flex:none; }
+.yt-caret.empty { visibility:hidden; }
+.yt-ico { width:18px; text-align:center; flex:none; }
+.yt-label { cursor:pointer; color:#0f172a; }
+.yt-label .yt-prefix { color:#94a3b8; }
+.yt-type { color:#7c3aed; margin-left:6px; font-size:11px; }
+.yt-keybadge { color:#dc2626; margin-left:4px; font-size:10px; }
+.yt-ro { color:#dc2626; margin-left:4px; font-size:10px; }
+.yt-rail { display:inline-block; width:14px; flex:none; border-left:1px dotted #cbd5e1; height:24px; margin-left:6px; }
+.yt-val input, .yt-val select { width:100%; font-size:11px; padding:2px 4px; border:1px solid #cbd5e1; border-radius:3px; font-family:inherit; }
+.yt-val input[type=checkbox] { width:auto; }
+/* node-type icon glyphs (drawn with unicode + color) */
+.ico-container { color:#d97706; }   /* folder — amber */
+.ico-list      { color:#2563eb; }   /* list — blue */
+.ico-leaf      { color:#16a34a; }   /* leaf — green */
+.ico-leaflist  { color:#059669; }   /* leaf-list — teal-green */
+.ico-choice    { color:#9333ea; }   /* choice — purple */
+.ico-case      { color:#7c3aed; }
 </style>
 </head>
 <body data-app-version="{{ app_version }}">
@@ -643,7 +672,7 @@
     </div>
   </div>
   <div class="v18-nav-footer">
-    <span id="v18-version-badge">v1.30.0</span>
+    <span id="v18-version-badge">v1.30.1</span>
   </div>
 </aside>
 <!-- v1.20.1: single drag bar on the merged sidebar's right edge -->
@@ -6587,64 +6616,120 @@ function initV18Yang() {
     } catch (e) { setStatus(e.message, true); treeBox.innerHTML = '<span style="color:#dc2626;">' + escapeHtml(e.message) + '</span>'; }
   });
 
-  const KW_ICON = { container:'📁', list:'📋', leaf:'🍃', 'leaf-list':'🍂', choice:'❓', case:'▸' };
+  // YANGSuite-style node icons (unicode glyphs + CSS color classes)
+  const ICON = {
+    container: ['\u{1F4C1}', 'ico-container'],   // folder
+    list:      ['\u2637',     'ico-list'],        // trigram (grid-like) = list
+    leaf:      ['\u{1F343}', 'ico-leaf'],         // leaf
+    'leaf-list':['\u{1F343}', 'ico-leaflist'],    // leaf (list variant, teal)
+    choice:    ['\u2298', 'ico-choice'],
+    case:      ['\u25B8',     'ico-case'],
+  };
+  function iconFor(kw) {
+    const m = ICON[kw] || ['\u2022', ''];
+    return `<span class="yt-ico ${m[1]}">${m[0]}</span>`;
+  }
 
   function renderTree(tree) {
     treeBox.innerHTML = '';
-    const root = document.createElement('div');
-    root.innerHTML = `<div style="font-weight:600; color:#0f172a; margin-bottom:4px;">${escapeHtml(tree.module)} <span style="color:#94a3b8; font-weight:400;">(${escapeHtml(tree.prefix)})</span></div>`;
-    treeBox.appendChild(root);
-    tree.children.forEach(n => root.appendChild(nodeEl(n)));
+    const wrap = document.createElement('div');
+    wrap.className = 'yt-wrap';
+    // header row (Nodes | Value)
+    const head = document.createElement('div');
+    head.className = 'yt-head';
+    head.innerHTML = `<div class="yt-h-nodes">Nodes — <b>${escapeHtml(tree.module)}</b> <span style="color:#94a3b8;">(${escapeHtml(tree.prefix)})${tree.revision ? ' @ ' + escapeHtml(tree.revision) : ''}</span></div><div class="yt-h-val">Value</div>`;
+    wrap.appendChild(head);
+    const body = document.createElement('div');
+    tree.children.forEach(n => body.appendChild(nodeEl(n, 0)));
+    wrap.appendChild(body);
+    treeBox.appendChild(wrap);
   }
 
-  function nodeEl(node) {
+  function valueWidget(node) {
+    // only leaf / leaf-list get a value input; type-aware
+    if (node.keyword !== 'leaf' && node.keyword !== 'leaf-list') return '';
+    const ti = node.typeinfo || {};
+    if (ti.is_bool) {
+      return `<input type="checkbox" title="boolean">`;
+    }
+    if (ti.enums && ti.enums.length) {
+      return `<select><option value=""></option>` +
+             ti.enums.map(e => `<option>${escapeHtml(e)}</option>`).join('') + `</select>`;
+    }
+    const ph = node.datatype ? escapeHtml(node.datatype) : '';
+    return `<input type="text" placeholder="${ph}">`;
+  }
+
+  function nodeEl(node, depth) {
     const wrap = document.createElement('div');
-    wrap.style.marginLeft = '12px';
     const hasKids = node.children && node.children.length;
+
     const row = document.createElement('div');
-    row.style.cssText = 'cursor:pointer; padding:1px 3px; border-radius:3px; white-space:nowrap;';
+    row.className = 'yt-row';
     row.dataset.name = node.name;
-    const caret = hasKids ? '<span class="yang-caret" style="display:inline-block; width:12px;">▸</span>' : '<span style="display:inline-block; width:12px;"></span>';
-    const icon = KW_ICON[node.keyword] || '•';
-    const typ = node.datatype ? ` <span style="color:#7c3aed;">${escapeHtml(node.datatype)}</span>` : '';
-    const key = node.key ? ` <span style="color:#0891b2;">[key:${escapeHtml(node.key)}]</span>` : '';
-    const cfg = node.config === false ? ' <span style="color:#dc2626;" title="read-only (config false)">ro</span>' : '';
-    row.innerHTML = `${caret} ${icon} <span style="color:#0f172a;">${escapeHtml(node.name)}</span>${typ}${key}${cfg}`;
+
+    // left: nodes column with indentation rails + caret + icon + label
+    const nodes = document.createElement('div');
+    nodes.className = 'yt-nodes';
+    let rails = '';
+    for (let i = 0; i < depth; i++) rails += '<span class="yt-rail"></span>';
+    const caret = hasKids
+      ? '<span class="yt-caret">\u25B8</span>'
+      : '<span class="yt-caret empty">\u25B8</span>';
+    const prefix = (node.prefix && node.module && node.module !== node.prefix)
+      ? '' : '';  // prefix shown in detail; keep tree clean
+    const keyBadge = node.is_key ? '<span class="yt-keybadge" title="list key">\u{1F511}key</span>' : '';
+    const typeStr = node.datatype ? `<span class="yt-type">${escapeHtml(node.datatype)}</span>` : '';
+    const roBadge = node.config === false ? '<span class="yt-ro" title="read-only (config false)">ro</span>' : '';
+    const listKey = (node.keyword === 'list' && node.key) ? `<span class="yt-type" style="color:#0891b2;">[keys: ${escapeHtml(node.key)}]</span>` : '';
+    nodes.innerHTML = rails + caret + iconFor(node.keyword) +
+      `<span class="yt-label">${escapeHtml(node.name)}</span>` +
+      typeStr + listKey + keyBadge + roBadge;
+
+    // right: value column
+    const val = document.createElement('div');
+    val.className = 'yt-val';
+    val.innerHTML = valueWidget(node);
+
+    row.appendChild(nodes);
+    row.appendChild(val);
     wrap.appendChild(row);
 
     let kidsBox = null;
     if (hasKids) {
       kidsBox = document.createElement('div');
       kidsBox.style.display = 'none';
-      node.children.forEach(c => kidsBox.appendChild(nodeEl(c)));
+      node.children.forEach(c => kidsBox.appendChild(nodeEl(c, depth + 1)));
       wrap.appendChild(kidsBox);
     }
-    row.addEventListener('click', (e) => {
-      e.stopPropagation();
-      selectNode(node, row);
-      if (kidsBox) {
-        const open = kidsBox.style.display === 'block';
-        kidsBox.style.display = open ? 'none' : 'block';
-        const c = row.querySelector('.yang-caret'); if (c) c.textContent = open ? '▸' : '▾';
-      }
+
+    const caretEl = nodes.querySelector('.yt-caret');
+    function toggle() {
+      if (!kidsBox) return;
+      const open = kidsBox.style.display === 'block';
+      kidsBox.style.display = open ? 'none' : 'block';
+      caretEl.textContent = open ? '\u25B8' : '\u25BE';
+    }
+    caretEl.addEventListener('click', (e) => { e.stopPropagation(); toggle(); });
+    nodes.querySelector('.yt-label').addEventListener('click', (e) => {
+      e.stopPropagation(); selectNode(node, row); toggle();
     });
     return wrap;
   }
 
   let lastSelRow = null;
   function selectNode(node, row) {
-    if (lastSelRow) lastSelRow.style.background = '';
-    row.style.background = '#dbeafe';
+    if (lastSelRow) lastSelRow.classList.remove('sel');
+    row.classList.add('sel');
     lastSelRow = row;
-    // detail
     const rows = [
-      ['Name', node.name], ['Type', node.keyword], ['Datatype', node.datatype || '—'],
-      ['Key', node.key || '—'], ['Config', node.config === false ? 'false (read-only)' : 'true'],
-      ['Module', node.module], ['Namespace', node.namespace], ['Prefix', node.prefix],
-      ['Description', node.description || '—'],
+      ['Name', node.name], ['Nodetype', node.keyword], ['Datatype', node.datatype || '\u2014'],
+      ['Key', node.key || (node.is_key ? '(is a list key)' : '\u2014')],
+      ['Config', node.config === false ? 'false (read-only)' : 'true'],
+      ['Module', node.module], ['Prefix', node.prefix], ['Namespace', node.namespace],
+      ['XPath', node.xpath], ['Description', node.description || '\u2014'],
     ];
-    detailEl.innerHTML = rows.map(([k,v]) => `<div style="display:flex; gap:6px;"><span style="min-width:90px; color:#94a3b8;">${k}</span><span style="color:#0f172a; word-break:break-all;">${escapeHtml(String(v))}</span></div>`).join('');
-    // generate
+    detailEl.innerHTML = rows.map(([k,v]) => `<div style="display:flex; gap:6px; margin-bottom:2px;"><span style="min-width:80px; color:#94a3b8;">${k}</span><span style="color:#0f172a; word-break:break-all;">${escapeHtml(String(v))}</span></div>`).join('');
     fetch('/api/yang/generate', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({node})})
       .then(r => r.json()).then(d => {
         if (d.ok) { genRc.value = d.generated.restconf_path || ''; genXp.value = d.generated.xpath || ''; }

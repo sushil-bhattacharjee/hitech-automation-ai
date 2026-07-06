@@ -63,6 +63,21 @@ def _leaf_type(stmt) -> str | None:
     return t.arg if t else None
 
 
+def _type_info(stmt) -> dict:
+    """Return {base, enums:[...], is_bool} for a leaf/leaf-list, for value widgets."""
+    t = stmt.search_one("type")
+    if not t:
+        return {}
+    base = t.arg
+    info = {"base": base}
+    if base == "enumeration":
+        info["enums"] = [e.arg for e in t.substmts if e.keyword == "enum"]
+    elif base == "boolean":
+        info["is_bool"] = True
+    # identityref / leafref / etc. just carry base
+    return info
+
+
 def _desc(stmt) -> str:
     d = stmt.search_one("description")
     return (d.arg or "").strip() if d else ""
@@ -96,6 +111,8 @@ def build_tree(module, depth_limit: int = 0):
                 "name": s.arg,
                 "keyword": s.keyword,
                 "datatype": _leaf_type(s),
+                "typeinfo": _type_info(s) if s.keyword in ("leaf", "leaf-list") else {},
+                "is_key": False,  # set below when a parent list declares keys
                 "key": key.arg if key else None,
                 "config": (cfg.arg != "false") if cfg else True,
                 "description": _desc(s)[:200],
@@ -108,6 +125,12 @@ def build_tree(module, depth_limit: int = 0):
             }
             if depth_limit == 0 or depth < depth_limit:
                 node["children"] = walk(s, depth + 1, xp, rc)
+                # mark key leaves for list nodes
+                if s.keyword == "list" and node.get("key"):
+                    keyset = set(node["key"].split())
+                    for ch in node["children"]:
+                        if ch["name"] in keyset:
+                            ch["is_key"] = True
             else:
                 node["truncated"] = True
             nodes.append(node)
