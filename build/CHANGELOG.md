@@ -1,5 +1,785 @@
 # CHANGELOG
 
+## hitech_automation_ai.1.45.0 — 2026-07-12
+
+### Added — collapsible sections in the YANG workspace
+- Every block in **NETCONF-YANG** is now a **collapsible section** with a ▼/▶
+  header, in the same style as the Filter/extract block: **RPC controls**,
+  **Module loader**, **YANG tree**, **RPC & device reply**, **Filter/extract**,
+  and **Saved NETCONF operations** (which starts collapsed, since it's the
+  noisiest).
+- **Node detail folds to a thin strip on the right edge** — click it and the
+  tree pane takes the full width. Applies to Explore-YANG too.
+- **⊟ Collapse all / ⊞ Expand all** buttons in the YANG sub-tab bar.
+- **Layout is remembered** (localStorage), so your preferred arrangement
+  survives reloads.
+- Collapsing is **purely visual** — nothing is unmounted, so ticked nodes,
+  filled values and the loaded tree all survive folding (verified in jsdom).
+
+
+## hitech_automation_ai.1.44.2 — 2026-07-12
+
+### Fixed — the v1.44.1 saved-payload fix never took effect
+- v1.44.1 claimed to fix `XMLError: Element [{…}native] does not meet
+  requirement` on ▶ Run of a saved operation, but the patch matched a
+  **different copy** of the handler (the string differed by one word), so the
+  live Run path still posted the bare fragment to `/api/netconf-send`.
+- The **actual** saved-entry Run branch now wraps the stored fragment into a
+  complete `<rpc>` (adding `<filter>` / `<config>`) and dispatches it through
+  `/api/yang/run-rpc`, with the reply rendered in the pretty XML view.
+
+
+## hitech_automation_ai.1.44.1 — 2026-07-12
+
+### Added
+- **XPath style is now a 3-way selector**: **no prefix (default)** | short prefix
+  | module prefix. "No prefix" produces exactly the form of a hand-written
+  working filter (`/interfaces/interface[admin-status="if-state-up"]…`).
+  "Short prefix" uses a compact alias (`intf`, `bgp`, `ospf`, `ios`) declared on
+  the filter, instead of the model's verbose prefix
+  (`interfaces-ios-xe-oper:` repeated on every step).
+- **Client-side XPath filter + Extract→table on the device reply** — the same
+  real-XPath-1.0 tooling already available under the XPath nav, now directly
+  under the NETCONF reply: run predicates / `//` / `contains()` against the
+  returned XML, or extract a row element + labelled columns into a table.
+
+### Fixed
+- **`XMLError: Element [{…}native] does not meet requirement` when running a
+  saved operation.** Older records stored a **bare data fragment**; ncclient
+  needs `<filter>` (or `<config>`) around it. Saved payloads are now wrapped
+  correctly on both ▶ Run and ⬆ Load, and an already-wrapped payload is not
+  double-wrapped.
+- **"➕ NETCONF get filter" appeared to do nothing.** It saved the operation
+  out of view. It now also **switches to the NETCONF-YANG tab, loads the RPC
+  into the editor and scrolls to it** — ready to ▶ Run.
+- Legacy `undefined:` prefixes in saved operation notes are repaired on read.
+
+
+## hitech_automation_ai.1.44.0 — 2026-07-11
+
+### Fixed — no dropdown for enum leaves defined via a typedef
+- `Cisco-IOS-XE-interfaces-oper`'s `admin-status` / `oper-status` are typed with
+  **typedefs** (`intf-state`, `oper-state`) that resolve to an enumeration in
+  another module. The parser only looked for a literal `type enumeration`, so
+  those leaves rendered as a plain **text box** with the raw type name, while
+  YANG Suite offered a dropdown (`if-state-up`, `if-state-down`, …).
+- `_type_info()` now reads pyang's **resolved type spec** (`i_type_spec`), which
+  follows typedefs for us — so enum dropdowns appear for typedef'd leaves.
+  Enums inside **unions** are collected too, and **identityref** leaves offer
+  their derived identities.
+- Numeric / string leaves now show their **restriction as a placeholder hint**
+  (`uint16 (68..9216)`, `string (len 1..64)`), with the **pattern** in the
+  tooltip.
+
+
+## hitech_automation_ai.1.43.2 — 2026-07-11
+
+### Fixed — device rejected the filter: `unknown-element <bad-element>filter</bad-element>`
+- v1.43.1 declared the model namespace as the **default xmlns on `<filter>`** to
+  allow unprefixed steps. That moved the `<filter>` element itself **out of the
+  NETCONF base namespace** into the OpenConfig one, so the device saw an unknown
+  element called `filter` and refused the RPC.
+- `<filter>` now always stays in the **NETCONF base namespace**:
+  - **unprefixed** → `<filter type="xpath" select='/interfaces/…'/>` with **no
+    model namespace declared** — byte-identical to what ncclient puts on the wire
+    for `session.get(filter=('xpath', '<string>'))`, i.e. the form already proven
+    to work on the lab device.
+  - **use prefixes** → `<filter xmlns:oc-if="…" type="xpath" select="/oc-if:…"/>`.
+- Verified by parsing both forms back and asserting the filter element resolves
+  in the NETCONF namespace with the correct (or absent) nsmap.
+
+
+## hitech_automation_ai.1.43.1 — 2026-07-11
+
+### Changed — XPath filters are now written the way a human would write them
+Benchmarked against a hand-written filter that works on IOS-XE. The generator
+now produces **byte-for-byte the same expression**:
+
+```
+/interfaces/interface[starts-with(name,"GigabitEthernet")]
+                     [state/oper-status="UP" and state/admin-status="UP"]
+                     [state/counters/in-octets>0 or state/counters/out-octets>0]
+```
+
+Three changes got us there:
+- **No more per-leaf union.** We used to emit one arm per selected leaf and
+  repeat every condition in each arm. The device returns the whole matched block
+  anyway, so we now select the **common list ancestor once**. (A union is still
+  used when the selections genuinely span different branches.)
+- **Unprefixed steps by default.** Prefixing every step was most of the visual
+  noise. The namespace is now declared as the **default xmlns on the filter**, and
+  steps are bare. A **"use prefixes"** checkbox restores the prefixed form for
+  multi-namespace expressions.
+- **Grouped bracket predicates** instead of one long `and` chain: keys in the
+  first bracket, equality conditions in the second, comparisons in the third —
+  with an **and / or** selector for the comparison group (so
+  `in-octets>0 or out-octets>0` is expressible).
+
+
+## hitech_automation_ai.1.43.0 — 2026-07-11
+
+### Fixed — device reply showed raw `<style="color:…">` markup
+- The XML highlighter chained `.replace()` calls that ran over **their own
+  output**: the tag rule then matched inside the `<span>` tags it had just
+  emitted, producing the broken `<style="color:#7dd3fc;">` text you saw.
+  Rewritten as a **single-pass tokenizer** that escapes each piece exactly once.
+
+### Fixed — Copy buttons did nothing
+- The app is served over **http://**, where `navigator.clipboard` is not
+  available (it requires a secure context). Copy now falls back to a hidden
+  textarea + `execCommand('copy')`. **The RPC pane has its own Copy button too.**
+
+### Fixed — xpath filter ignored values like "UP" and ">0"
+- Values were only turned into predicates for **list KEY leaves**; a value on an
+  ordinary leaf (oper-status, in-octets) was silently dropped. Non-key leaf
+  values now become **XPath conditions on the nearest list ancestor**:
+  `interface[starts-with(oc-if:name,"Gigabit") and oc-if:state/oc-if:oper-status="UP"
+  and oc-if:state/oc-if:counters/oc-if:in-octets>0]/…`
+
+### Added
+- **Resizable panes** (the corner grabber): RPC editor, device reply, the YANG
+  tree, and every RESTCONF result box — drag to expand/shrink.
+- **Multi-line `select=`** — each union arm on its own line. XML attribute values
+  may contain newlines and XPath ignores the whitespace, so this stays valid;
+  verified by parsing the result back to the identical expression.
+
+
+## hitech_automation_ai.1.42.5 — 2026-07-11
+
+### Fixed — NETCONF-YANG "Load module → tree" did nothing (status lied)
+- The NETCONF tab's Load button worked by **copying its selection into the
+  Explore tab's dropdowns and reusing that loader**. Those dropdowns are only
+  populated once the Explore tab has been opened, so going straight to
+  NETCONF-YANG left them empty: setting `.value` silently failed, the loader
+  bailed out — and the handler still reported **"Tree loaded"** while the pane
+  showed the placeholder.
+- The shared loader now takes **explicit (set, module) arguments** instead of
+  reading Explore's DOM, **returns success/failure**, and the NETCONF handler
+  reports the truth (and mounts the tree pane **before** rendering into it, so
+  the output lands in the host you are actually looking at).
+- Tree relocation between the two tabs now uses a **DOM anchor** rather than
+  fragile sibling lookups, so the tree always returns to its exact place in
+  Explore. Verified in jsdom: mount → render → content visible in the NC host →
+  move back → content preserved.
+
+
+## hitech_automation_ai.1.42.4 — 2026-07-11
+
+### Fixed — readability of the RPC and the device reply
+- **`&quot;` everywhere in the xpath filter.** lxml always delimits attributes
+  with double quotes, so every `"` inside `starts-with(...,"Gigabit")` was
+  escaped. The `select` attribute is now emitted with **single-quote
+  delimiters**, so it reads
+  `select='/oc-if:interfaces/…[starts-with(oc-if:name,"Gigabit")]/…'`
+  — still valid XML, verified by parsing it back.
+- **The device reply was one unreadable wall of XML.** It is now
+  **pretty-printed and syntax-highlighted** (elements, attributes, values), with
+  leaf text kept on one line (`<in-octets>566039686</in-octets>`), plus a
+  **Copy** button and a **wrap** toggle. Self-contained highlighter — no CDN.
+- **Long xpath `select=` unions** are displayed with each ` | ` arm on its own
+  line, so a 4-way union is readable (the attribute itself stays one line, as
+  XML requires).
+- **A comparison value in a SUBTREE filter is now blocked with an explanation.**
+  `>0` was silently emitted as the literal text `&gt; 0` — subtree filters match
+  values exactly and cannot express comparisons. The builder now says so and
+  points you to the xpath filter (or to just tick the node).
+
+
+## hitech_automation_ai.1.42.3 — 2026-07-11
+
+### Fixed — four bugs from live testing
+- **Build RPC failed with "YangEngineError: yangsuite engine packages not
+  installed".** The subtree/config builder hard-depended on the optional
+  yangsuite pip packages. A **native lxml builder** now produces the identical
+  XML (merged list entries, empty leaves, correct namespaces) and is used
+  automatically when the engine isn't present — Build RPC works out of the box.
+- **xpath filter produced `RPCError: XPath syntax error`.** A key value that is
+  an XPath *expression* was being quoted as a literal:
+  `[oc-if:name="starts-with(name,&quot;Gigabit&quot;)"]`. Expressions are now
+  detected and emitted unquoted — `[starts-with(oc-if:name,"Gigabit")]` — and
+  comparisons like `>0` become `[oc-if:in-octets>0]`. Plain values still quote
+  normally.
+- **Node detail showed a stale node from a PREVIOUS module** (openconfig tree
+  displaying `Cisco-IOS-XE-bgp` / `/native/router/bgp`). Loading a tree now
+  clears the selection, Node detail, RFC panel, Generated paths and API
+  operations.
+- **The ➕ buttons gave no feedback.** They now flash a green ✓ (or red ✕ on
+  failure) for ~1.4 s when an operation is added.
+
+
+## hitech_automation_ai.1.42.2 — 2026-07-11
+
+### Added — smart path-aware node search
+The find box now understands paths, not just names:
+
+| Query | Matches |
+|---|---|
+| `bgp` | name contains "bgp" (as before) |
+| `bgp*` / `*bgp` | name glob |
+| `//bgp` | node **named** `bgp` at **any depth** (drops the `bgp-id` noise) |
+| `/native/router/bgp` | **absolute path**, anchored at the tree root |
+| `router/bgp` | **path suffix** — any node whose path ends with these segments |
+| `/native/*/bgp` | `*` matches exactly one path segment |
+| `//interface/*/mpls/bgp` | descendant + wildcard combined |
+
+- The **exact** checkbox still forces whole-name equality for plain names.
+- An absolute query that matches nothing **falls back to a suffix match** and
+  says so, rather than just reporting "No match".
+- Ranking unchanged: exact-name matches first, then shallowest paths.
+- The matcher was verified against the *rendered* template JS (not just the
+  source) to confirm the regex escaping survives templating.
+
+
+## hitech_automation_ai.1.42.1 — 2026-07-11
+
+### Changed — RESTCONF-YANG response handling
+- **HTTPS mode now returns the response only** — status line, collapsible
+  response headers, and the body. The curl / python-requests / http.client
+  export snippets (and the curl preview block) appear **only in curl mode**,
+  where they belong.
+- **Format selector: JSON | XML** sets `Accept` (and `Content-Type` when a
+  payload is present) to `application/yang-data+json` or
+  `application/yang-data+xml`. The media type is shown in an **editable field**
+  so it can be overridden by hand, and the generated curl uses it too.
+- **The body is pretty-printed** — parsed and indented JSON, or indented XML —
+  instead of the escaped one-line `"body": "{\n \"…\""` dump. Status code is
+  colour-coded (2xx green / 4xx-5xx red) with the elapsed time.
+- New backend flag `include_export` on `/api/restconf-execute`.
+
+### Fixed
+- **"undefined:process-id"** in collected operation notes — `node.module` was
+  dropped from the compact tree in v1.34.3; the note now resolves the module
+  from `augmented_from` / tree meta.
+
+
+## hitech_automation_ai.1.42.0 — 2026-07-11
+
+### Added — YANG tree inside NETCONF-YANG (YANG Suite layout)
+- NETCONF-YANG now has its own **YANG set + module picker (with search) and
+  Load button**, and the schema **tree renders right there** above the RPC
+  panes. Tick nodes / fill values in that tree and Build RPC (subtree or xpath)
+  uses exactly those selections — no detour through Explore-YANG.
+- Implemented as **one shared tree instance that is relocated** between the
+  Explore and NETCONF hosts, so there is a single renderer, a single selection
+  state, and no divergent behaviour (icons, badges, lazy DOM, search all
+  identical in both tabs).
+
+### Fixed — augment-only modules rendered an empty tree
+- `openconfig-if-ethernet` (and any module that only **augments** others) has no
+  top-level nodes of its own, so its tree was legitimately empty — but the UI
+  just showed a blank pane and blamed duplicates. The backend now detects an
+  augment-only module, resolves its **augment target(s)**, and returns the
+  TARGET module's tree with the augmented nodes merged in (this is what YANG
+  Suite does), plus a clear note explaining the substitution. If the target
+  isn't in the set, it says so and tells you to add it.
+- **The misleading red banner is gone.** When a tree really does come back
+  empty, the UI now lists the **actual blocking findings** from the set
+  (e.g. `already a child node to "/if:interfaces/if:interface"`, missing
+  `ietf-routing` types) instead of guessing "duplicate revisions".
+
+
+## hitech_automation_ai.1.41.1 — 2026-07-11
+
+### Fixed — find-node exploded the tree (200+ branches auto-expanded)
+- Typing `router` matched every `*router*` node and the search **expanded the
+  ancestor chain of all 200 matches**, leaving the tree unusable.
+- **Search now shows a results list instead of expanding anything**: each hit
+  shows its node type and full path. **Click a result to jump** — only that
+  node's chain is expanded, it is highlighted, scrolled into view, and selected
+  (Node detail fills in). Jumping to another hit **collapses the previous
+  branch**, so the tree stays tidy.
+- **Prev / Next** buttons (and Enter / Shift+Enter in the box) step through
+  matches with a `3 / 47` counter.
+- **exact** checkbox matches the node name exactly instead of any substring.
+- Results are **ranked**: exact-name matches first, then shallowest paths — so
+  `router` puts `/native/router` (container) at the top, above the dozens of
+  `*-router-id` leaves.
+- Clearing the box still collapses the tree back to top level.
+
+
+## hitech_automation_ai.1.41.0 — 2026-07-11
+
+### Added — subtree / xpath filter choice + selectable tree nodes
+- **Filter type selector** in NETCONF-YANG: **subtree** (default, YANG Suite's
+  behaviour) or **xpath**. xpath builds
+  `<filter type="xpath" xmlns:pfx="…" select="…"/>` from the selected nodes
+  (multiple selections joined with the XPath union `|`, prefixes declared on
+  the filter element per RFC 6241 §6.4.2). The selector is disabled for
+  edit-config (which carries `<config>`, not a filter).
+- **:xpath capability guard** — Run RPC checks the device's advertised
+  capabilities first and returns a clear "switch to subtree" message instead of
+  a cryptic RPC error.
+- **Selectable nodes in the tree** (the ✓ boxes YANG Suite has): containers and
+  lists now have a select checkbox, and leaves get one alongside their value
+  box. A node ticked WITHOUT a value emits an empty element — this is how the
+  `<counters><in-octets/></counters>` "fetch this field" filter shape is built.
+  `collectFilled()` now includes selected-but-valueless nodes.
+
+
+## hitech_automation_ai.1.40.0 — 2026-07-11
+
+### Added — NETCONF-YANG is now a live RPC builder (YANG Suite parity)
+- **NETCONF Operation** selector (get / get-config / edit-config) + datastore
+  (running / candidate) + device picker.
+- **&lt;/&gt; Build RPC** renders the COMPLETE `<rpc>` document from the values you
+  filled in the Explore-YANG tree — proper envelopes:
+  `get` → `<get><filter type="subtree">…`, `get-config` → adds
+  `<source><running/></source>`, `edit-config` → `<target>` + `<config>`.
+  The XML lands in an **editable** pane (edit before sending).
+- **▶ Run RPC** dispatches the raw `<rpc>` to the device via ncclient and shows
+  the device reply side-by-side. **⃠ Clear RPC** resets both panes.
+- Saved NETCONF operations get an **⬆ Load** button that pushes them into the
+  RPC editor, wrapped in the right envelope.
+- New routes `/api/yang/build-rpc-envelope` and `/api/yang/run-rpc`;
+  `yang_engine.build_rpc_envelope()` builds the full document.
+
+### Fixed
+- **"undefined:bgp"** in built RPC notes — `treeMeta` was used without a guard;
+  Build now refuses (with a clear message) if module metadata is missing.
+- **edit-config was offered for read-only (config false) data.** Building from
+  oper nodes now falls back to `get`, and edit-config is rejected outright for
+  read-only selections.
+
+
+## hitech_automation_ai.1.39.1 — 2026-07-10
+
+### Fixed — XPath empty ("/") for notification / rpc / action nodes
+- `xpathOf()` built the path from the DATA-node chain, which excludes
+  `notification`, `rpc`, `action`, `input`, `output`, `choice`, `case`. Selecting
+  a notification (e.g. `bgp-peer-state-change`) therefore showed XPath `/`
+  where YANG Suite shows `/bgp-peer-state-change`.
+- **XPath / Schema Node Id now use the full SCHEMA chain** (all schema
+  statements), while the RESTCONF path correctly keeps using the data-node
+  chain only. Non-data nodes now show "— (no RESTCONF data path for a
+  notification)" instead of a misleading bare `/restconf/data/`.
+- **Access / Operations** now reflect the statement type: notification →
+  read-only / "notification"; rpc & action → "rpc"/"action"; config false →
+  get-config/get; otherwise edit-config/get-config/get.
+
+
+## hitech_automation_ai.1.39.0 — 2026-07-10
+
+### Added — View module text + RFC reference (YANG Suite parity)
+- **📄 View text** button in Explore-YANG opens the raw `.yang` source of the
+  selected module in a modal: line numbers, find-in-text (highlights + scrolls),
+  and Copy. New route `/api/yang/module-text`.
+- **Node detail enriched** to match YANG Suite's Node Properties: added
+  **Access** (read-write / read-only), **Operations** (edit-config/get-config/get
+  vs get-config/get, derived from config), and **Schema Node Id**.
+- **RFC 7950 reference panel** under Node detail: clicking a node shows the
+  relevant statement's section (e.g. a `list` → RFC 7950 §7.8 "The list
+  Statement") with a short bundled excerpt and a link to the full section on
+  ietf.org. New module `tools/yang_rfc.py` (covers the ~20 core YANG
+  statements) + `/api/yang/rfc/{keyword}` route.
+
+### Note
+- This build also carries the v1.38.5 OpenAPI generator fix (single-pass path
+  construction; no more double-key / over-prefixed paths). APP_VERSION strings
+  are normalized to 1.39.0 across main.py and the UI badge (they had lagged at
+  1.38.3 in the 1.38.5 zip).
+
+
+## hitech_automation_ai.1.38.5 — 2026-07-07
+
+### Fixed — Generate API(s) produced 12,687 malformed paths (should be ~50)
+- Comparing our bgp export to YANG Suite's revealed the path builder was
+  broken two ways, which multiplied a 50-path spec into 12k+:
+  1. **Double key predicate** — a selected list emitted `bgp={id}={id}` because
+     the base-path builder and the subtree walker BOTH appended the key.
+  2. **Over-prefixing** — every descendant carried `Cisco-IOS-XE-bgp:` on every
+     segment (`…/Cisco-IOS-XE-bgp:bgp/Cisco-IOS-XE-bgp:aigp-rib-metric`) instead
+     of only where the owning module changes (YANG Suite prints bare child
+     names within the same module).
+- **Path construction rewritten as a single clean pass**: each segment is
+  emitted once with the correct module-prefix rule, and list keys become a
+  single `={list-key}` predicate. Verified against YANG Suite's exported bgp
+  JSON — path structure, prefixing, and per-node method sets all match.
+
+
+## hitech_automation_ai.1.38.3 — 2026-07-07
+
+### Fixed — Swagger grouping matches YANG Suite; render verified end-to-end
+- Operations are now tagged **"<Verb> <Node>"** (Modify Bgp, View As-Path, …)
+  exactly like YANG Suite, so Swagger-UI shows the same section headers
+  (Modify Bgp / Replace Bgp / Add Bgp / View Bgp / Remove Bgp) instead of one
+  flat group.
+- **Render proven headless**: the vendored Swagger-UI bundle was run against a
+  generated bgp spec in jsdom — 123 KB of real DOM with operation blocks. If
+  your right-side panel was still blank, it was running a pre-1.38.2 build that
+  fetched Swagger from the (blocked) CDN; deploy this build.
+- Spec validated: every `{path-param}` has a matching parameter definition,
+  every operation has responses.
+
+
+## hitech_automation_ai.1.38.2 — 2026-07-07
+
+### Fixed — Swagger-UI blank modal (CDN dependency removed)
+- The OpenAPI modal rendered blank when the Swagger-UI CDN bundle failed to
+  load (offline/filtered network or a stale CDN path). **Swagger-UI is now
+  vendored locally** under `static/swagger/` and served by the app — no
+  external network needed.
+- The bundle loads on first modal open with a hard fallback: if assets still
+  fail, the modal shows a clear message plus the raw spec (JSON) instead of a
+  blank screen; ⬇ JSON / ⬇ YAML always work.
+- Confirmed the generator itself was correct for `bgp` (a top-level list): the
+  spec matched YANG Suite's exported JSON path-for-path; the failure was purely
+  the missing renderer.
+
+
+## hitech_automation_ai.1.38.1 — 2026-07-07
+
+### Fixed — Generate API(s) now covers the WHOLE subtree (YANG Suite parity)
+- v1.38.0 emitted a single path (5 methods) for the selected node. YANG Suite
+  emits a path for the node **and every descendant** — router-ospf produces ~50
+  resources. The generator now **recurses the full subtree** with YANG Suite's
+  exact per-node-type method rules, decoded from its own exported JSON:
+  container → GET/POST/PUT/PATCH/DELETE; list-collection → GET/POST/PUT/PATCH
+  (no DELETE); list-instance `={key}` → GET/DELETE; leaf/leaf-list →
+  GET/PUT/PATCH/DELETE (no POST); key leaves → informational path under their
+  list's collection, no operations. List keys become distinct `{list-key}` path
+  parameters at every level.
+- Frontend now sends the node's full (depth-preserving) subtree to the
+  generator, and warns if the tree was **depth-limited** (reload at
+  Depth=unlimited for the complete API set).
+- Verified path-for-path and method-for-method against the attached
+  `Cisco-IOS-XE-ospf_router-ospf.json`.
+
+
+## hitech_automation_ai.1.38.0 — 2026-07-07
+
+### Added — Generate API(s): OpenAPI 3.0.3 + Swagger-UI (YANG Suite parity)
+- **⚡ Generate API(s)** in Explore-YANG: select any data node → get a full
+  **OpenAPI 3.0.3** document with all five operations on the RESTCONF data
+  path, grouped exactly like YANG Suite — **View / Add / Replace / Modify /
+  Remove** (GET/POST/PUT/PATCH/DELETE). List keys become `{key}` path
+  parameters; request/response bodies carry a schema derived from the node's
+  children (enums, booleans, ints, nested lists).
+- **Swagger-UI modal** renders the spec with live **Try it out / Execute**,
+  plus **⬇ JSON** and **⬇ YAML** download (matches YANG Suite's Download
+  OpenAPI JSON/YAML).
+- New `tools/yang_openapi.py` (spec generator, verified against the
+  `router-ospf` example from the screenshots) and `/api/yang/openapi` route.
+
+
+## hitech_automation_ai.1.37.0 — 2026-07-07
+
+### Added — resizable Explore panel + HTTPS/curl in RESTCONF-YANG
+- **Explore-YANG tree ↔ Node-detail split is now drag-resizable** (grab the
+  handle between them; double-click resets to 420px) — the detail/Generated
+  panel no longer clips on wide content.
+- **RESTCONF-YANG: every operation now shows its equivalent `curl` command**
+  (creds masked as `<user>:<pass>`, copy button) alongside the editable URI.
+- **Run-mode toggle: HTTPS ⇄ curl.** HTTPS runs through the app's client
+  (as before); curl runs the real command **on the server** with the device's
+  resolved credentials and returns headers + body + exit code. New backend
+  flag `as_curl` on `/api/restconf-execute` (auth/URL resolution shared with
+  the HTTPS path; Authorization redacted in the echoed command).
+
+
+## hitech_automation_ai.1.36.1 — 2026-07-07
+
+### Fixed — Explore-YANG module picker is searchable
+- New 🔎 search box next to "Module (from set)": type `nati` → the dropdown
+  filters live to matching modules (selection preserved when still visible,
+  else first match auto-selected). **Enter** in the search box loads the
+  selected module straight into the tree.
+
+
+## hitech_automation_ai.1.36.0 — 2026-07-07
+
+### Added — Cisco YANG Suite engine EMBEDDED (Apache-2.0 pip packages, headless)
+- **Build RPC from tree values** — YANG Suite's signature feature, powered by
+  its own `YSNetconfRPCBuilder`, running inside our backend (no Django server,
+  no second app). Fill values / tick checkboxes in the Explore tree (list KEY
+  leaves included), then:
+  - **🛠 Build edit-config from values** → one merged NETCONF `<config>` with
+    correct namespaces and list-key elements
+    (`GigabitEthernet><name>2</name><description>…`), or
+  - **Build get filter** → subtree `<filter>` from the same selections.
+  Both land in the **NETCONF-YANG tab** ready to ▶ Run against a device.
+  Guard rails: refuses to build while a referenced list's key leaf is empty
+  (tells you which); flags payloads containing augmented-module nodes so you
+  can verify xmlns.
+- **Repository status now uses YANG Suite's `quickparser`** (revision-aware
+  import/include scanning) with the regex scan as automatic fallback.
+- New `tools/yang_engine.py`: one-time headless Django-settings bootstrap;
+  `rpcbuilder.py` loaded directly by file path (bypasses the package
+  __init__ chain that would drag in ysdevices/netmiko needlessly).
+- requirements: + yangsuite, yangsuite-netconf, yangsuite-filemanager, django
+  (configured headless — FastAPI remains the only server).
+
+### Decided with evidence — tree stays on OUR engine
+Their headless tree builder (`YSYangModels`) was tested three ways against
+real 17.7.1 models (directory repo / full-set context / product-exact
+YSYangRepository+YSMutableYangSet): augments outside the import closure do not
+merge without their Django UI glue, while our resolved-tree engine produces
+the product-equivalent merge (router = 12 children incl. bgp/ospf/isis/lisp).
+Embedding it would have been a downgrade; revisit if their packages change.
+
+
+## hitech_automation_ai.1.35.1 — 2026-07-07
+
+### Reverted — v1.35.0 launcher was the wrong delivery
+- **Native YANG UI fully restored** (Repo / Explore-YANG / RESTCONF-YANG /
+  NETCONF-YANG, exactly as v1.34.3). The YANG Suite *launcher* and companion
+  container are removed — requirement clarified: YANG Suite's capabilities
+  belong INSIDE this software, not as a dependency on another program.
+- `docker/` now defines a **single service** (this app only). The Cisco
+  one-container assets are dropped from the zip.
+- Next (v1.36.0, awaiting go): embed YANG Suite's open-source ENGINE
+  (ysyangtree / ysfilemanager pip packages, Apache-2.0) underneath the
+  existing tabs — proven headless in prototyping.
+
+
+## hitech_automation_ai.1.35.0 — 2026-07-07
+
+### Changed — native YANG section REPLACED by Cisco YANG Suite (Option A)
+- **New `docker/` directory** ships alongside `build/`:
+  `docker-compose.yml` runs two services — **software_ai** (this app,
+  containerized for the first time: python:3.11-slim, git for sparse imports,
+  state in the `hitech-state` volume, `OLLAMA_URL` env-overridable) and
+  **yangsuite** (Cisco's official one-container build: HTTPS UI on **8480**,
+  telemetry receivers 57500/57501, `ys-data` volume, self-signed cert,
+  default login developer/developer).
+- **The YANG nav section is now a YANG Suite launcher**: live health pill
+  (`/api/yangsuite/health`, self-signed TLS tolerated), "Open YANG Suite ↗",
+  and start-up instructions shown when the container is down. The four native
+  sub-tabs (Repo / Explore-YANG / RESTCONF-YANG / NETCONF-YANG) are removed
+  from the UI.
+- **Kept on purpose:** all `/api/yang/*` backend routes and your data under
+  `~/.hitech_automation_ai/yang/` — the AI agent can still drive them; a later
+  cleanup release can strip whichever routes prove dead.
+- Verified: zero orphaned `yang-*` element references remain in the JS (the
+  Classic-UI-removal gotcha), rendered scripts pass node --check, compose YAML
+  and both Dockerfiles validate, all build contexts/paths resolve.
+- Note: systemd zip deployment still works exactly as before; compose is an
+  additional way to run.
+
+
+## hitech_automation_ai.1.34.3 — 2026-07-07
+
+### Fixed — Explore tree performance (minutes → instant)
+- Measured on real Cisco 17.7.1 native: depth 8 = 116,765 nodes / **77 MB
+  JSON**, all rendered as DOM up-front — the browser froze for minutes. Two
+  fixes:
+  1. **Compact tree JSON** — per-node defaults omitted; xpath/restconf/module/
+     namespace no longer shipped per node (the client derives them from the
+     parent chain with the same rules). Depth 8: 77 MB → **18 MB**; unlimited:
+     173 MB → 38 MB.
+  2. **Lazy DOM (YANGSuite-style)** — children materialize on first expand;
+     the initial render is ~40 top-level rows, instant at any depth.
+- **Find-in-tree rewritten** to walk the data (lazy DOM means rows may not
+  exist): matches (cap 200) get their ancestor chain auto-expanded and
+  highlighted, first match scrolled into view; **clearing the box collapses
+  back to top level** (the v1.32.2 request, delivered).
+- Node detail / Generated / API operations now compute paths client-side —
+  verified identical to the backend's rules (cross-module prefixes included).
+
+
+## hitech_automation_ai.1.34.2 — 2026-07-07
+
+### Fixed — validation findings triage (the wall of warnings, explained)
+- **Verified against real Cisco IOS-XE 17.7.1 models (637 modules):** pyang
+  reports ~1500 findings on Cisco's own files, yet the resolved tree is
+  complete and correct (router = bgp/ospf/ospfv3/eigrp/rip/lisp/isis merged
+  in). The findings are inherent to Cisco/openconfig models — Cisco YANG Suite
+  shows the same wall. Adding files does not (and cannot) silence them.
+- **Validate now triages instead of dumping**: findings grouped by pattern
+  with counts; known-benign patterns (cross-module XPath in groupings, leafref
+  "in the path for", openconfig deviation targets, escape-sequence style
+  warnings, unused imports, skipped duplicate revisions) are tagged **(benign)**
+  with an explanation; a **verdict banner** leads: "✅ No tree-blocking
+  findings — N known-benign patterns, safe to ignore", or lists the
+  genuinely-actionable groups first.
+- New `yang_parser.triage_findings()`; validate route returns `triage`.
+
+
+## hitech_automation_ai.1.34.1 — 2026-07-07
+
+### Fixed — duplicate module revisions were silently breaking everything
+- **Root cause of "3100 errors + router won't expand":** two revisions of the
+  same module (e.g. Cisco-IOS-XE-native @ 2021-07-01 AND @ 2021-08-10) in one
+  pyang context break prefix→module resolution — every augment target lookup
+  fails ("node …::native is not found in module …") and trees render without
+  merged children.
+- **parse_set now keeps only the newest revision per module name** and reports
+  each skipped duplicate as a warning.
+- **Repo tab: "Delete older duplicate revisions"** button removes all but the
+  newest file per module; duplicated names are highlighted ⚠ amber in the list
+  with a count in the header.
+- **Explore now explains instead of failing silently**: if the context floods
+  with errors and the tree comes back nearly empty, a red guidance banner tells
+  you the cause and the fix path (Repo → dedupe → Validate → reload).
+- Tree pane gets a **horizontal scrollbar** (long rows no longer clip).
+
+
+## hitech_automation_ai.1.34.0 — 2026-07-07
+
+### Added — RESTCONF-YANG and NETCONF-YANG tabs are live
+- **Explore-YANG → "API operations" panel** on every data node: generated
+  **GET (collection) / GET (instance) / POST / PUT / PATCH / DELETE** rows —
+  URIs carry `{key}` placeholders for every list along the path (ancestors
+  included), POST targets the parent path, write methods come with an editable
+  **JSON payload skeleton** (keys first, enum/boolean/int example values,
+  augmented children carry their `module:` prefix). ➕ per row, **Add all**,
+  plus **NETCONF get filter** and **NETCONF edit-config** generators
+  (subtree XML with key elements and namespace on the outermost element).
+- **RESTCONF-YANG tab**: every collected operation as an editable entry
+  (method badge, URI, payload, note) with 💾 save, checkbox **Delete checked**,
+  and **▶ Run** against an inventory device — executes through the existing
+  `/api/restconf-execute` backend (inventory auth), response shown inline.
+  Refuses to run while `{key}` placeholders remain.
+- **NETCONF-YANG tab**: same list for NETCONF operations — get/get-config use
+  the XML as a subtree filter, edit-config wraps it in `<config>`; ▶ Run goes
+  through `/api/netconf-send`.
+- Collections persist server-side in `~/.hitech_automation_ai/yang/apis.json`
+  (`/api/yang/apis` + add/update/delete routes).
+
+### Notes / limitations
+- NETCONF XML uses the top module's namespace on the outermost element;
+  augmented subtrees that need their own xmlns may require a manual tweak (the
+  payload is editable in-place).
+- Unlimited operations can be collected — "as many API URIs as you want".
+
+
+## hitech_automation_ai.1.33.0 — 2026-07-07
+
+### Added — YANG Explorer restructured into sub-tabs (YANG Suite workflow)
+- **New sub-tab bar under YANG: Repo | Explore-YANG** (+ RESTCONF-YANG and
+  NETCONF-YANG placeholders, coming v1.34/v1.35).
+- **Repo tab** = everything from v1.32 (repos, Upload/NETCONF/SCP/Git import,
+  module list) **plus**:
+  - **Repository status** — "Check dependencies" scans every module's
+    import/include statements and reports missing modules in red as
+    `Cisco-IOS-XE-features @ unknown (needed by …)`, green when complete.
+  - **YANG module sets** — YANGSuite-style two-list builder: *modules in this
+    set* vs *additional modules in the repository*, Add selected / **Add entire
+    repository** / Remove selected / Remove all, filters, counts.
+    Sets persist in `~/.hitech_automation_ai/yang/sets.json`.
+  - **Validate YANG modules** — parses the entire set in ONE pyang context and
+    lists per-position errors (✖ red) and warnings (⚠ amber).
+- **Explore-YANG tab** — pick a set → module → load. The tree is built from
+  pyang's **resolved schema (i_children)** with the whole set in context:
+  **augments from other modules are merged in** — `/native/router` now shows
+  the BGP/OSPF/EIGRP/LISP/… containers contributed by the separate
+  Cisco-IOS-XE-* modules, which single-file parsing could never show.
+  Augmented nodes carry correct cross-module RESTCONF prefixes
+  (e.g. `Cisco-IOS-XE-native:native/router/Cisco-IOS-XE-bgp:bgp`) and an
+  `augmented_from` field. `config false` inheritance now uses pyang's
+  `i_config` (whole read-only subtrees badge correctly).
+- New routes: `/api/yang/sets` (+save/delete/validate), `/api/yang/repo/status`,
+  `/api/yang/set-tree`. Set parse results are **cached** per set (invalidated
+  when any member file changes) — first full-set parse of ~1400 modules takes
+  a while; repeats are instant.
+
+### Notes
+- The single-file tree (`/api/yang/tree`) still works and remains the loader
+  for the Repo-tab module list.
+- v1.34 (next, NOT built): Explore API-URI builder — GET/POST/PUT/PATCH/DELETE
+  URIs with key placeholders + JSON payload skeletons, collected into a list →
+  RESTCONF-YANG tab to review/execute. v1.35: NETCONF-YANG tab.
+
+
+## hitech_automation_ai.1.32.1 — 2026-07-07
+
+### Fixed — YANG Explorer import UX (no more dead ends)
+- **Auto-create repository at the point of import.** Download selected schemas /
+  Copy YANG files / Import YANG files / Upload with no repository selected now
+  prompt for a repo name (pre-filled with the device name for NETCONF, else
+  "ios-xe"), create + select it, and proceed — instead of erroring with
+  "Create/select a repository first".
+- **"(no repos)" can never be a silent import target** — every import path goes
+  through the ensureRepo guard.
+- **Delete repo now states the blast radius**: 'Delete repository "ios-xe" and
+  its 577 module file(s)? This cannot be undone.' — deleting a repo removes all
+  its downloaded YANG files; this makes that unmissable.
+
+
+## hitech_automation_ai.1.32.0 — 2026-07-06
+
+### Added — YANG Explorer: add modules to repository (YANGSuite parity)
+- **New "Add modules to repository" tab block: Upload | NETCONF | SCP | Git.**
+- **NETCONF:** pick an inventory device → "Check device connectivity" (hello +
+  netconf-monitoring capability) → "Get schema list" (ietf-netconf-monitoring
+  /netconf-state/schemas) → filter, Select all/none → "Download selected schemas"
+  via `<get-schema>`, saved as `<name>@<revision>.yang`. Client sends batches of
+  10 with a live saved/skipped/failed counter — a full ~700-schema cat8Kv71 pull
+  stays responsive and one bad schema never kills the run.
+- **SCP:** host / SSH user / password / remote directory / include-subdirectories
+  → paramiko SFTP copies all `*.yang` from any SSH host.
+- **Git:** repository URL / branch / directory-within-repo → **shallow sparse
+  clone** (`--depth 1 --filter=blob:none --sparse`) so even the multi-GB
+  YangModels repo imports one vendor directory in seconds. Requires the `git`
+  binary on the server.
+- **"YANG modules in repository" list panel** (replaces the module dropdown):
+  shows `module @ revision`, filter box, Select all / Select none /
+  **Delete selected**, module count; double-click loads the tree.
+- New module `tools/yang_device.py`; 6 new routes (`/api/yang/device/check`,
+  `/device/schemas`, `/device/download`, `/scp/copy`, `/git/import`,
+  `/module/delete`). All imports audited via audit.log. No new dependencies.
+
+### Fixed
+- `yang_store._safe()` stripped `@` from filenames, mangling `name@revision.yang`
+  to `name_revision.yang` — `@` is now allowed.
+- Repo metadata now records each module's **revision** (from `name@rev.yang` or
+  the first `revision` statement in the source).
+
+### Notes
+- Per-schema/get-schema responses are cleaned of CDATA wrappers / XML
+  declarations before saving; duplicates are skipped and counted.
+- v1.33.0 (next): Repository status panel (missing-dependency report) + YANG
+  module sets with pyang validation.
+
+
+## hitech_automation_ai.1.31.0 — 2026-07-06
+
+### Changed — YANG Explorer: full YANGSuite-style tree legend
+- **Node icons replaced** with inline SVG matching Cisco YANG Suite shapes/palette:
+  container (blue folder), list (blue lines), leaf (green), leaf-list (green multi-leaf),
+  choice (split arrow), case (arrow), module, submodule, rpc (envelope), action (target),
+  input, output, notification, anydata (green asterisk), anyxml (green `</>`).
+- **Parser now emits rpc / action / input / output / notification / anydata / anyxml**
+  nodes (previously skipped entirely). anydata/anyxml count as data nodes for
+  XPath/RESTCONF path generation.
+- **New node badges** (YANGSuite legend): 🔑 list key (red), presence container (green),
+  ⓘ mandatory (green), 🔗 must (red, tooltip shows the constraint), 🔗 when (blue,
+  tooltip shows the condition), ⧉ leafref (indigo, tooltip shows the target path).
+- **Status-colored icons**: deprecated nodes render a yellow icon, obsolete render red
+  (in addition to the existing strike-through + badge).
+- **"ⓘ Icon legend" button** opens a YANGSuite-style popup with three sections:
+  Node Icons / Node Support / Node Badges.
+- **Node detail** gains Presence / Mandatory / Must / When / Leafref rows.
+- **Deferred to v2:** `deviation: not-supported` rendering (needs deviation-module
+  upload + application). Shown greyed in the legend as "(v2)".
+- New test model `example-legend-test.yang` exercises every legend item.
+
+## hitech_automation_ai.1.30.2 — 2026-07-06
+
+### Fixed — YANG Explorer renderer
+- **Parser reads `status`** (current/deprecated/obsolete); renderer shows struck-through
+  labels + amber "deprecated" / red "obsolete" badges.
+- **`uses <grouping>` now expands inline** — grouping contents were previously invisible.
+- New kitchen-sink test model `example-kitchen-sink.yang`.
+
+## hitech_automation_ai.1.30.1 — 2026-07-05
+
+### Fixed — YANG Explorer hotfixes after first live test
+- Tree rendering fixes (icons, key badges, value widgets) found during first
+  on-device testing of the YANG Explorer.
+
+## hitech_automation_ai.1.30.0 — 2026-07-05
+
+### Added — YANG Explorer v1 (feature/yang-suite)
+- New "🌲 YANG" left-nav section: create repositories, upload `.yang` files, parse with
+  **pyang**, browse the schema tree, and generate a **RESTCONF path + on-device XPath**
+  for any selected node.
+- New modules: `tools/yang_store.py` (repo storage under `~/.hitech_automation_ai/yang/`),
+  `tools/yang_parser.py` (pyang → normalized JSON tree), `tools/yang_generate.py`
+  (RESTCONF path / unprefixed XPath / keyed path / NETCONF subtree-filter skeleton).
+- 8 new `/api/yang/*` routes. New dependency: `pyang>=2.6`.
+- v1 scope: single-module upload. Git/device import + dependency resolution = v2.
+
+
 ## hitech_automation_ai.1.29.0 — 2026-06-24
 
 ### Changed — better agent tool descriptions (fewer wasted iterations)

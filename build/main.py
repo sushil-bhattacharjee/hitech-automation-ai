@@ -40,7 +40,7 @@ from typing import Optional
 
 import httpx
 import yaml
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Form
 
 # RAG (optional — works without the vector DB built)
 import rag_retriever
@@ -59,7 +59,7 @@ import agent as agent_mod
 from tools import DeviceContext
 
 # ----------------------------- version ----------------------------- #
-APP_VERSION = "hitech_automation_ai.1.29.0"
+APP_VERSION = "hitech_automation_ai.1.45.0"
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from jinja2 import Environment, StrictUndefined, TemplateSyntaxError
@@ -1673,6 +1673,8 @@ class RestconfExecuteRequest(BaseModel):
     device_name: Optional[str] = None     # for auth_type=inventory
     payload: Optional[str] = None         # JSON body for write methods
     verify_tls: bool = False              # lab default
+    as_curl: bool = False                 # v1.37.0: run via server-side curl instead of httpx client
+    include_export: bool = True           # v1.42.1: HTTPS mode wants response only, no curl/python snippets
     restconf_defaults: bool = False       # v1.28.0 issue-1: if True, add Accept/Content-Type yang-data defaults; default OFF (emit only headers the user set)
 
 
@@ -1800,6 +1802,36 @@ async def api_restconf_execute(req: RestconfExecuteRequest):
                     method=req.method, uri=final_uri,
                     device=req.device_name or "(explicit)")
 
+    # v1.37.0: run as a real curl on the server (same resolved URL/creds/headers).
+    if req.as_curl:
+        import asyncio as _aio
+        import shlex as _shlex
+        cmd = ["curl", "-sk", "-i", "-X", req.method, final_uri]
+        for k, v in headers_out.items():
+            cmd += ["-H", f"{k}: {v}"]
+        if final_payload:
+            cmd += ["--data", final_payload]
+        t0 = time.monotonic()
+        try:
+            proc = await _aio.create_subprocess_exec(
+                *cmd, stdout=_aio.subprocess.PIPE, stderr=_aio.subprocess.PIPE)
+            out, err = await _aio.wait_for(proc.communicate(), timeout=30)
+        except Exception as e:
+            return {"ok": False, "error": f"curl failed: {type(e).__name__}: {e}"}
+        elapsed_ms = int((time.monotonic() - t0) * 1000)
+        # printable command with creds masked
+        shown = " ".join(_shlex.quote(c) for c in cmd)
+        for h in headers_out.values():
+            if h.startswith("Basic ") or h.startswith("Bearer "):
+                shown = shown.replace(_shlex.quote(f"Authorization: {h}"),
+                                      "'Authorization: <redacted>'")
+        return {
+            "ok": True, "mode": "curl", "command": shown,
+            "exit_code": proc.returncode, "elapsed_ms": elapsed_ms,
+            "body": out.decode("utf-8", "replace"),
+            "stderr": err.decode("utf-8", "replace"),
+        }
+
     t0 = time.monotonic()
     try:
         async with httpx.AsyncClient(verify=req.verify_tls, timeout=30.0) as client:
@@ -1814,17 +1846,19 @@ async def api_restconf_execute(req: RestconfExecuteRequest):
             set_last_result("restconf", r.text or "", device=getattr(req, "device_name", None),
                             query=final_uri,
                             kind=("xml" if (r.text or "").lstrip().startswith("<") else "text"))
-            export = _build_export_snippets(req.method, final_uri, headers_out,
-                                            dict(req.params or {}), final_payload, req.verify_tls)
-            return {
+            out = {
                 "ok": True,
                 "status_code": r.status_code,
                 "headers": dict(r.headers),
                 "body": r.text,
                 "elapsed_ms": elapsed_ms,
                 "request_url": final_uri,
-                "export": export,
             }
+            if req.include_export:      # v1.42.1: only when asked (curl mode / explicit export)
+                out["export"] = _build_export_snippets(
+                    req.method, final_uri, headers_out,
+                    dict(req.params or {}), final_payload, req.verify_tls)
+            return out
     except httpx.RequestError as e:
         elapsed_ms = int((time.monotonic() - t0) * 1000)
         return {
@@ -2890,6 +2924,536 @@ async def api_netconf_xpath(req: NetconfXpathRequest):
             "elapsed_ms": elapsed_ms,
             "device": d.name,
         }
+
+
+# ----------------------------- v1.30.0: YANG Explorer ----------------------------- #
+# Upload .yang files into a repository, parse a module into a tree, and generate
+# RESTCONF paths + XPath for a selected node. Files on disk (no DB), parsed with pyang.
+from tools import yang_store, yang_parser, yang_generate
+
+
+@app.get("/api/yang/repos")
+def api_yang_repos():
+    return {"ok": True, "repos": yang_store.list_repos()}
+
+
+class YangRepoReq(BaseModel):
+    name: str
+
+@app.post("/api/yang/repos/create")
+def api_yang_repo_create(req: YangRepoReq):
+    try:
+        return {"ok": True, "repo": yang_store.create_repo(req.name)}
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+@app.post("/api/yang/repos/delete")
+def api_yang_repo_delete(req: YangRepoReq):
+    try:
+        yang_store.delete_repo(req.name)
+        return {"ok": True}
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+@app.post("/api/yang/upload")
+async def api_yang_upload(repo: str = Form(...), files: list[UploadFile] = File(...)):
+    """Upload one or more .yang files into a repository."""
+    try:
+        yang_store.create_repo(repo)
+        added = []
+        for f in files:
+            content = (await f.read()).decode("utf-8", errors="replace")
+            added.append(yang_store.add_module(repo, f.filename, content))
+        return {"ok": True, "added": added}
+    except Exception as e:
+        log.exception("yang upload failed")
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+class YangTreeReq(BaseModel):
+    repo: str
+    file: str
+    depth_limit: int = 0
+
+@app.post("/api/yang/tree")
+def api_yang_tree(req: YangTreeReq):
+    """Parse a module in a repo and return its node tree."""
+    try:
+        path = str(yang_store.module_path(req.repo, req.file))
+        search = [str(yang_store.repo_dir(req.repo))]
+        ctx, module, errors = yang_parser.parse_module(path, search_dirs=search)
+        tree = yang_parser.build_tree(module, depth_limit=req.depth_limit)
+        return {"ok": True, "tree": tree, "warnings": errors}
+    except yang_parser.YangParseError as e:
+        return JSONResponse({"ok": False, "error": str(e)}, status_code=200)
+    except Exception as e:
+        log.exception("yang tree failed")
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+class YangGenReq(BaseModel):
+    node: dict
+
+@app.post("/api/yang/generate")
+def api_yang_generate(req: YangGenReq):
+    """Generate RESTCONF path + XPath for a selected node dict."""
+    try:
+        return {"ok": True, "generated": yang_generate.generate(req.node)}
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+# ------------------------------------------------------------------ #
+# v1.32.0: YANG Explorer — add modules to repository from             #
+# NETCONF (<get-schema>), SCP/SFTP directory, or Git sparse clone.    #
+# ------------------------------------------------------------------ #
+from tools import yang_device as _yang_device
+
+
+def _yang_resolve_device(device_name: str):
+    d = _inventory.get_device(device_name)
+    if not d:
+        raise HTTPException(400, f"unknown device {device_name!r}")
+    from tools import netconf_tools as _nctools
+    return d, _nctools._ncclient_device_name(d.device_type)
+
+
+class YangDevReq(BaseModel):
+    device_name: str
+
+
+@app.post("/api/yang/device/check")
+def api_yang_device_check(req: YangDevReq):
+    """NETCONF hello against an inventory device (connectivity + monitoring cap)."""
+    try:
+        d, ncname = _yang_resolve_device(req.device_name)
+        info = _yang_device.netconf_check(d.host, d.port_netconf, d.username,
+                                          d.password, ncname)
+        _audit.log_event("yang_device_check", device=req.device_name)
+        return {"ok": True, **info}
+    except HTTPException:
+        raise
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+@app.post("/api/yang/device/schemas")
+def api_yang_device_schemas(req: YangDevReq):
+    """List the device's YANG schemas from ietf-netconf-monitoring."""
+    try:
+        d, ncname = _yang_resolve_device(req.device_name)
+        schemas = _yang_device.netconf_schema_list(d.host, d.port_netconf,
+                                                   d.username, d.password, ncname)
+        _audit.log_event("yang_device_schemas", device=req.device_name, count=len(schemas))
+        return {"ok": True, "schemas": schemas}
+    except HTTPException:
+        raise
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+class YangDownloadReq(BaseModel):
+    repo: str
+    device_name: str
+    identifiers: list[dict]   # [{identifier, version}] — client batches (~10/call)
+
+
+@app.post("/api/yang/device/download")
+def api_yang_device_download(req: YangDownloadReq):
+    """<get-schema> a batch of identifiers into the repo."""
+    try:
+        d, ncname = _yang_resolve_device(req.device_name)
+        yang_store.create_repo(req.repo)
+        res = _yang_device.netconf_download(req.repo, d.host, d.port_netconf,
+                                            d.username, d.password,
+                                            req.identifiers, ncname)
+        _audit.log_event("yang_device_download", device=req.device_name,
+                         repo=req.repo, saved=len(res["saved"]),
+                         failed=len(res["failed"]))
+        return {"ok": True, **res}
+    except HTTPException:
+        raise
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+class YangScpReq(BaseModel):
+    repo: str
+    host: str
+    username: str
+    password: str
+    remote_dir: str
+    recursive: bool = True
+    port: int = 22
+
+
+@app.post("/api/yang/scp/copy")
+def api_yang_scp_copy(req: YangScpReq):
+    """Copy *.yang files from a remote directory over SFTP into the repo."""
+    try:
+        yang_store.create_repo(req.repo)
+        res = _yang_device.scp_copy(req.repo, req.host, req.username, req.password,
+                                    req.remote_dir, req.recursive, req.port)
+        _audit.log_event("yang_scp_copy", host=req.host, repo=req.repo,
+                         saved=len(res["saved"]), failed=len(res["failed"]))
+        return {"ok": True, **res}
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+class YangGitReq(BaseModel):
+    repo: str
+    url: str
+    branch: str = ""
+    subdir: str = ""
+    recursive: bool = True
+
+
+@app.post("/api/yang/git/import")
+def api_yang_git_import(req: YangGitReq):
+    """Sparse-clone a git repo subdirectory and import its *.yang files."""
+    try:
+        yang_store.create_repo(req.repo)
+        res = _yang_device.git_import(req.repo, req.url, req.branch,
+                                      req.subdir, req.recursive)
+        _audit.log_event("yang_git_import", url=req.url, repo=req.repo,
+                         saved=len(res["saved"]), failed=len(res["failed"]))
+        return {"ok": True, **res}
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+# ------------------------------------------------------------------ #
+# v1.33.0: module sets + repository status + set-based resolved tree  #
+# ------------------------------------------------------------------ #
+
+@app.get("/api/yang/sets")
+def api_yang_sets():
+    return {"ok": True, "sets": yang_store.list_sets()}
+
+
+class YangSetSaveReq(BaseModel):
+    name: str
+    repo: str
+    modules: list[str]
+
+
+@app.post("/api/yang/sets/save")
+def api_yang_sets_save(req: YangSetSaveReq):
+    try:
+        s = yang_store.save_set(req.name, req.repo, req.modules)
+        _audit.log_event("yang_set_save", name=req.name, count=len(req.modules))
+        return {"ok": True, "set": s}
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+class YangSetNameReq(BaseModel):
+    name: str
+
+
+@app.post("/api/yang/sets/delete")
+def api_yang_sets_delete(req: YangSetNameReq):
+    return {"ok": True, "deleted": yang_store.delete_set(req.name)}
+
+
+@app.post("/api/yang/sets/validate")
+def api_yang_sets_validate(req: YangSetNameReq):
+    """Parse the whole set in one pyang context; return errors/warnings."""
+    try:
+        s = yang_store.get_set(req.name)
+        if not s:
+            return JSONResponse({"ok": False, "error": "unknown set"}, status_code=200)
+        import time as _t
+        t0 = _t.time()
+        mods, errors = yang_parser.parse_set(
+            yang_store._repo_path(s["repo"]), s["modules"], s["name"])
+        triage = yang_parser.triage_findings(errors)   # v1.34.2
+        return {"ok": True, "parsed": len(mods), "requested": len(s["modules"]),
+                "triage": triage, "errors": errors[:400],
+                "elapsed_s": round(_t.time() - t0, 1)}
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+class YangRepoStatusReq(BaseModel):
+    repo: str
+
+
+@app.post("/api/yang/repo/status")
+def api_yang_repo_status(req: YangRepoStatusReq):
+    """Missing-dependency report for a repository (import/include scan)."""
+    try:
+        try:                                     # v1.36.0: YANG Suite quickparser
+            from tools import yang_engine
+            missing = yang_engine.repo_missing_dependencies_ys(
+                yang_store._repo_path(req.repo))
+            engine = "yangsuite-quickparser"
+        except Exception:
+            missing = yang_parser.repo_missing_dependencies(
+                yang_store._repo_path(req.repo))
+            engine = "regex-fallback"
+        return {"ok": True, "missing": missing, "engine": engine}
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+class YangSetTreeReq(BaseModel):
+    set: str
+    file: str
+    depth: int = 0
+
+
+@app.post("/api/yang/set-tree")
+def api_yang_set_tree(req: YangSetTreeReq):
+    """Resolved tree of one module parsed in its SET context: groupings
+    expanded and augments from other set modules merged in."""
+    try:
+        s = yang_store.get_set(req.set)
+        if not s:
+            return JSONResponse({"ok": False, "error": "unknown set"}, status_code=200)
+        import time as _t
+        t0 = _t.time()
+        mods, errors = yang_parser.parse_set(
+            yang_store._repo_path(s["repo"]), s["modules"], s["name"])
+        if req.file not in mods:
+            return JSONResponse({"ok": False,
+                                 "error": f"{req.file} not parsed in set (see validate)"},
+                                status_code=200)
+        sel = mods[req.file]
+        note = ""
+        # v1.42.0: an augment-only module (e.g. openconfig-if-ethernet) has no
+        # top-level nodes of its own — its content lives under the module(s) it
+        # augments. Show the TARGET's tree instead (this is what YANG Suite does).
+        if not yang_parser.has_data_nodes(sel):
+            targets = yang_parser.augment_targets(sel)
+            tfile = None
+            for t in targets:
+                for f, mod in mods.items():
+                    if mod.arg == t:
+                        tfile = f
+                        break
+                if tfile:
+                    break
+            if tfile:
+                note = (f"{sel.arg} only augments other modules — showing the tree of "
+                        f"{mods[tfile].arg} with {sel.arg}'s nodes merged in.")
+                sel = mods[tfile]
+            else:
+                note = (f"{sel.arg} has no data nodes of its own (it augments "
+                        f"{', '.join(targets) or 'other modules'}), and the target "
+                        f"module is not in this set — add it to the set to see the tree.")
+        tree = yang_parser.build_tree_resolved(sel, req.depth)
+        errs = [e for e in errors if e["kind"] == "error"]
+        # v1.42.0: surface the actual BLOCKING findings (not a generic guess)
+        triage = yang_parser.triage_findings(errors)
+        blocking = [g for g in triage["groups"] if not g["benign"]][:6]
+        return {"ok": True, "tree": tree, "warnings": len(errors) - len(errs),
+                "errors": len(errs), "note": note, "blocking": blocking,
+                "elapsed_s": round(_t.time() - t0, 1)}
+    except Exception as e:
+        log.exception("yang set-tree failed")
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+# v1.34.0: saved API operations (RESTCONF-YANG / NETCONF-YANG tabs)
+@app.get("/api/yang/apis")
+def api_yang_apis():
+    # v1.44.1: repair legacy records whose note was built before the module name
+    # was available ("undefined:bgp — …").
+    apis = yang_store.list_apis()
+    for a in apis:
+        note = a.get("note") or ""
+        if note.startswith("undefined:"):
+            a["note"] = note.replace("undefined:", "", 1)
+    return {"ok": True, "apis": apis}
+
+
+class YangApisAddReq(BaseModel):
+    items: list[dict]
+
+
+@app.post("/api/yang/apis/add")
+def api_yang_apis_add(req: YangApisAddReq):
+    try:
+        stored = yang_store.add_apis(req.items)
+        _audit.log_event("yang_apis_add", count=len(stored))
+        return {"ok": True, "added": stored}
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+class YangApisUpdateReq(BaseModel):
+    id: int
+    fields: dict
+
+
+@app.post("/api/yang/apis/update")
+def api_yang_apis_update(req: YangApisUpdateReq):
+    return {"ok": True, "updated": yang_store.update_api(req.id, req.fields)}
+
+
+class YangApisDelReq(BaseModel):
+    ids: list[int]
+
+
+@app.post("/api/yang/apis/delete")
+def api_yang_apis_delete(req: YangApisDelReq):
+    return {"ok": True, "removed": yang_store.delete_apis(req.ids)}
+
+
+# ------------------------------------------------------------------ #
+# v1.36.0: embedded YANG Suite engine — RPC builder from tree values   #
+# ------------------------------------------------------------------ #
+class YangBuildRpcReq(BaseModel):
+    namespace: str
+    prefix: str
+    mode: str = "edit-config"       # edit-config | get
+    cfgs: list[dict]                # [{xpath, value}]
+
+
+@app.post("/api/yang/build-rpc")
+def api_yang_build_rpc(req: YangBuildRpcReq):
+    """Build NETCONF <config>/<filter> XML from (xpath, value) pairs using
+    YANG Suite's own YSNetconfRPCBuilder (embedded, headless)."""
+    try:
+        from tools import yang_engine
+        xml = yang_engine.build_rpc(req.namespace, req.prefix, req.cfgs, req.mode)
+        _audit.log_event("yang_build_rpc", mode=req.mode, cfgs=len(req.cfgs))
+        return {"ok": True, "xml": xml}
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+# v1.38.0: OpenAPI 3.0.3 generation from a YANG node (YANG Suite "Generate API(s)")
+# v1.39.0: view raw module text + RFC reference (YANG Suite parity)
+class YangModuleTextReq(BaseModel):
+    repo: str
+    file: str
+
+
+@app.post("/api/yang/module-text")
+def api_yang_module_text(req: YangModuleTextReq):
+    """Return the raw .yang source of a repository module."""
+    try:
+        p = yang_store.module_path(req.repo, req.file)
+        if not p.exists() or p.suffix != ".yang":
+            return JSONResponse({"ok": False, "error": "module not found"}, status_code=200)
+        text = p.read_text(encoding="utf-8", errors="replace")
+        return {"ok": True, "file": req.file, "text": text,
+                "lines": text.count("\n") + 1}
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+@app.get("/api/yang/rfc/{keyword}")
+def api_yang_rfc(keyword: str):
+    """RFC 7950 reference excerpt for a YANG statement keyword."""
+    from tools import yang_rfc
+    ref = yang_rfc.rfc_for(keyword)
+    return {"ok": True, "ref": ref}
+
+
+class YangOpenApiReq(BaseModel):
+    node: dict
+    chain: list[dict]           # root→node ancestry (data nodes)
+    meta: dict                  # {module, prefix, namespace}
+    host: str = ""
+
+
+@app.post("/api/yang/openapi")
+def api_yang_openapi(req: YangOpenApiReq):
+    try:
+        from tools import yang_openapi
+        spec = yang_openapi.generate_openapi(req.node, req.chain, req.meta, req.host)
+        return {"ok": True, "spec": spec}
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+# v1.40.0: full <rpc> envelope for the NETCONF-YANG RPC builder
+class YangRpcEnvelopeReq(BaseModel):
+    namespace: str
+    prefix: str
+    cfgs: list[dict]
+    operation: str = "get"          # get | get-config | edit-config
+    target: str = "running"
+    filter_type: str = "subtree"    # v1.41.0: subtree | xpath
+
+
+@app.post("/api/yang/build-rpc-envelope")
+def api_yang_build_rpc_envelope(req: YangRpcEnvelopeReq):
+    try:
+        from tools import yang_engine
+        xml = yang_engine.build_rpc_envelope(req.namespace, req.prefix, req.cfgs,
+                                             req.operation, req.target,
+                                             filter_type=req.filter_type)
+        _audit.log_event("yang_build_rpc_envelope", operation=req.operation,
+                         cfgs=len(req.cfgs))
+        return {"ok": True, "xml": xml}
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+class YangRunRpcReq(BaseModel):
+    device_name: str
+    rpc: str                        # full <rpc> document (may be user-edited)
+
+
+@app.post("/api/yang/run-rpc")
+def api_yang_run_rpc(req: YangRunRpcReq):
+    """Send a raw <rpc> to the device over NETCONF and return the reply."""
+    try:
+        d = _inventory.get_device(req.device_name)
+        if not d:
+            raise HTTPException(400, f"unknown device {req.device_name!r}")
+        from tools import netconf_tools as _nct
+        from ncclient import manager
+        from lxml import etree
+        import time as _t
+        # strip the outer <rpc> wrapper: ncclient adds its own envelope
+        root = etree.fromstring(req.rpc.encode())
+        tag = etree.QName(root).localname
+        inner = root if tag != "rpc" else (list(root)[0] if len(root) else root)
+        wants_xpath = b'type="xpath"' in req.rpc.encode()
+        t0 = _t.time()
+        with manager.connect(
+                host=d.host, port=d.port_netconf, username=d.username,
+                password=d.password, hostkey_verify=False, allow_agent=False,
+                look_for_keys=False, timeout=60,
+                device_params={"name": _nct._ncclient_device_name(d.device_type)}) as mgr:
+            # v1.41.0: xpath filters need the :xpath capability — say so up front
+            if wants_xpath and not any(":xpath" in c for c in mgr.server_capabilities):
+                return {"ok": False,
+                        "error": "This device does not advertise the NETCONF "
+                                 ":xpath capability, so an xpath filter will be "
+                                 "rejected. Switch Filter type to 'subtree'."}
+            reply = mgr.dispatch(inner)
+            xml = reply.xml if hasattr(reply, "xml") else str(reply)
+        _audit.log_event("yang_run_rpc", device=req.device_name)
+        return {"ok": True, "reply": xml, "elapsed_s": round(_t.time() - t0, 1)}
+    except HTTPException:
+        raise
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+class YangModDelReq(BaseModel):
+    repo: str
+    files: list[str]
+
+
+@app.post("/api/yang/module/delete")
+def api_yang_module_delete(req: YangModDelReq):
+    """Delete selected .yang files from a repository."""
+    try:
+        removed = [f for f in req.files if yang_store.delete_module(req.repo, f)]
+        _audit.log_event("yang_module_delete", repo=req.repo, count=len(removed))
+        return {"ok": True, "removed": removed}
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
 
 
 @app.get("/api/health")
