@@ -558,7 +558,7 @@
   .hide { display: none !important; }
 
 /* v1.30.1: YANG Explorer tree — YANGSuite-style GUI */
-.yt-wrap { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px; }
+.yt-wrap { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px;; min-width:max-content; }
 .yt-head { display:flex; background:#eef2f7; border-bottom:1px solid #cbd5e1; font-weight:600; color:#334155; position:sticky; top:0; z-index:2; }
 .yt-head .yt-h-nodes { flex:1; padding:5px 8px; }
 .yt-head .yt-h-val { width:230px; padding:5px 8px; border-left:1px solid #cbd5e1; }
@@ -578,17 +578,66 @@
 .yt-rail { display:inline-block; width:14px; flex:none; border-left:1px dotted #cbd5e1; height:24px; margin-left:6px; }
 .yt-val input, .yt-val select { width:100%; font-size:11px; padding:2px 4px; border:1px solid #cbd5e1; border-radius:3px; font-family:inherit; }
 .yt-val input[type=checkbox] { width:auto; }
-/* node-type icon glyphs (drawn with unicode + color) */
-.ico-container { color:#d97706; }   /* folder — amber */
-.ico-list      { color:#2563eb; }   /* list — blue */
-.ico-leaf      { color:#16a34a; }   /* leaf — green */
-.ico-leaflist  { color:#059669; }   /* leaf-list — teal-green */
-.ico-choice    { color:#9333ea; }   /* choice — purple */
-.ico-case      { color:#7c3aed; }
+/* v1.31.0: node-type icons — inline SVG, YANGSuite palette */
+.yt-ico svg { width:15px; height:15px; vertical-align:-3px; }
 .yt-status { margin-left:6px; font-size:9px; padding:1px 4px; border-radius:3px; font-weight:600; }
 .yt-dep { background:#fef3c7; color:#b45309; }   /* deprecated — amber */
 .yt-obs { background:#fee2e2; color:#b91c1c; }   /* obsolete — red */
+/* v1.31.0: node badges (YANGSuite legend) */
+.yt-badge { margin-left:4px; font-size:9px; padding:1px 4px; border-radius:3px; font-weight:600; white-space:nowrap; }
+.yt-b-key   { background:#fee2e2; color:#b91c1c; }  /* list key — red */
+.yt-b-pres  { background:#dcfce7; color:#15803d; }  /* presence container — green */
+.yt-b-mand  { background:#dcfce7; color:#166534; border:1px solid #16a34a; }  /* mandatory — green info */
+.yt-b-must  { background:#fee2e2; color:#b91c1c; }  /* must constraint — red link */
+.yt-b-when  { background:#dbeafe; color:#1d4ed8; }  /* when constraint — blue link */
+.yt-b-lref  { background:#e0e7ff; color:#3730a3; }  /* leafref — indigo */
+/* v1.31.0: Icon legend popup (YANGSuite-style) */
+.yt-legend { position:absolute; top:44px; right:16px; z-index:50; width:260px; background:#fff;
+  border:1px solid #cbd5e1; border-radius:8px; box-shadow:0 8px 24px rgba(15,23,42,.18);
+  font-size:12px; display:none; }
+.yt-legend.open { display:block; }
+.yt-legend-head { background:#0ea5e9; color:#fff; font-weight:600; padding:6px 10px;
+  border-radius:8px 8px 0 0; display:flex; justify-content:space-between; align-items:center; }
+.yt-legend-head .yt-legend-x { cursor:pointer; font-weight:700; }
+.yt-legend-sect { background:#f1f5f9; font-weight:700; color:#334155; padding:4px 10px; border-top:1px solid #e2e8f0; }
+.yt-legend-row { display:flex; align-items:center; gap:8px; padding:4px 10px; border-top:1px solid #f1f5f9; }
+.yt-legend-row .yt-ico { width:20px; text-align:center; }
+.yt-legend-row.v2 { opacity:.5; }
+.yt-legend-row .strike { text-decoration:line-through; }
+/* v1.45.0: collapsible sections */
+.ysec { border:1px solid #e2e8f0; border-radius:8px; margin-bottom:10px; background:#fff; }
+.ysec-hd { display:flex; align-items:center; gap:8px; padding:6px 10px; cursor:pointer;
+           background:#f8fafc; border-radius:8px 8px 0 0; user-select:none; font-weight:600;
+           color:#334155; font-size:13px; }
+.ysec-hd:hover { background:#f1f5f9; }
+.ysec-hd .ysec-caret { color:#64748b; width:12px; display:inline-block; }
+.ysec-bd { padding:10px; }
+.ysec.collapsed .ysec-bd { display:none; }
+.ysec.collapsed .ysec-hd { border-radius:8px; }
+/* Node-detail collapses to a thin vertical strip on the right */
+#yang-detail-pane.detail-collapsed { width:34px !important; min-width:34px !important; }
+#yang-detail-pane.detail-collapsed > *:not(#yang-detail-toggle) { display:none; }
+#yang-detail-toggle { cursor:pointer; background:#f1f5f9; border:1px solid #e2e8f0;
+  border-radius:6px; padding:6px 2px; font-size:12px; color:#475569; text-align:center;
+  writing-mode:vertical-rl; user-select:none; }
+#yang-detail-toggle:hover { background:#e2e8f0; }
+/* v1.43.0: every output/edit pane is resizable (drag the corner grabber) */
+.resizable { resize: both; overflow: auto; }
+.resizable-v { resize: vertical; overflow: auto; }
+/* v1.32.0: Add modules to repository — tabs + forms */
+.yang-add-tab { font-size:13px; font-weight:600; color:#64748b; text-decoration:none; padding:4px 2px 6px; border-bottom:2px solid transparent; margin-bottom:-2px; }
+.yang-add-tab.active { color:#0e7c9e; border-bottom-color:#0e7c9e; }
+.yang-main-tab { font-size:14px; font-weight:700; color:#64748b; text-decoration:none; padding:4px 2px 8px; border-bottom:3px solid transparent; margin-bottom:-2px; }
+.yang-main-tab.active { color:#0e7c9e; border-bottom-color:#0e7c9e; }
+.yang-main-tab.disabled { color:#cbd5e1; cursor:not-allowed; }
+.rc-mode { background:#f1f5f9; color:#475569; }
+.rc-mode.active { background:#0e7c9e; color:#fff; }
+.yang-form-row { display:flex; align-items:center; gap:8px; margin-bottom:5px; }
+.yang-form-row label { min-width:170px; font-size:12px; color:#475569; }
+.yang-form-row input { flex:1; font-size:12px; padding:5px; border:1px solid #cbd5e1; border-radius:4px; }
 </style>
+<!-- v1.38.2: Swagger-UI served locally (no CDN dependency) -->
+<link rel="stylesheet" href="/static/swagger/swagger-ui.css">
 </head>
 <body data-app-version="{{ app_version }}">
 
@@ -675,7 +724,7 @@
     </div>
   </div>
   <div class="v18-nav-footer">
-    <span id="v18-version-badge">v1.30.2</span>
+    <span id="v18-version-badge">v1.45.0</span>
   </div>
 </aside>
 <!-- v1.20.1: single drag bar on the merged sidebar's right edge -->
@@ -1369,14 +1418,26 @@ out-octets = state/counters/out-octets</textarea>
 <!-- v1.30.0: YANG Explorer -->
 <section id="v18-yang-section" class="v18-section">
   <main>
-    <section class="panel">
+    <section class="panel" style="position:relative;">
       <h2>🌲 YANG Explorer</h2>
       <p style="color:#64748b; font-size:13px; margin-top:-4px;">
         Import YANG models, browse the schema tree, and generate a RESTCONF path or XPath for any node.
-        <em>(v1: upload a single .yang file. Git / device import and NETCONF payload generation are coming.)</em>
+        <em>(Repo: import via Upload / NETCONF / SCP / Git + dependency status + module sets. Explore-YANG: set-context trees with augments merged. RESTCONF-YANG / NETCONF-YANG: collect + run generated API operations.)</em>
       </p>
 
-      <!-- Repository + upload row -->
+      <!-- v1.33.0: YANG sub-tabs -->
+      <div style="display:flex; gap:14px; border-bottom:2px solid #e2e8f0; margin-bottom:12px;">
+        <a href="#" class="yang-main-tab active" data-ytab="repo">Repo</a>
+        <a href="#" class="yang-main-tab" data-ytab="explore">Explore-YANG</a>
+        <a href="#" class="yang-main-tab" data-ytab="rc">RESTCONF-YANG</a>
+        <a href="#" class="yang-main-tab" data-ytab="nc">NETCONF-YANG</a>
+        <div style="flex:1;"></div>
+        <button id="yang-sec-collapse" class="small" style="padding:2px 8px; font-size:12px;" title="Collapse every section">⊟ Collapse all</button>
+        <button id="yang-sec-expand" class="small" style="padding:2px 8px; font-size:12px;" title="Expand every section">⊞ Expand all</button>
+      </div>
+
+      <div id="yang-tab-repo">
+      <!-- Repository row -->
       <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-bottom:10px;">
         <div>
           <label style="font-size:12px; display:block; color:#475569;">Repository</label>
@@ -1384,20 +1445,146 @@ out-octets = state/counters/out-octets</textarea>
         </div>
         <button id="yang-repo-new" class="small">+ New repo</button>
         <button id="yang-repo-del" class="small" style="background:#dc2626; color:#fff; border-color:#dc2626;">Delete repo</button>
-        <div style="flex:1;"></div>
-        <div>
-          <label style="font-size:12px; display:block; color:#475569;">Upload .yang file(s)</label>
-          <input type="file" id="yang-file-input" accept=".yang" multiple style="font-size:12px;">
-        </div>
-        <button id="yang-upload-btn" class="small" style="background:#16a34a; color:#fff; border-color:#16a34a;">⬆ Upload</button>
       </div>
 
-      <!-- Module selector + load -->
+      <!-- v1.32.0: YANGSuite-style two-panel layout -->
+      <div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:10px;">
+
+        <!-- LEFT: YANG modules in repository -->
+        <div style="flex:1; min-width:340px;">
+          <div style="font-weight:600; color:#334155; margin-bottom:4px;">YANG modules in repository <span id="yang-mod-count" style="color:#94a3b8; font-weight:400;"></span></div>
+          <div style="display:flex; gap:6px; margin-bottom:4px;">
+            <button id="yang-mod-selall" class="small">Select all</button>
+            <button id="yang-mod-selnone" class="small">Select none</button>
+            <button id="yang-mod-delsel" class="small" style="background:#dc2626; color:#fff; border-color:#dc2626;">Delete selected</button>
+            <button id="yang-mod-dedupe" class="small" style="background:#b45309; color:#fff; border-color:#b45309;" title="Two revisions of the same module in one set break pyang resolution">Delete older duplicate revisions</button>
+          </div>
+          <input id="yang-mod-filter" placeholder="Filter" style="width:100%; font-size:12px; padding:5px; margin-bottom:4px; box-sizing:border-box;">
+          <select id="yang-module-sel" multiple size="14" style="width:100%; font-size:12px; font-family:ui-monospace,Menlo,Consolas,monospace; padding:2px;"></select>
+        </div>
+
+        <!-- RIGHT: Add modules to repository -->
+        <div style="flex:1.2; min-width:380px;">
+          <div style="font-weight:600; color:#334155; margin-bottom:4px;">Add modules to repository</div>
+          <div style="display:flex; gap:14px; border-bottom:2px solid #e2e8f0; margin-bottom:8px;">
+            <a href="#" class="yang-add-tab active" data-tab="upload">Upload</a>
+            <a href="#" class="yang-add-tab" data-tab="netconf">NETCONF</a>
+            <a href="#" class="yang-add-tab" data-tab="scp">SCP</a>
+            <a href="#" class="yang-add-tab" data-tab="git">Git</a>
+          </div>
+
+          <!-- Upload tab -->
+          <div id="yang-add-upload" class="yang-add-pane">
+            <label style="font-size:12px; display:block; color:#475569;">Select YANG files to upload</label>
+            <input type="file" id="yang-file-input" accept=".yang" multiple style="font-size:12px; margin:4px 0;">
+            <div><button id="yang-upload-btn" class="small" style="background:#0e7c9e; color:#fff; border-color:#0e7c9e;">Upload files to repository</button></div>
+          </div>
+
+          <!-- NETCONF tab -->
+          <div id="yang-add-netconf" class="yang-add-pane" style="display:none;">
+            <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-bottom:6px;">
+              <div>
+                <label style="font-size:12px; display:block; color:#475569;">Select device profile</label>
+                <select id="yang-nc-dev" style="min-width:160px; font-size:12px; padding:5px;"></select>
+              </div>
+              <button id="yang-nc-check" class="small">Check device connectivity</button>
+              <button id="yang-nc-list" class="small" style="background:#0e7c9e; color:#fff; border-color:#0e7c9e;">Get schema list</button>
+            </div>
+            <input id="yang-nc-filter" placeholder="Filter" style="width:100%; font-size:12px; padding:5px; margin-bottom:4px; box-sizing:border-box;">
+            <select id="yang-nc-schemas" multiple size="9" style="width:100%; font-size:12px; font-family:ui-monospace,Menlo,Consolas,monospace; padding:2px;"></select>
+            <div style="display:flex; gap:6px; margin-top:4px; align-items:center;">
+              <button id="yang-nc-selall" class="small">Select all</button>
+              <button id="yang-nc-selnone" class="small">Select none</button>
+              <button id="yang-nc-download" class="small" style="background:#0e7c9e; color:#fff; border-color:#0e7c9e;">Download selected schemas</button>
+              <span id="yang-nc-progress" style="font-size:11px; color:#64748b;"></span>
+            </div>
+          </div>
+
+          <!-- SCP tab -->
+          <div id="yang-add-scp" class="yang-add-pane" style="display:none;">
+            <div class="yang-form-row"><label>Remote host</label><input id="yang-scp-host" placeholder="192.168.89.71"></div>
+            <div class="yang-form-row"><label>SSH username</label><input id="yang-scp-user"></div>
+            <div class="yang-form-row"><label>SSH password</label><input id="yang-scp-pass" type="password"></div>
+            <div class="yang-form-row"><label>Remote directory path</label><input id="yang-scp-dir" placeholder="/yang"></div>
+            <label style="font-size:12px;"><input type="checkbox" id="yang-scp-recursive" checked> Include subdirectories</label>
+            <div style="margin-top:6px;"><button id="yang-scp-copy" class="small" style="background:#0e7c9e; color:#fff; border-color:#0e7c9e;">Copy YANG files</button>
+            <span id="yang-scp-progress" style="font-size:11px; color:#64748b;"></span></div>
+          </div>
+
+          <!-- Git tab -->
+          <div id="yang-add-git" class="yang-add-pane" style="display:none;">
+            <div class="yang-form-row"><label>Repository URL</label><input id="yang-git-url" placeholder="https://github.com/YangModels/yang.git"></div>
+            <div class="yang-form-row"><label>Git branch</label><input id="yang-git-branch" placeholder="main"></div>
+            <div class="yang-form-row"><label>Directory within repository</label><input id="yang-git-dir" placeholder="vendor/cisco/xe/2611"></div>
+            <label style="font-size:12px;"><input type="checkbox" id="yang-git-recursive" checked> Include subdirectories</label>
+            <div style="margin-top:6px;"><button id="yang-git-import" class="small" style="background:#0e7c9e; color:#fff; border-color:#0e7c9e;">Import YANG files</button>
+            <span id="yang-git-progress" style="font-size:11px; color:#64748b;"></span></div>
+            <div style="font-size:11px; color:#94a3b8; margin-top:4px;">Shallow sparse clone — only the given directory is fetched, so even the multi-GB YangModels repo imports in seconds.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- v1.33.0: Repository status (missing dependencies) -->
+      <div style="margin:6px 0 14px;">
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div style="font-weight:600; color:#334155;">Repository status</div>
+          <button id="yang-repo-status-btn" class="small">Check dependencies</button>
+        </div>
+        <div id="yang-repo-status" style="font-size:12px; margin-top:6px;"></div>
+      </div>
+
+      <!-- v1.33.0: Module sets -->
+      <div style="border-top:1px solid #e2e8f0; padding-top:10px;">
+        <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-bottom:8px;">
+          <div>
+            <label style="font-size:12px; display:block; color:#475569;">YANG module set</label>
+            <select id="yang-set-sel" style="min-width:180px; font-size:13px; padding:6px;"></select>
+          </div>
+          <button id="yang-set-new" class="small">+ New set</button>
+          <button id="yang-set-del" class="small" style="background:#dc2626; color:#fff; border-color:#dc2626;">Delete set</button>
+          <button id="yang-set-validate" class="small" style="background:#0e7c9e; color:#fff; border-color:#0e7c9e;">Validate YANG modules</button>
+          <span id="yang-set-status" style="font-size:12px; color:#64748b;"></span>
+        </div>
+        <div style="display:flex; gap:14px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:320px;">
+            <div style="font-weight:600; color:#334155;">YANG modules in this set <span id="yang-set-count" style="color:#94a3b8; font-weight:400;"></span></div>
+            <input id="yang-set-filter" placeholder="Filter" style="width:100%; font-size:12px; padding:5px; margin:4px 0; box-sizing:border-box;">
+            <select id="yang-set-list" multiple size="10" style="width:100%; font-size:12px; font-family:ui-monospace,Menlo,Consolas,monospace;"></select>
+            <div style="display:flex; gap:6px; margin-top:4px;">
+              <button id="yang-set-remove" class="small">Remove selected</button>
+              <button id="yang-set-removeall" class="small">Remove all</button>
+            </div>
+          </div>
+          <div style="flex:1; min-width:320px;">
+            <div style="font-weight:600; color:#334155;">Additional modules in the repository <span id="yang-avail-count" style="color:#94a3b8; font-weight:400;"></span></div>
+            <input id="yang-avail-filter" placeholder="Filter" style="width:100%; font-size:12px; padding:5px; margin:4px 0; box-sizing:border-box;">
+            <select id="yang-avail-list" multiple size="10" style="width:100%; font-size:12px; font-family:ui-monospace,Menlo,Consolas,monospace;"></select>
+            <div style="display:flex; gap:6px; margin-top:4px;">
+              <button id="yang-set-add" class="small">Add selected</button>
+              <button id="yang-set-addall" class="small" style="background:#0e7c9e; color:#fff; border-color:#0e7c9e;">Add entire repository</button>
+            </div>
+          </div>
+        </div>
+        <div id="yang-set-errors" style="font-size:12px; margin-top:8px;"></div>
+      </div>
+      </div><!-- /yang-tab-repo -->
+
+      <div id="yang-tab-explore" style="display:none;">
       <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-bottom:8px;">
         <div>
-          <label style="font-size:12px; display:block; color:#475569;">Module</label>
-          <select id="yang-module-sel" style="min-width:260px; font-size:13px; padding:6px;"></select>
+          <label style="font-size:12px; display:block; color:#475569;">YANG set</label>
+          <select id="yang-x-set" style="min-width:180px; font-size:13px; padding:6px;"></select>
         </div>
+        <div>
+          <label style="font-size:12px; display:block; color:#475569;">Module (from set)</label>
+          <div style="display:flex; gap:6px;">
+            <input id="yang-x-module-filter" placeholder="🔎 search module…" style="width:170px; font-size:13px; padding:6px;">
+            <select id="yang-x-module" style="min-width:260px; font-size:13px; padding:6px;"></select>
+          </div>
+        </div>
+      </div>
+      <!-- Load into tree -->
+      <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-bottom:8px;">
         <div>
           <label style="font-size:12px; display:block; color:#475569;">Depth limit</label>
           <select id="yang-depth-sel" style="font-size:13px; padding:6px;">
@@ -1410,19 +1597,35 @@ out-octets = state/counters/out-octets</textarea>
           </select>
         </div>
         <button id="yang-load-btn" class="small" style="background:#2563eb; color:#fff; border-color:#2563eb;">Load module → tree</button>
-        <input id="yang-tree-search" placeholder="🔎 find node…" style="font-size:13px; padding:6px; min-width:180px;">
+        <input id="yang-tree-search" placeholder="🔎 find: bgp · //bgp · /native/router/bgp · router/bgp · /native/*/bgp"
+               title="bgp = name contains · bgp* = glob · //bgp = named bgp at any depth · /native/router/bgp = absolute path · router/bgp = path suffix · * = one segment"
+               style="font-size:13px; padding:6px; min-width:320px;">
+        <label style="font-size:12px; color:#475569; white-space:nowrap;" title="Match the node name exactly instead of any substring">
+          <input type="checkbox" id="yang-search-exact"> exact</label>
+        <button id="yang-legend-btn" class="small" style="background:#0ea5e9; color:#fff; border-color:#0ea5e9;" title="Tree icon legend">ⓘ Icon legend</button>
+        <button id="yang-build-edit" class="small" style="background:#15803d; color:#fff; border-color:#15803d;" title="Collect every value you filled in the tree into one NETCONF edit-config (YANG Suite RPC builder)">🛠 Build edit-config from values</button>
+        <button id="yang-build-get" class="small" title="Build a get filter from the filled/checked nodes">Build get filter</button>
+        <button id="yang-gen-openapi" class="small" style="background:#7c3aed; color:#fff; border-color:#7c3aed;" title="Generate an OpenAPI 3.0.3 spec (all 5 methods) for the selected node — Swagger-UI + download">⚡ Generate API(s)</button>
+        <button id="yang-view-text" class="small" title="View the raw .yang module source">📄 View text</button>
         <span id="yang-status" style="font-size:12px; color:#64748b;"></span>
+        <!-- v1.31.0: YANGSuite-style Tree Icon Legend popup (content filled by JS) -->
+        <div id="yang-legend" class="yt-legend"></div>
       </div>
 
-      <!-- Split: tree | detail+generate -->
-      <div style="display:flex; gap:12px; align-items:stretch;">
-        <div id="yang-tree" style="flex:1; min-height:420px; max-height:640px; overflow:auto; border:1px solid #e2e8f0; border-radius:8px; padding:8px; background:#fafafa; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px;">
+      <!-- v1.41.1: search results list (click a hit to jump; no mass expansion) -->
+      <div id="yang-search-results" style="display:none; max-height:180px; overflow:auto; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:8px; background:#fff;"></div>
+
+      <!-- Split: tree | resize handle | detail+generate (v1.37.0) -->
+      <div id="yang-split" style="display:flex; gap:0; align-items:stretch;">
+        <div id="yang-tree" class="resizable-v" style="flex:1; min-width:280px; min-height:240px; height:480px; overflow:auto; border:1px solid #e2e8f0; border-radius:8px; padding:8px; background:#fafafa; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px;">
           <span style="color:#94a3b8;">Upload a .yang file, pick a module, and click “Load module → tree”.</span>
         </div>
-        <div style="width:420px; display:flex; flex-direction:column; gap:10px;">
+        <div id="yang-split-handle" title="Drag to resize" style="width:8px; margin:0 4px; cursor:col-resize; flex:0 0 auto; border-radius:4px; background:#e2e8f0;"></div>
+        <div id="yang-detail-pane" style="width:420px; min-width:260px; flex:0 0 auto; display:flex; flex-direction:column; gap:10px;">
           <div style="border:1px solid #e2e8f0; border-radius:8px; padding:10px; background:#fff;">
             <h3 style="font-size:13px; margin:0 0 6px;">Node detail</h3>
             <div id="yang-node-detail" style="font-size:12px; color:#475569;">Select a node in the tree.</div>
+            <div id="yang-rfc"></div>
           </div>
           <div style="border:1px solid #e2e8f0; border-radius:8px; padding:10px; background:#fff;">
             <h3 style="font-size:13px; margin:0 0 6px;">Generated</h3>
@@ -1437,7 +1640,168 @@ out-octets = state/counters/out-octets</textarea>
               <button class="small yang-copy" data-src="yang-gen-xpath">📋</button>
             </div>
             <div id="yang-warnings" style="margin-top:8px; font-size:11px; color:#b45309;"></div>
+            <!-- v1.34.0: API operations for the selected node -->
+            <div id="yang-apiops" style="margin-top:12px;"></div>
           </div>
+        </div>
+      </div>
+      </div><!-- /yang-tab-explore -->
+
+      <!-- v1.34.0: RESTCONF-YANG — collected API operations -->
+      <div id="yang-tab-rc" style="display:none;">
+        <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-bottom:10px;">
+          <div>
+            <label style="font-size:12px; display:block; color:#475569;">Device (inventory auth)</label>
+            <select id="yang-rc-dev" style="min-width:160px; font-size:13px; padding:6px;"></select>
+          </div>
+          <button id="yang-rc-refresh" class="small">↻ Refresh list</button>
+          <button id="yang-rc-delsel" class="small" style="background:#dc2626; color:#fff; border-color:#dc2626;">Delete checked</button>
+          <div style="display:flex; gap:0; border:1px solid #cbd5e1; border-radius:6px; overflow:hidden;">
+            <button id="yang-rc-mode-https" class="small rc-mode active" data-mode="https" style="border:0; border-radius:0;">HTTPS</button>
+            <button id="yang-rc-mode-curl" class="small rc-mode" data-mode="curl" style="border:0; border-radius:0;">curl</button>
+          </div>
+          <div>
+            <label style="font-size:12px; display:block; color:#475569;">Format</label>
+            <select id="yang-rc-format" style="font-size:13px; padding:6px;">
+              <option value="json">JSON</option>
+              <option value="xml">XML</option>
+            </select>
+          </div>
+          <div style="flex:1; min-width:280px;">
+            <label style="font-size:12px; display:block; color:#475569;">Accept / Content-Type (editable)</label>
+            <input id="yang-rc-media" value="application/yang-data+json"
+                   style="width:100%; font-family:ui-monospace,monospace; font-size:12px; padding:6px; box-sizing:border-box;">
+          </div>
+          <span style="font-size:12px; color:#94a3b8;">{key} placeholders must be replaced first.</span>
+        </div>
+        <div id="yang-rc-list"></div>
+      </div>
+
+      <!-- v1.34.0: NETCONF-YANG — collected NETCONF operations -->
+      <div id="yang-tab-nc" style="display:none;">
+        <!-- v1.40.0: live NETCONF RPC builder (YANG Suite parity) -->
+        <div data-ysec="RPC controls" style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-bottom:10px;">
+          <div>
+            <label style="font-size:12px; display:block; color:#475569;">NETCONF Operation</label>
+            <select id="yang-nc2-op" style="min-width:150px; font-size:13px; padding:6px;">
+              <option value="get">get</option>
+              <option value="get-config">get-config</option>
+              <option value="edit-config">edit-config</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px; display:block; color:#475569;">Filter type</label>
+            <select id="yang-nc2-filter" style="min-width:130px; font-size:13px; padding:6px;" title="subtree = XML skeleton filter. xpath = single select= expression; device must advertise the :xpath capability.">
+              <option value="subtree">subtree</option>
+              <option value="xpath">xpath</option>
+            </select>
+          </div>
+          <div id="yang-nc2-xopts" style="display:none;">
+            <label style="font-size:12px; display:block; color:#475569;">XPath style</label>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <select id="yang-nc2-pfxmode" style="font-size:12px; padding:4px;"
+                      title="no prefix: bare step names — what a hand-written working filter looks like (default). short prefix: a compact alias declared on the filter. module prefix: the model's own (often long) prefix.">
+                <option value="none">no prefix</option>
+                <option value="short">short prefix</option>
+                <option value="module">module prefix</option>
+              </select>
+              <label style="font-size:12px; color:#475569;" title="How to join comparison conditions (in-octets>0, out-octets>0)">
+                compare with
+                <select id="yang-nc2-join" style="font-size:12px; padding:2px;">
+                  <option value="and">and</option>
+                  <option value="or">or</option>
+                </select>
+              </label>
+            </div>
+          </div>
+          <div>
+            <label style="font-size:12px; display:block; color:#475569;">Datastore (for get-config/edit-config)</label>
+            <select id="yang-nc2-target" style="min-width:120px; font-size:13px; padding:6px;">
+              <option value="running">running</option>
+              <option value="candidate">candidate</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px; display:block; color:#475569;">Device</label>
+            <select id="yang-nc2-dev" style="min-width:160px; font-size:13px; padding:6px;"></select>
+          </div>
+          <button id="yang-nc2-build" class="small" style="background:#0e7c9e; color:#fff; border-color:#0e7c9e;">&lt;/&gt; Build RPC</button>
+          <button id="yang-nc2-run" class="small" style="background:#15803d; color:#fff; border-color:#15803d;">▶ Run RPC</button>
+          <button id="yang-nc2-clear" class="small" style="background:#dc2626; color:#fff; border-color:#dc2626;">⃠ Clear RPC</button>
+          <span id="yang-nc2-status" style="font-size:12px; color:#64748b;"></span>
+        </div>
+
+        <!-- v1.42.0: YANG tree lives here too (YANG Suite layout) -->
+        <div data-ysec="Module loader" style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-bottom:8px; padding-top:4px;">
+          <div>
+            <label style="font-size:12px; display:block; color:#475569;">YANG set</label>
+            <select id="yang-nc2-set" style="min-width:170px; font-size:13px; padding:6px;"></select>
+          </div>
+          <div>
+            <label style="font-size:12px; display:block; color:#475569;">Module</label>
+            <div style="display:flex; gap:6px;">
+              <input id="yang-nc2-modfilter" placeholder="🔎 search…" style="width:140px; font-size:13px; padding:6px;">
+              <select id="yang-nc2-module" style="min-width:240px; font-size:13px; padding:6px;"></select>
+            </div>
+          </div>
+          <button id="yang-nc2-load" class="small" style="background:#2563eb; color:#fff; border-color:#2563eb;">Load module → tree</button>
+          <span style="font-size:12px; color:#94a3b8;">Tick nodes / fill values below, then Build RPC. (The Explore-YANG tab shares the same tree.)</span>
+        </div>
+        <div id="yang-nc2-treehost" data-ysec="YANG tree" style="margin-bottom:12px;"></div>
+
+        <div data-ysec="RPC &amp; device reply" style="display:flex; gap:12px; align-items:stretch; margin-bottom:12px;">
+          <div style="flex:1; min-width:320px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+              <div style="font-weight:600; color:#334155;">RPC (editable)</div>
+              <button id="yang-nc2-rpc-copy" class="small" style="padding:1px 8px;">📋 Copy</button>
+            </div>
+            <textarea id="yang-nc2-rpc" rows="16" class="resizable" placeholder="Tick nodes / fill values in the tree, pick an operation, then click “Build RPC”. The generated &lt;rpc&gt; appears here and can be edited before running."
+              style="width:100%; min-height:180px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; padding:8px; box-sizing:border-box; border:1px solid #cbd5e1; border-radius:6px;"></textarea>
+          </div>
+          <div style="flex:1; min-width:320px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+              <div style="font-weight:600; color:#334155;">Device reply</div>
+              <button id="yang-nc2-reply-copy" class="small" style="padding:1px 8px;">📋 Copy</button>
+              <label style="font-size:12px; color:#475569;"><input type="checkbox" id="yang-nc2-reply-wrap" checked> wrap</label>
+            </div>
+            <pre id="yang-nc2-reply" class="xmlview resizable" style="margin:0; height:340px; min-height:120px; overflow:auto; background:#0f172a; color:#e2e8f0; font-size:12px; padding:10px; border-radius:6px; white-space:pre-wrap;">—</pre>
+          </div>
+        </div>
+
+        <!-- v1.44.1: client-side lxml filtering of the device reply -->
+        <details id="yang-nc2-postproc" style="margin:8px 0 12px; border:1px solid #e2e8f0; border-radius:8px; padding:8px;">
+          <summary style="cursor:pointer; font-weight:600; color:#334155;">🔎 Filter / extract from the device reply (real XPath 1.0, client-side)</summary>
+          <div style="font-size:12px; color:#64748b; margin:6px 0;">Runs against the reply above — predicates <code>[]</code>, <code>//</code>, <code>@attr</code>, <code>contains()</code>, <code>text()</code>, and/or, positions. Namespaces are ignored by default, so unprefixed paths just work.</div>
+          <div style="display:flex; gap:8px; align-items:flex-start; flex-wrap:wrap;">
+            <div style="flex:1; min-width:280px;">
+              <label style="font-size:12px; color:#475569;">XPath expression</label>
+              <textarea id="yang-nc2-xf" rows="2" class="resizable-v" placeholder="//interface[admin-status='if-state-up']/name"
+                style="width:100%; font-family:ui-monospace,monospace; font-size:12px; padding:6px; box-sizing:border-box;"></textarea>
+              <div style="display:flex; gap:8px; align-items:center; margin-top:4px;">
+                <button id="yang-nc2-xf-run" class="small" style="background:#2563eb; color:#fff; border-color:#2563eb;">Run filter</button>
+                <label style="font-size:12px; color:#475569;"><input type="checkbox" id="yang-nc2-xf-ns"> namespace-aware</label>
+              </div>
+            </div>
+            <div style="flex:1; min-width:280px;">
+              <label style="font-size:12px; color:#475569;">Extract fields → table</label>
+              <div style="display:flex; gap:6px;">
+                <input id="yang-nc2-row" placeholder="row element (e.g. interface)" style="width:44%; font-size:12px; padding:6px;">
+                <textarea id="yang-nc2-cols" rows="4" class="resizable-v" placeholder="name = name&#10;in-octets = statistics/in-octets&#10;out-octets = statistics/out-octets"
+                  style="flex:1; font-family:ui-monospace,monospace; font-size:12px; padding:6px; box-sizing:border-box;"></textarea>
+              </div>
+              <button id="yang-nc2-extract" class="small" style="margin-top:4px; background:#0e7c9e; color:#fff; border-color:#0e7c9e;">Extract → table</button>
+            </div>
+          </div>
+          <div id="yang-nc2-xf-out" style="margin-top:8px;"></div>
+        </details>
+
+        <div data-ysec="Saved NETCONF operations" data-ysec-collapsed="1">
+          <div style="display:flex; gap:8px; align-items:center;">
+            <button id="yang-nc2-refresh" class="small">↻ Refresh list</button>
+            <button id="yang-nc2-delsel" class="small" style="background:#dc2626; color:#fff; border-color:#dc2626;">Delete checked</button>
+            <span style="font-size:12px; color:#94a3b8;">Click ▶ Run on an entry, or ⬆ Load it into the RPC editor above.</span>
+          </div>
+          <div id="yang-nc2-list" style="margin-top:8px;"></div>
         </div>
       </div>
     </section>
@@ -1445,6 +1809,36 @@ out-octets = state/counters/out-octets</textarea>
 </section>
 
 <!-- Chat with AI drawer -->
+<!-- v1.39.0: raw module text viewer -->
+<div id="yang-text-modal" style="display:none; position:fixed; inset:0; z-index:1000; background:rgba(15,23,42,.55);">
+  <div style="position:absolute; inset:4% 6%; background:#fff; border-radius:10px; display:flex; flex-direction:column; overflow:hidden;">
+    <div style="display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid #e2e8f0;">
+      <b style="font-size:15px;">📄 Module source</b>
+      <span id="yang-text-title" style="color:#64748b; font-size:13px; font-family:ui-monospace,monospace;"></span>
+      <input id="yang-text-find" placeholder="find…" style="font-size:12px; padding:4px 8px;">
+      <div style="flex:1;"></div>
+      <button id="yang-text-copy" class="small">📋 Copy</button>
+      <button id="yang-text-close" class="small" style="background:#dc2626; color:#fff; border-color:#dc2626;">Close</button>
+    </div>
+    <div id="yang-text-body" style="flex:1; overflow:auto; background:#0f172a;"></div>
+  </div>
+</div>
+
+<!-- v1.38.0: OpenAPI / Swagger-UI modal -->
+<div id="yang-openapi-modal" style="display:none; position:fixed; inset:0; z-index:1000; background:rgba(15,23,42,.55);">
+  <div style="position:absolute; inset:3% 4%; background:#fff; border-radius:10px; display:flex; flex-direction:column; overflow:hidden;">
+    <div style="display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid #e2e8f0;">
+      <b style="font-size:15px;">OpenAPI 3.0.3</b>
+      <span id="yang-openapi-title" style="color:#64748b; font-size:13px;"></span>
+      <div style="flex:1;"></div>
+      <button id="yang-openapi-json" class="small">⬇ JSON</button>
+      <button id="yang-openapi-yaml" class="small">⬇ YAML</button>
+      <button id="yang-openapi-close" class="small" style="background:#dc2626; color:#fff; border-color:#dc2626;">Close</button>
+    </div>
+    <div id="yang-swagger" style="flex:1; overflow:auto; background:#fafafa;"></div>
+  </div>
+</div>
+
 <div id="chat-drawer">
   <div id="chat-resize-handle" title="Drag to resize"></div>
   <div id="chat-header">
@@ -6558,17 +6952,414 @@ function initV18Yang() {
 
   function currentRepo() { return repoSel.value || ''; }
 
+  // v1.32.1: auto-create a repo at the point of import — no detour to "+ New repo".
+  async function ensureRepo(defaultName) {
+    const cur = currentRepo();
+    if (cur) return cur;
+    const name = prompt('No repository selected.\nName for the new repository:', defaultName || 'ios-xe');
+    if (!name) return '';
+    try {
+      await api('/api/yang/repos/create', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name})});
+      await loadRepos(name);
+      setStatus('Repository "' + name + '" created');
+      return currentRepo();
+    } catch (e) { setStatus(e.message, true); return ''; }
+  }
+
+  let allModules = [];  // v1.32.0: [{file, module, revision}]
+
   async function loadModules() {
     const repo = currentRepo();
     modSel.innerHTML = '';
-    if (!repo) return;
+    allModules = [];
+    if (!repo) { renderModuleList(); return; }
     try {
       const data = await api('/api/yang/repos');
       const r = (data.repos || []).find(x => x.name === repo);
-      const mods = (r && r.modules) || [];
-      modSel.innerHTML = mods.map(m => `<option value="${escapeHtml(m.file)}">${escapeHtml(m.module)}</option>`).join('') || '<option value="">(no modules — upload a .yang)</option>';
+      allModules = (r && r.modules) || [];
+      renderModuleList();
+      if (typeof renderSetLists === 'function') renderSetLists();  // v1.33.0
     } catch (e) { setStatus(e.message, true); }
   }
+
+  // v1.32.0: modules list panel — "module @ revision", filter, select all/none, delete
+  function renderModuleList() {
+    const q = (document.getElementById('yang-mod-filter').value || '').toLowerCase();
+    const counts = {};
+    allModules.forEach(m => counts[m.module] = (counts[m.module] || 0) + 1);
+    const shown = allModules.filter(m => !q || m.file.toLowerCase().includes(q));
+    modSel.innerHTML = shown.map(m => {
+      const dup = counts[m.module] > 1;
+      return `<option value="${escapeHtml(m.file)}"${dup ? ' style="color:#b45309;"' : ''}>${dup ? '⚠ ' : ''}${escapeHtml(m.module)} @ ${escapeHtml(m.revision || 'unknown')}</option>`;
+    }).join('');
+    const dupNames = Object.values(counts).filter(c => c > 1).length;
+    document.getElementById('yang-mod-count').textContent = allModules.length ?
+      `(${allModules.length} module(s)${dupNames ? `, ⚠ ${dupNames} duplicated module name(s)` : ''})` : '';
+  }
+
+  // v1.34.1: delete all but the newest revision of every duplicated module name
+  document.getElementById('yang-mod-dedupe').addEventListener('click', async () => {
+    const byName = {};
+    allModules.forEach(m => (byName[m.module] = byName[m.module] || []).push(m));
+    const toDelete = [];
+    Object.values(byName).forEach(list => {
+      if (list.length < 2) return;
+      const sorted = [...list].sort((a, b) => (b.revision || '').localeCompare(a.revision || ''));
+      toDelete.push(...sorted.slice(1).map(m => m.file));
+    });
+    if (!toDelete.length) { setStatus('No duplicate module names in this repository.'); return; }
+    if (!confirm('Delete ' + toDelete.length + ' older duplicate file(s), keeping the newest revision of each module?\n\n' + toDelete.slice(0, 12).join('\n') + (toDelete.length > 12 ? '\n…' : ''))) return;
+    try {
+      const d = await api('/api/yang/module/delete', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({repo: currentRepo(), files: toDelete})});
+      setStatus('Deleted ' + (d.removed || []).length + ' older duplicate(s). Re-validate your set.');
+      loadModules();
+    } catch (e) { setStatus(e.message, true); }
+  });
+  document.getElementById('yang-mod-filter').addEventListener('input', renderModuleList);
+  modSel.addEventListener('dblclick', () => document.getElementById('yang-load-btn').click());  // v1.32.0
+  setTimeout(() => { try { loadSets(); } catch (e) {} }, 400);  // v1.33.0: populate sets on startup
+
+  // ================= v1.33.0: sub-tabs =================
+  document.querySelectorAll('.yang-main-tab[data-ytab]').forEach(tab => {
+    tab.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelectorAll('.yang-main-tab[data-ytab]').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      for (const [id, key] of [['yang-tab-repo','repo'],['yang-tab-explore','explore'],['yang-tab-rc','rc'],['yang-tab-nc','nc']])
+        document.getElementById(id).style.display = tab.dataset.ytab === key ? 'block' : 'none';
+      // v1.42.0: the tree pane follows the active tab (one shared instance)
+      if (tab.dataset.ytab === 'explore') { loadSetsIntoExplore(); mountTree('explore'); }
+      if (tab.dataset.ytab === 'rc') { fillApiDevs('yang-rc-dev'); renderApiList('rc'); }
+      if (tab.dataset.ytab === 'nc') {
+        fillApiDevs('yang-nc2-dev'); renderApiList('nc');
+        loadNcSets(); mountTree('nc');
+        initSections(); initDetailToggle();     // v1.45.0
+      }
+    });
+  });
+
+  // ================= v1.33.0: repository status =================
+  document.getElementById('yang-repo-status-btn').addEventListener('click', async () => {
+    const repo = currentRepo();
+    if (!repo) { setStatus('Select a repository first', true); return; }
+    const box = document.getElementById('yang-repo-status');
+    box.innerHTML = '<span style="color:#64748b;">scanning imports…</span>';
+    try {
+      const d = await api('/api/yang/repo/status', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({repo})});
+      const miss = d.missing || [];
+      if (!miss.length) {
+        box.innerHTML = '<span style="color:#15803d;">It appears that all necessary dependencies of the modules in this repository are present.</span>';
+      } else {
+        box.innerHTML = '<div style="color:#b91c1c;">The modules in this repository depend on the following missing modules — add them or YANG sets using this repository may be incomplete or invalid:</div>' +
+          '<ul style="color:#b91c1c; margin:4px 0 0 18px;">' +
+          miss.map(m => `<li>${escapeHtml(m.module)} @ ${escapeHtml(m.revision)} <span style="color:#94a3b8;">(needed by ${m.needed_by.map(escapeHtml).join(', ')}${m.needed_by.length >= 8 ? ', …' : ''})</span></li>`).join('') +
+          '</ul>';
+      }
+    } catch (e) { box.innerHTML = ''; setStatus(e.message, true); }
+  });
+
+  // ================= v1.33.0: module sets =================
+  let allSets = [];          // [{name, repo, modules[]}]
+  let setModules = [];       // working copy for the selected set
+
+  function currentSet() { return document.getElementById('yang-set-sel').value || ''; }
+
+  async function loadSets(selectName) {
+    try {
+      const d = await api('/api/yang/sets');
+      allSets = d.sets || [];
+      const sel = document.getElementById('yang-set-sel');
+      sel.innerHTML = allSets.map(s => `<option value="${escapeHtml(s.name)}">${escapeHtml(s.name)} (${s.modules.length})</option>`).join('') || '<option value="">(no sets)</option>';
+      if (selectName) sel.value = selectName;
+      onSetChange();
+    } catch (e) { setStatus(e.message, true); }
+  }
+
+  function onSetChange() {
+    const s = allSets.find(x => x.name === currentSet());
+    setModules = s ? [...s.modules] : [];
+    renderSetLists();
+    document.getElementById('yang-set-errors').innerHTML = '';
+  }
+  document.getElementById('yang-set-sel').addEventListener('change', onSetChange);
+
+  function renderSetLists() {
+    const inQ = (document.getElementById('yang-set-filter').value || '').toLowerCase();
+    const avQ = (document.getElementById('yang-avail-filter').value || '').toLowerCase();
+    const inSet = new Set(setModules);
+    const inShown = setModules.filter(f => !inQ || f.toLowerCase().includes(inQ)).sort();
+    const avail = allModules.map(m => m.file).filter(f => !inSet.has(f));
+    const avShown = avail.filter(f => !avQ || f.toLowerCase().includes(avQ)).sort();
+    document.getElementById('yang-set-list').innerHTML = inShown.map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f.replace(/\.yang$/, '').replace('@', ' @ '))}</option>`).join('');
+    document.getElementById('yang-avail-list').innerHTML = avShown.map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f.replace(/\.yang$/, '').replace('@', ' @ '))}</option>`).join('');
+    document.getElementById('yang-set-count').textContent = `${setModules.length} module(s)`;
+    document.getElementById('yang-avail-count').textContent = `${avail.length} module(s)`;
+  }
+  document.getElementById('yang-set-filter').addEventListener('input', renderSetLists);
+  document.getElementById('yang-avail-filter').addEventListener('input', renderSetLists);
+
+  async function persistSet() {
+    const name = currentSet();
+    if (!name) return;
+    const s = allSets.find(x => x.name === name);
+    await api('/api/yang/sets/save', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({name, repo: (s && s.repo) || currentRepo(), modules: setModules})});
+    const local = allSets.find(x => x.name === name);
+    if (local) local.modules = [...setModules];
+    document.getElementById('yang-set-sel').selectedOptions[0].textContent = `${name} (${setModules.length})`;
+  }
+
+  document.getElementById('yang-set-new').addEventListener('click', async () => {
+    const repo = currentRepo();
+    if (!repo) { setStatus('Select a repository first', true); return; }
+    const name = prompt('Name for the new YANG module set:', repo + '-module');
+    if (!name) return;
+    try {
+      await api('/api/yang/sets/save', {method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({name, repo, modules: []})});
+      await loadSets(name);
+      setStatus('Set "' + name + '" created — add modules from the right list.');
+    } catch (e) { setStatus(e.message, true); }
+  });
+
+  document.getElementById('yang-set-del').addEventListener('click', async () => {
+    const name = currentSet();
+    if (!name) return;
+    if (!confirm('Delete YANG module set "' + name + '"? (Repository files are NOT deleted.)')) return;
+    await api('/api/yang/sets/delete', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name})});
+    loadSets();
+  });
+
+  document.getElementById('yang-set-add').addEventListener('click', async () => {
+    const sel = [...document.getElementById('yang-avail-list').selectedOptions].map(o => o.value);
+    if (!sel.length || !currentSet()) return;
+    setModules = [...new Set([...setModules, ...sel])];
+    renderSetLists(); await persistSet();
+  });
+  document.getElementById('yang-set-addall').addEventListener('click', async () => {
+    if (!currentSet()) { setStatus('Create/select a set first', true); return; }
+    setModules = allModules.map(m => m.file);
+    renderSetLists(); await persistSet();
+  });
+  document.getElementById('yang-set-remove').addEventListener('click', async () => {
+    const sel = new Set([...document.getElementById('yang-set-list').selectedOptions].map(o => o.value));
+    if (!sel.size || !currentSet()) return;
+    setModules = setModules.filter(f => !sel.has(f));
+    renderSetLists(); await persistSet();
+  });
+  document.getElementById('yang-set-removeall').addEventListener('click', async () => {
+    if (!currentSet() || !confirm('Remove ALL modules from this set?')) return;
+    setModules = [];
+    renderSetLists(); await persistSet();
+  });
+
+  document.getElementById('yang-set-validate').addEventListener('click', async () => {
+    const name = currentSet();
+    if (!name) return;
+    const st = document.getElementById('yang-set-status');
+    const box = document.getElementById('yang-set-errors');
+    st.textContent = 'validating (first run parses the whole set — can take a while)…';
+    box.innerHTML = '';
+    try {
+      const d = await api('/api/yang/sets/validate', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name})});
+      const t = d.triage || {errors_total: 0, warnings_total: 0, benign_total: 0, blocking_total: 0, groups: []};
+      st.textContent = `parsed ${d.parsed}/${d.requested} module(s) in ${d.elapsed_s}s`;
+      // v1.34.2: verdict first, grouped findings second
+      const verdict = t.blocking_total === 0
+        ? `<div style="background:#f0fdf4; border:1px solid #bbf7d0; color:#15803d; padding:8px; border-radius:6px; font-size:13px; margin-bottom:8px;">✅ <b>No tree-blocking findings.</b> ${t.benign_total} finding(s) are known-benign patterns of Cisco/openconfig models (also visible in Cisco YANG Suite) — safe to ignore. Trees, augment merging, and API generation are unaffected.</div>`
+        : `<div style="background:#fffbeb; border:1px solid #fde68a; color:#b45309; padding:8px; border-radius:6px; font-size:13px; margin-bottom:8px;">⚠ ${t.blocking_total} finding(s) need a look (listed first below); ${t.benign_total} more are known-benign Cisco model patterns — safe to ignore.</div>`;
+      box.innerHTML = verdict +
+        (t.groups || []).map(g => `
+          <details style="margin-bottom:4px;">
+            <summary style="cursor:pointer; font-size:12px; color:${g.benign ? '#94a3b8' : (g.kind === 'error' ? '#b91c1c' : '#b45309')};">
+              ${g.benign ? '☑' : (g.kind === 'error' ? '✖' : '⚠')} <b>×${g.count}</b> ${escapeHtml(g.sample.slice(0, 140))}${g.benign ? ' <span style="color:#16a34a;">(benign)</span>' : ''}
+            </summary>
+            <div style="font-size:11px; color:#475569; margin:4px 0 6px 18px;">
+              ${g.explanation ? escapeHtml(g.explanation) + '<br>' : ''}
+              ${(g.positions || []).map(p => `<span style="color:#94a3b8;">${escapeHtml(p)}</span>`).join('<br>')}
+            </div>
+          </details>`).join('');
+    } catch (e) { st.textContent = ''; setStatus(e.message, true); }
+  });
+
+  // ================= v1.33.0: Explore-YANG =================
+  async function loadSetsIntoExplore() {
+    try {
+      const d = await api('/api/yang/sets');
+      const sel = document.getElementById('yang-x-set');
+      const prev = sel.value;
+      sel.innerHTML = (d.sets || []).map(s => `<option value="${escapeHtml(s.name)}">${escapeHtml(s.name)}</option>`).join('') || '<option value="">(no sets — build one in Repo)</option>';
+      if (prev) sel.value = prev;
+      fillExploreModules(d.sets || []);
+    } catch (e) { setStatus(e.message, true); }
+  }
+  let exploreModules = [];   // v1.36.1: full list backing the searchable picker
+  function fillExploreModules(sets) {
+    const s = (sets || allSets).find(x => x.name === document.getElementById('yang-x-set').value);
+    exploreModules = s ? [...s.modules].sort() : [];
+    renderExploreModules();
+  }
+  function renderExploreModules() {
+    const q = (document.getElementById('yang-x-module-filter').value || '').toLowerCase();
+    const msel = document.getElementById('yang-x-module');
+    const prev = msel.value;
+    const shown = exploreModules.filter(f => !q || f.toLowerCase().includes(q));
+    msel.innerHTML = shown.map(f =>
+      `<option value="${escapeHtml(f)}">${escapeHtml(f.replace(/\.yang$/, '').replace('@', ' @ '))}</option>`).join('');
+    if (shown.includes(prev)) msel.value = prev;
+    else if (shown.length) msel.selectedIndex = 0;
+  }
+  document.getElementById('yang-x-module-filter').addEventListener('input', renderExploreModules);
+  document.getElementById('yang-x-module-filter').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {   // Enter = load the selected match
+      e.preventDefault();
+      document.getElementById('yang-load-btn').click();
+    }
+  });
+  document.getElementById('yang-x-set').addEventListener('change', async () => {
+    const d = await api('/api/yang/sets');
+    fillExploreModules(d.sets || []);
+  });
+  document.getElementById('yang-mod-selall').addEventListener('click', () => { for (const o of modSel.options) o.selected = true; });
+  document.getElementById('yang-mod-selnone').addEventListener('click', () => { for (const o of modSel.options) o.selected = false; });
+  document.getElementById('yang-mod-delsel').addEventListener('click', async () => {
+    const files = [...modSel.selectedOptions].map(o => o.value);
+    if (!files.length) { setStatus('Select module(s) to delete first', true); return; }
+    if (!confirm('Delete ' + files.length + ' module file(s) from repository "' + currentRepo() + '"?')) return;
+    try {
+      const d = await api('/api/yang/module/delete', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({repo: currentRepo(), files})});
+      setStatus('Deleted ' + (d.removed || []).length + ' module(s)');
+      loadModules();
+    } catch (e) { setStatus(e.message, true); }
+  });
+
+  // v1.32.0: Add-modules tabs
+  document.querySelectorAll('.yang-add-tab').forEach(tab => {
+    tab.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelectorAll('.yang-add-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelectorAll('.yang-add-pane').forEach(p => p.style.display = 'none');
+      document.getElementById('yang-add-' + tab.dataset.tab).style.display = 'block';
+      if (tab.dataset.tab === 'netconf') loadNcDevices();
+    });
+  });
+
+  // ---- NETCONF tab ----
+  let ncDevicesLoaded = false;
+  let ncSchemas = [];  // [{identifier, version}]
+  async function loadNcDevices() {
+    if (ncDevicesLoaded) return;
+    try {
+      const r = await fetch('/api/devices'); const d = await r.json();
+      const sel = document.getElementById('yang-nc-dev');
+      sel.innerHTML = (d.devices || []).map(x => `<option value="${escapeHtml(x.name)}">${escapeHtml(x.name)}</option>`).join('') || '<option value="">(no devices)</option>';
+      ncDevicesLoaded = true;
+    } catch (e) { setStatus('device list: ' + e.message, true); }
+  }
+  function renderNcSchemas() {
+    const q = (document.getElementById('yang-nc-filter').value || '').toLowerCase();
+    const box = document.getElementById('yang-nc-schemas');
+    const shown = ncSchemas.filter(s => !q || s.identifier.toLowerCase().includes(q));
+    box.innerHTML = shown.map((s, i) =>
+      `<option value="${escapeHtml(s.identifier)}|${escapeHtml(s.version)}">${escapeHtml(s.identifier)} @ ${escapeHtml(s.version || 'null')}</option>`
+    ).join('');
+  }
+  document.getElementById('yang-nc-filter').addEventListener('input', renderNcSchemas);
+  document.getElementById('yang-nc-selall').addEventListener('click', () => { for (const o of document.getElementById('yang-nc-schemas').options) o.selected = true; });
+  document.getElementById('yang-nc-selnone').addEventListener('click', () => { for (const o of document.getElementById('yang-nc-schemas').options) o.selected = false; });
+
+  document.getElementById('yang-nc-check').addEventListener('click', async () => {
+    const dev = document.getElementById('yang-nc-dev').value;
+    if (!dev) { setStatus('Pick a device first', true); return; }
+    const prog = document.getElementById('yang-nc-progress');
+    prog.textContent = 'connecting…';
+    try {
+      const d = await api('/api/yang/device/check', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({device_name: dev})});
+      prog.textContent = `connected — ${d.capabilities} capabilities, netconf-monitoring ${d.netconf_monitoring ? 'supported' : 'NOT supported'}`;
+    } catch (e) { prog.textContent = ''; setStatus(e.message, true); }
+  });
+
+  document.getElementById('yang-nc-list').addEventListener('click', async () => {
+    const dev = document.getElementById('yang-nc-dev').value;
+    if (!dev) { setStatus('Pick a device first', true); return; }
+    const prog = document.getElementById('yang-nc-progress');
+    prog.textContent = 'reading schema list…';
+    try {
+      const d = await api('/api/yang/device/schemas', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({device_name: dev})});
+      ncSchemas = d.schemas || [];
+      renderNcSchemas();
+      prog.textContent = ncSchemas.length + ' schema(s) on device';
+    } catch (e) { prog.textContent = ''; setStatus(e.message, true); }
+  });
+
+  document.getElementById('yang-nc-download').addEventListener('click', async () => {
+    const dev = document.getElementById('yang-nc-dev').value;
+    if (!dev) { setStatus('Pick a device first', true); return; }
+    const repo = await ensureRepo(dev);  // v1.32.1: auto-create, pre-filled with device name
+    if (!repo) return;
+    const sel = [...document.getElementById('yang-nc-schemas').selectedOptions]
+      .map(o => { const [identifier, version] = o.value.split('|'); return {identifier, version}; });
+    if (!sel.length) { setStatus('Select schema(s) to download first', true); return; }
+    const prog = document.getElementById('yang-nc-progress');
+    let done = 0, saved = 0, skipped = 0, failed = 0;
+    const BATCH = 10;
+    for (let i = 0; i < sel.length; i += BATCH) {
+      const batch = sel.slice(i, i + BATCH);
+      prog.textContent = `downloading… ${done}/${sel.length} (saved ${saved}, skipped ${skipped}, failed ${failed})`;
+      try {
+        const d = await api('/api/yang/device/download', {method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({repo, device_name: dev, identifiers: batch})});
+        saved += (d.saved || []).length; skipped += (d.skipped || []).length; failed += (d.failed || []).length;
+      } catch (e) { failed += batch.length; }
+      done += batch.length;
+    }
+    prog.textContent = `done: ${saved} saved, ${skipped} already present, ${failed} failed (of ${sel.length})`;
+    loadModules();
+  });
+
+  // ---- SCP tab ----
+  document.getElementById('yang-scp-copy').addEventListener('click', async () => {
+    const repo = await ensureRepo('ios-xe');  // v1.32.1
+    if (!repo) return;
+    const body = {
+      repo,
+      host: document.getElementById('yang-scp-host').value.trim(),
+      username: document.getElementById('yang-scp-user').value.trim(),
+      password: document.getElementById('yang-scp-pass').value,
+      remote_dir: document.getElementById('yang-scp-dir').value.trim(),
+      recursive: document.getElementById('yang-scp-recursive').checked,
+    };
+    if (!body.host || !body.username || !body.remote_dir) { setStatus('host, username and remote directory are required', true); return; }
+    const prog = document.getElementById('yang-scp-progress');
+    prog.textContent = 'copying…';
+    try {
+      const d = await api('/api/yang/scp/copy', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+      prog.textContent = `done: ${(d.saved||[]).length} saved, ${(d.skipped||[]).length} already present, ${(d.failed||[]).length} failed`;
+      loadModules();
+    } catch (e) { prog.textContent = ''; setStatus(e.message, true); }
+  });
+
+  // ---- Git tab ----
+  document.getElementById('yang-git-import').addEventListener('click', async () => {
+    const repo = await ensureRepo('ios-xe');  // v1.32.1
+    if (!repo) return;
+    const body = {
+      repo,
+      url: document.getElementById('yang-git-url').value.trim(),
+      branch: document.getElementById('yang-git-branch').value.trim(),
+      subdir: document.getElementById('yang-git-dir').value.trim(),
+      recursive: document.getElementById('yang-git-recursive').checked,
+    };
+    if (!body.url) { setStatus('Repository URL is required', true); return; }
+    const prog = document.getElementById('yang-git-progress');
+    prog.textContent = 'cloning (sparse)…';
+    try {
+      const d = await api('/api/yang/git/import', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+      prog.textContent = `done: ${(d.saved||[]).length} saved, ${(d.skipped||[]).length} already present, ${(d.failed||[]).length} failed`;
+      loadModules();
+    } catch (e) { prog.textContent = ''; setStatus(e.message, true); }
+  });
 
   repoSel.addEventListener('change', loadModules);
 
@@ -6582,14 +7373,15 @@ function initV18Yang() {
   document.getElementById('yang-repo-del').addEventListener('click', async () => {
     const name = currentRepo();
     if (!name) return;
-    if (!confirm('Delete repository "' + name + '" and all its YANG files?')) return;
+    const n = allModules.length;  // v1.32.1: state the blast radius
+    if (!confirm('Delete repository "' + name + '" and its ' + n + ' module file(s)?\nThis cannot be undone.')) return;
     try { await api('/api/yang/repos/delete', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name})}); loadRepos(); setStatus('Repo deleted'); }
     catch (e) { setStatus(e.message, true); }
   });
 
   document.getElementById('yang-upload-btn').addEventListener('click', async () => {
-    const repo = currentRepo();
-    if (!repo) { setStatus('Create/select a repository first', true); return; }
+    const repo = await ensureRepo('ios-xe');  // v1.32.1: auto-create at point of use
+    if (!repo) return;
     const input = document.getElementById('yang-file-input');
     if (!input.files.length) { setStatus('Choose .yang file(s) first', true); return; }
     const fd = new FormData();
@@ -6604,7 +7396,45 @@ function initV18Yang() {
     } catch (e) { setStatus(e.message, true); }
   });
 
+  // v1.42.5: shared loader takes EXPLICIT args. Previously it read Explore's
+  // <select>s, which are only populated when the Explore tab has been opened —
+  // so loading from NETCONF-YANG silently did nothing while the status still
+  // said "Tree loaded". Returns true on success.
+  async function loadModuleTree(setName, file) {
+    setName = setName || document.getElementById('yang-x-set').value;
+    file = file || document.getElementById('yang-x-module').value;
+    if (!setName || !file) { setStatus('Pick a set and a module first', true); return false; }
+    const depth = parseInt(document.getElementById('yang-depth-sel').value || '0', 10);
+    setStatus('Parsing set context (first load of a big set can take a while)…');
+    try {
+      const d = await api('/api/yang/set-tree', {method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({set: setName, file, depth})});
+      renderTree(d.tree);
+      setStatus(`Loaded: ${d.tree.module} @ ${d.tree.revision} — set context, ${d.elapsed_s}s` +
+                (d.errors ? `, ${d.errors} error(s)` : '') + (d.warnings ? `, ${d.warnings} warning(s)` : ''));
+      const flat = c => (c.children || []).reduce((a, x) => a + 1 + flat(x), 0);
+      if (d.note) {
+        treeBox.insertAdjacentHTML('afterbegin',
+          '<div style="background:#eff6ff; border:1px solid #bfdbfe; color:#1d4ed8; font-size:12px; padding:8px; border-radius:6px; margin-bottom:8px;">' +
+          escapeHtml(d.note) + '</div>');
+      }
+      if (flat(d.tree) < 3 && (d.blocking || []).length) {
+        treeBox.insertAdjacentHTML('afterbegin',
+          '<div style="background:#fef2f2; border:1px solid #fecaca; color:#b91c1c; font-size:12px; padding:8px; border-radius:6px; margin-bottom:8px;">' +
+          '<b>The tree came back empty. Blocking findings from this set:</b><ul style="margin:4px 0 0 18px;">' +
+          d.blocking.map(g => `<li>×${g.count} ${escapeHtml(g.sample.slice(0, 160))}</li>`).join('') +
+          '</ul><div style="margin-top:4px;">Fix these in the Repo tab (add the missing modules, or remove the colliding ones) and re-validate.</div></div>');
+      }
+      return true;
+    } catch (e) { setStatus(e.message, true); return false; }
+  }
+
   document.getElementById('yang-load-btn').addEventListener('click', async () => {
+    const exploring = document.getElementById('yang-tab-explore').style.display !== 'none';
+    if (exploring) {
+      await loadModuleTree();
+      return;
+    }
     const repo = currentRepo(), file = modSel.value;
     if (!repo || !file) { setStatus('Pick a module first', true); return; }
     const depth = parseInt(document.getElementById('yang-depth-sel').value || '0', 10);
@@ -6619,21 +7449,90 @@ function initV18Yang() {
     } catch (e) { setStatus(e.message, true); treeBox.innerHTML = '<span style="color:#dc2626;">' + escapeHtml(e.message) + '</span>'; }
   });
 
-  // YANGSuite-style node icons (unicode glyphs + CSS color classes)
-  const ICON = {
-    container: ['\u{1F4C1}', 'ico-container'],   // folder
-    list:      ['\u2637',     'ico-list'],        // trigram (grid-like) = list
-    leaf:      ['\u{1F343}', 'ico-leaf'],         // leaf
-    'leaf-list':['\u{1F343}', 'ico-leaflist'],    // leaf (list variant, teal)
-    choice:    ['\u2298', 'ico-choice'],
-    case:      ['\u25B8',     'ico-case'],
+  // v1.31.0: YANGSuite node icons — inline SVG, same shapes/palette as Cisco YANG Suite
+  const SVG = {
+    container:   '<svg viewBox="0 0 16 16"><path fill="#1d9fd7" d="M1 3.5c0-.6.4-1 1-1h4l1.5 1.5H14c.6 0 1 .4 1 1V6H3.2L1 12z"/><path fill="#7fcbe8" d="M3.4 6.8h12L13 12.5c-.1.4-.5.7-1 .7H1.3z"/></svg>',
+    list:        '<svg viewBox="0 0 16 16"><g fill="#1d9fd7"><rect x="1" y="2.5" width="2" height="2"/><rect x="4.5" y="2.5" width="10.5" height="2"/><rect x="1" y="7" width="2" height="2"/><rect x="4.5" y="7" width="10.5" height="2"/><rect x="1" y="11.5" width="2" height="2"/><rect x="4.5" y="11.5" width="10.5" height="2"/></g></svg>',
+    leaf:        '<svg viewBox="0 0 16 16"><path fill="#54a832" d="M14.5 1.5C7 2 2.5 5.5 2 12c2-4.5 5.5-7 9-8-4 2.5-7 5.5-8.5 10.5l1.8.5C5.5 11 9 7.5 14.5 5.5z"/></svg>',
+    'leaf-list': '<svg viewBox="0 0 16 16"><g fill="#54a832"><path d="M9 1C5 1.3 2.5 3 2.2 6.5 3.4 4 5.3 2.7 7.2 2.2 5 3.5 3.4 5.2 2.6 8l1 .3C4.5 5.8 6.4 4 9 3z"/><path d="M12 5.5C8.5 5.8 6.3 7.3 6 10.4c1-2.2 2.7-3.4 4.4-3.8-2 1.1-3.3 2.6-4 5.1l.9.3c.8-2.3 2.4-3.8 4.7-4.7z"/><path d="M14.8 10c-3 .3-4.9 1.6-5.1 4.2.9-1.9 2.3-2.9 3.7-3.3-1.6 1-2.8 2.3-3.4 4.4l.8.3c.7-2 2-3.3 4-4z"/></g></svg>',
+    choice:      '<svg viewBox="0 0 16 16"><path fill="none" stroke="#1d9fd7" stroke-width="1.6" d="M2 8h4m0 0c2.5 0 3-2.5 5-2.5M6 8c2.5 0 3 2.5 5 2.5"/><path fill="#1d9fd7" d="M11 3.5l3.5 2-3.5 2zM11 8.5l3.5 2-3.5 2z"/></svg>',
+    case:        '<svg viewBox="0 0 16 16"><path fill="none" stroke="#1d9fd7" stroke-width="1.6" d="M2 8h9"/><path fill="#1d9fd7" d="M10 4.5L15 8l-5 3.5z"/></svg>',
+    module:      '<svg viewBox="0 0 16 16"><g fill="#334155"><circle cx="4.5" cy="4.5" r="2.4"/><circle cx="11.5" cy="4.5" r="2.4"/><circle cx="4.5" cy="11.5" r="2.4"/><circle cx="11.5" cy="11.5" r="2.4"/></g></svg>',
+    submodule:   '<svg viewBox="0 0 16 16"><path fill="none" stroke="#334155" stroke-width="1.5" d="M13 5.5A5.5 5.5 0 0 0 3.2 5"/><path fill="#334155" d="M3.5 1.5v4h4z"/><path fill="none" stroke="#334155" stroke-width="1.5" d="M3 10.5a5.5 5.5 0 0 0 9.8.5"/><path fill="#334155" d="M12.5 14.5v-4h-4z"/></svg>',
+    rpc:         '<svg viewBox="0 0 16 16"><rect x="1.5" y="3" width="13" height="10" rx="1" fill="none" stroke="#475569" stroke-width="1.5"/><path fill="none" stroke="#475569" stroke-width="1.5" d="M2 4l6 5 6-5"/></svg>',
+    action:      '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.2" fill="none" stroke="#475569" stroke-width="1.5"/><circle cx="8" cy="8" r="3.4" fill="none" stroke="#475569" stroke-width="1.5"/><circle cx="8" cy="8" r="1.2" fill="#475569"/></svg>',
+    input:       '<svg viewBox="0 0 16 16"><path fill="#1d9fd7" d="M1 8h7V5l5 3-5 3V8H1z" transform="translate(0,-.5)"/><path fill="none" stroke="#1d9fd7" stroke-width="1.6" d="M10 3h4v10h-4"/></svg>',
+    output:      '<svg viewBox="0 0 16 16"><path fill="none" stroke="#1d9fd7" stroke-width="1.6" d="M6 3H2v10h4"/><path fill="#1d9fd7" d="M6 7.5h5v-3l5 3.5-5 3.5v-3H6z"/></svg>',
+    notification:'<svg viewBox="0 0 16 16"><g fill="#475569"><rect x="2" y="7" width="12" height="7" rx="1"/><rect x="1.2" y="4.3" width="13.6" height="2.2" rx=".6"/><rect x="7.2" y="2" width="1.6" height="12"/><path d="M5 4c-1.4 0-2.3-.9-2.3-1.8C2.7 1.5 3.3 1 4 1c1.2 0 2.4 1.2 4 3zm6 0c1.4 0 2.3-.9 2.3-1.8C13.3 1.5 12.7 1 12 1c-1.2 0-2.4 1.2-4 3z"/></g></svg>',
+    anydata:     '<svg viewBox="0 0 16 16"><path fill="#54a832" d="M7 1h2v5l4.3-2.5 1 1.7L10 7.7l4.3 2.5-1 1.7L9 9.5V15H7V9.5l-4.3 2.4-1-1.7L6 7.7 1.7 5.2l1-1.7L7 6z"/></svg>',
+    anyxml:      '<svg viewBox="0 0 16 16"><path fill="none" stroke="#54a832" stroke-width="1.7" d="M5.5 3.5L2 8l3.5 4.5M10.5 3.5L14 8l-3.5 4.5"/><path fill="none" stroke="#54a832" stroke-width="1.5" d="M9 2.5l-2 11"/></svg>',
   };
-  function iconFor(kw) {
-    const m = ICON[kw] || ['\u2022', ''];
-    return `<span class="yt-ico ${m[1]}">${m[0]}</span>`;
+  // status re-colored leaf (YANGSuite: deprecated = yellow leaf, obsolete = red leaf)
+  const LEAF_DEP = SVG.leaf.replace(/#54a832/g, '#eab308');
+  const LEAF_OBS = SVG.leaf.replace(/#54a832/g, '#dc2626');
+  function iconFor(kw, status) {
+    let svg = SVG[kw] || SVG.leaf;
+    if (status === 'deprecated') svg = svg.replace(/#54a832|#1d9fd7/g, '#eab308');
+    else if (status === 'obsolete') svg = svg.replace(/#54a832|#1d9fd7/g, '#dc2626');
+    return `<span class="yt-ico">${svg}</span>`;
   }
 
+  // v1.31.0: YANGSuite-style Tree Icon Legend
+  function buildLegend() {
+    const box = document.getElementById('yang-legend');
+    if (!box || box.dataset.built) return;
+    const row = (icon, label, cls, strike) =>
+      `<div class="yt-legend-row ${cls||''}"><span class="yt-ico">${icon}</span><span class="${strike?'strike':''}">${label}</span></div>`;
+    const badge = (cls, txt, label) =>
+      `<div class="yt-legend-row"><span class="yt-badge ${cls}">${txt}</span><span>${label}</span></div>`;
+    box.innerHTML =
+      `<div class="yt-legend-head"><span>Tree Icon Legend</span><span class="yt-legend-x" id="yang-legend-x">✕</span></div>` +
+      `<div class="yt-legend-sect">Node Icons</div>` +
+      row(SVG.action, 'action') + row(SVG.anydata, 'anydata') + row(SVG.anyxml, 'anyxml') +
+      row(SVG.case, 'case') + row(SVG.choice, 'choice') + row(SVG.container, 'container') +
+      row(SVG.input, 'input') + row(SVG.leaf, 'leaf') + row(SVG['leaf-list'], 'leaf-list') +
+      row(SVG.list, 'list') + row(SVG.module, 'module') + row(SVG.notification, 'notification') +
+      row(SVG.output, 'output') + row(SVG.rpc, 'rpc') + row(SVG.submodule, 'submodule') +
+      `<div class="yt-legend-sect">Node Support</div>` +
+      row(LEAF_DEP, 'status: deprecated') + row(LEAF_OBS, 'status: obsolete') +
+      row(SVG.leaf.replace(/#54a832/g, '#94a3b8'), 'deviation: not-supported <span style="font-size:9px;color:#94a3b8;">(v2)</span>', 'v2', true) +
+      `<div class="yt-legend-sect">Node Badges</div>` +
+      badge('yt-b-key', '🔑key', 'list key') +
+      badge('yt-b-pres', 'presence', 'presence container') +
+      badge('yt-b-mand', 'ⓘ mand', 'mandatory node') +
+      badge('yt-b-must', '🔗must', '“must” constraint') +
+      badge('yt-b-when', '🔗when', '“when” constraint') +
+      badge('yt-b-lref', '⧉ leafref', 'leafref');
+    box.dataset.built = '1';
+    document.getElementById('yang-legend-x').addEventListener('click', () => box.classList.remove('open'));
+  }
+  document.getElementById('yang-legend-btn').addEventListener('click', () => {
+    buildLegend();
+    document.getElementById('yang-legend').classList.toggle('open');
+  });
+
+  // v1.34.3: currentTree (declared above) also feeds search + derived paths
+  let treeMeta = {module: '', prefix: '', namespace: ''};
   function renderTree(tree) {
+    currentTree = tree;
+    treeMeta = {module: tree.module, prefix: tree.prefix, namespace: tree.namespace};
+    // v1.42.3: a new tree invalidates the old selection — otherwise Node detail
+    // kept showing a node (and module/xpath!) from the PREVIOUS module.
+    lastSelNode = null;
+    lastSelRow = null;
+    detailEl.innerHTML = 'Select a node in the tree.';
+    const rfcBox = document.getElementById('yang-rfc');
+    if (rfcBox) rfcBox.innerHTML = '';
+    const opsBox = document.getElementById('yang-apiops');
+    if (opsBox) opsBox.innerHTML = '';
+    genRc.value = '';
+    genXp.value = '';
+    treeBox.style.overflowX = 'auto';        // v1.34.1: left/right scrollbar
+    // v1.34.0: link parents (non-enumerable — node JSON posted to /generate stays acyclic)
+    (function link(n, parent) {
+      Object.defineProperty(n, '_parent', {value: parent, enumerable: false, configurable: true});
+      (n.children || []).forEach(c => link(c, n));
+    })(tree, null);
     treeBox.innerHTML = '';
     const wrap = document.createElement('div');
     wrap.className = 'yt-wrap';
@@ -6649,6 +7548,12 @@ function initV18Yang() {
   }
 
   function valueWidget(node) {
+    // v1.41.0: container / list get a SELECT checkbox — include the node in the
+    // filter without giving it a value (this is how YANG Suite builds
+    // <counters><in-octets/></counters> with no values).
+    if (node.keyword === 'container' || node.keyword === 'list') {
+      return `<input type="checkbox" class="yt-sel" title="include this node in the filter">`;
+    }
     // only leaf / leaf-list get a value input; type-aware
     if (node.keyword !== 'leaf' && node.keyword !== 'leaf-list') return '';
     const ti = node.typeinfo || {};
@@ -6659,8 +7564,14 @@ function initV18Yang() {
       return `<select><option value=""></option>` +
              ti.enums.map(e => `<option>${escapeHtml(e)}</option>`).join('') + `</select>`;
     }
-    const ph = node.datatype ? escapeHtml(node.datatype) : '';
-    return `<input type="text" placeholder="${ph}">`;
+    // v1.44.0: show the resolved restriction as a hint (range / length / pattern)
+    let ph = node.datatype ? escapeHtml(node.datatype) : '';
+    if (ti.range) ph += ` (${escapeHtml(ti.range)})`;
+    else if (ti.length) ph += ` (len ${escapeHtml(ti.length)})`;
+    const title = ti.pattern ? ` title="pattern: ${escapeHtml(ti.pattern)}"` : '';
+    // v1.41.0: leaves also get a "select without value" checkbox -> <leaf/>
+    return `<input type="checkbox" class="yt-sel" title="include this leaf in the filter (no value)"> ` +
+           `<input type="text" placeholder="${ph}"${title}>`;
   }
 
   function nodeEl(node, depth) {
@@ -6681,42 +7592,64 @@ function initV18Yang() {
       : '<span class="yt-caret empty">\u25B8</span>';
     const prefix = (node.prefix && node.module && node.module !== node.prefix)
       ? '' : '';  // prefix shown in detail; keep tree clean
-    const keyBadge = node.is_key ? '<span class="yt-keybadge" title="list key">\u{1F511}key</span>' : '';
+    const keyBadge = node.is_key ? '<span class="yt-badge yt-b-key" title="list key">\u{1F511}key</span>' : '';
     const typeStr = node.datatype ? `<span class="yt-type">${escapeHtml(node.datatype)}</span>` : '';
     const roBadge = node.config === false ? '<span class="yt-ro" title="read-only (config false)">ro</span>' : '';
     let statusBadge = '';
     if (node.status === 'deprecated') statusBadge = '<span class="yt-status yt-dep" title="deprecated — avoid using">deprecated</span>';
     else if (node.status === 'obsolete') statusBadge = '<span class="yt-status yt-obs" title="obsolete — do not use">obsolete</span>';
     const listKey = (node.keyword === 'list' && node.key) ? `<span class="yt-type" style="color:#0891b2;">[keys: ${escapeHtml(node.key)}]</span>` : '';
+    // v1.31.0: YANGSuite legend badges
+    const presBadge = node.presence ? '<span class="yt-badge yt-b-pres" title="presence container — its existence carries meaning">presence</span>' : '';
+    const mandBadge = node.mandatory ? '<span class="yt-badge yt-b-mand" title="mandatory node">\u24D8 mand</span>' : '';
+    const mustBadge = (node.must && node.must.length) ? `<span class="yt-badge yt-b-must" title="must: ${escapeHtml(node.must.join(' | '))}">\u{1F517}must</span>` : '';
+    const whenBadge = node.when ? `<span class="yt-badge yt-b-when" title="when: ${escapeHtml(node.when)}">\u{1F517}when</span>` : '';
+    const lrefBadge = node.leafref ? `<span class="yt-badge yt-b-lref" title="leafref → ${escapeHtml(node.leafref)}">\u29C9 leafref</span>` : '';
     const dim = (node.status === 'deprecated' || node.status === 'obsolete') ? ' style="text-decoration:line-through; opacity:.7;"' : '';
-    nodes.innerHTML = rails + caret + iconFor(node.keyword) +
+    nodes.innerHTML = rails + caret + iconFor(node.keyword, node.status) +
       `<span class="yt-label"${dim}>${escapeHtml(node.name)}</span>` +
-      typeStr + listKey + keyBadge + roBadge + statusBadge;
+      typeStr + listKey + keyBadge + presBadge + mandBadge + mustBadge + whenBadge + lrefBadge + roBadge + statusBadge;
 
-    // right: value column
+    // right: value column — v1.36.0: widget is bound to the node for RPC building
     const val = document.createElement('div');
     val.className = 'yt-val';
     val.innerHTML = valueWidget(node);
+    // v1.41.0: bind the select-checkbox and the value widget separately
+    const selBox = val.querySelector('input.yt-sel');
+    if (selBox) Object.defineProperty(node, '_sel', {value: selBox, enumerable: false, configurable: true});
+    const w = val.querySelector('input:not(.yt-sel), select');
+    if (w) Object.defineProperty(node, '_val', {value: w, enumerable: false, configurable: true});
 
     row.appendChild(nodes);
     row.appendChild(val);
     wrap.appendChild(row);
 
+    // v1.34.3: LAZY children — DOM materializes on first expand (YANGSuite-style).
+    // Eager rendering of 100k+ rows froze the browser for minutes at depth 8.
     let kidsBox = null;
-    if (hasKids) {
+    let materialized = false;
+    function materialize() {
+      if (materialized || !hasKids) return;
       kidsBox = document.createElement('div');
       kidsBox.style.display = 'none';
       node.children.forEach(c => kidsBox.appendChild(nodeEl(c, depth + 1)));
       wrap.appendChild(kidsBox);
+      materialized = true;
     }
 
     const caretEl = nodes.querySelector('.yt-caret');
-    function toggle() {
-      if (!kidsBox) return;
-      const open = kidsBox.style.display === 'block';
-      kidsBox.style.display = open ? 'none' : 'block';
-      caretEl.textContent = open ? '\u25B8' : '\u25BE';
+    function setOpen(open) {
+      if (!hasKids) return;
+      materialize();
+      kidsBox.style.display = open ? 'block' : 'none';
+      caretEl.textContent = open ? '\u25BE' : '\u25B8';
     }
+    function toggle() {
+      if (!hasKids) return;
+      materialize();
+      setOpen(kidsBox.style.display !== 'block');
+    }
+    Object.defineProperty(node, '_ui', {value: {row, setOpen, materialize}, enumerable: false, configurable: true});
     caretEl.addEventListener('click', (e) => { e.stopPropagation(); toggle(); });
     nodes.querySelector('.yt-label').addEventListener('click', (e) => {
       e.stopPropagation(); selectNode(node, row); toggle();
@@ -6725,36 +7658,1492 @@ function initV18Yang() {
   }
 
   let lastSelRow = null;
+  let lastSelNode = null;   // v1.38.0: node backing Generate API(s)
   function selectNode(node, row) {
+    lastSelNode = node;
     if (lastSelRow) lastSelRow.classList.remove('sel');
     row.classList.add('sel');
     lastSelRow = row;
+    // v1.39.1: access/operations depend on the STATEMENT TYPE, not just config
+    let access, ops;
+    if (node.keyword === 'notification') { access = 'read-only'; ops = '"notification"'; }
+    else if (node.keyword === 'rpc' || node.keyword === 'action') { access = '\u2014'; ops = `"${node.keyword}"`; }
+    else if (node.config === false) { access = 'read-only'; ops = '"get-config", "get"'; }
+    else { access = 'read-write'; ops = '"edit-config", "get-config", "get"'; }
     const rows = [
       ['Name', node.name], ['Nodetype', node.keyword], ['Datatype', node.datatype || '\u2014'],
       ['Key', node.key || (node.is_key ? '(is a list key)' : '\u2014')],
       ['Config', node.config === false ? 'false (read-only)' : 'true'], ['Status', node.status || 'current'],
-      ['Module', node.module], ['Prefix', node.prefix], ['Namespace', node.namespace],
-      ['XPath', node.xpath], ['Description', node.description || '\u2014'],
+      ['Access', access], ['Operations', ops],
+      ['Presence', node.presence ? 'yes' : '\u2014'],
+      ['Mandatory', node.mandatory ? 'true' : '\u2014'],
+      ['Must', (node.must && node.must.length) ? node.must.join(' | ') : '\u2014'],
+      ['When', node.when || '\u2014'],
+      ['Leafref', node.leafref || '\u2014'],
+      ['Module', node.augmented_from || treeMeta.module], ['Prefix', treeMeta.prefix],
+      ['Namespace', treeMeta.namespace],
+      ['Schema Node Id', xpathOf(node)],
+      ['XPath', xpathOf(node)], ['Description', node.description || '\u2014'],
     ];
     detailEl.innerHTML = rows.map(([k,v]) => `<div style="display:flex; gap:6px; margin-bottom:2px;"><span style="min-width:80px; color:#94a3b8;">${k}</span><span style="color:#0f172a; word-break:break-all;">${escapeHtml(String(v))}</span></div>`).join('');
-    fetch('/api/yang/generate', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({node})})
-      .then(r => r.json()).then(d => {
-        if (d.ok) { genRc.value = d.generated.restconf_path || ''; genXp.value = d.generated.xpath || ''; }
-      }).catch(()=>{});
+    // v1.34.3: paths derived client-side from the parent chain (compact JSON)
+    // v1.39.1: only data nodes have a RESTCONF data URI
+    const rc = rcOf(node);
+    genRc.value = rc ? ('/restconf/data/' + rc)
+                     : '\u2014 (no RESTCONF data path for a ' + node.keyword + ')';
+    genXp.value = xpathOf(node);
+    renderApiOps(node);   // v1.34.0
+    renderRfc(node.keyword);   // v1.39.0
   }
 
-  // find-in-tree
-  document.getElementById('yang-tree-search').addEventListener('input', (e) => {
-    const q = e.target.value.toLowerCase();
-    treeBox.querySelectorAll('[data-name]').forEach(row => {
-      const hit = q && row.dataset.name.toLowerCase().includes(q);
-      row.style.outline = hit ? '2px solid #f59e0b' : '';
-      if (hit) { // reveal ancestors
-        let p = row.parentElement;
-        while (p && p !== treeBox) { if (p.style && p.style.display === 'none') p.style.display = 'block'; p = p.parentElement; }
-        row.scrollIntoView({block:'nearest'});
-      }
+  // v1.39.0: RFC 7950 reference panel for the selected node's statement type
+  const rfcCache = {};
+  async function renderRfc(keyword) {
+    const box = document.getElementById('yang-rfc');
+    if (!box) return;
+    box.innerHTML = '';
+    let ref = rfcCache[keyword];
+    if (ref === undefined) {
+      try { const d = await api('/api/yang/rfc/' + encodeURIComponent(keyword)); ref = d.ref; rfcCache[keyword] = ref; }
+      catch (e) { ref = null; }
+    }
+    if (!ref) return;
+    box.innerHTML =
+      `<div style="font-weight:700; color:#334155; margin:10px 0 4px;">Reference — RFC 7950 §${escapeHtml(ref.section)}</div>` +
+      `<div style="font-size:12px; color:#0f172a; margin-bottom:4px;"><b>${escapeHtml(ref.title)}</b></div>` +
+      `<div style="font-size:12px; color:#475569; line-height:1.4;">${escapeHtml(ref.text)}</div>` +
+      `<a href="${escapeHtml(ref.url)}" target="_blank" rel="noopener" style="font-size:12px; color:#0e7c9e;">Full section on ietf.org ↗</a>`;
+  }
+
+  // ============ v1.36.0: Build RPC from tree values (YANG Suite engine) ============
+  // v1.42.3: a key value may be a plain string OR an XPath expression.
+  //   "2"                      -> [ios:name="2"]
+  //   starts-with(name,"Gi")   -> [starts-with(ios:name,"Gi")]   (NOT quoted!)
+  //   >0 / >=100               -> [ios:in-octets>0]
+  // Quoting an expression produced [name="starts-with(name,&quot;Gi&quot;)"]
+  // and the device answered: RPCError: XPath syntax error.
+  function isXpathExpr(v) {
+    return /^\s*(?:starts-with|contains|not|count|substring|string-length|re-match)\s*\(/i.test(v)
+        || /^\s*[<>!=]=?\s*\S/.test(v)
+        || /\band\b|\bor\b/i.test(v);
+  }
+  function keyPredicate(px, key, v) {
+    if (!v) return `[${px}:${key}={${key}}]`;
+    if (isXpathExpr(v)) {
+      // function form: inject the prefixed key as the first argument if the
+      // user wrote the bare node name (starts-with(name,"Gi"))
+      let e = v.trim();
+      const m = e.match(/^([A-Za-z-]+)\s*\(\s*([A-Za-z0-9_.:-]+)\s*,(.*)$/);
+      if (m && m[2] === key) e = `${m[1]}(${px}:${key},${m[3]}`;
+      if (/^[<>!=]=?/.test(e)) e = `${px}:${key}${e}`;   // ">0" -> "ios:x>0"
+      return `[${e}]`;
+    }
+    return `[${px}:${key}="${v}"]`;
+  }
+  // ============ v1.43.1: collapsed, readable XPath (one path, grouped brackets)
+  // Old output unioned one arm PER LEAF and repeated every condition in each arm.
+  // The device returns the whole matched block anyway, so we select the common
+  // list ancestor ONCE — exactly like a hand-written working filter:
+  //   /interfaces/interface[starts-with(name,"GigabitEthernet")]
+  //                        [state/oper-status="UP" and state/admin-status="UP"]
+  //                        [state/counters/in-octets>0 or state/counters/out-octets>0]
+  function relPathTo(node, ancestor, px) {
+    const segs = [];
+    let x = node;
+    while (x && x !== ancestor) { segs.unshift(px ? `${px}:${x.name}` : x.name); x = x._parent; }
+    return segs.join('/');
+  }
+  function commonListAncestor(nodes) {
+    if (!nodes.length) return null;
+    const chains = nodes.map(n => dataChain(n));
+    let best = null;
+    for (const cand of chains[0]) {
+      if (cand.keyword !== 'list') continue;
+      if (chains.every(ch => ch.includes(cand))) best = cand;   // deepest wins
+    }
+    return best;
+  }
+  // v1.44.1: 'none' (default) | 'short' (compact alias) | 'module' (model's prefix)
+  function shortPrefix() {
+    const m = (treeMeta.module || '').toLowerCase();
+    if (m.includes('interfaces')) return 'intf';
+    if (m.includes('bgp')) return 'bgp';
+    if (m.includes('ospf')) return 'ospf';
+    if (m.includes('native')) return 'ios';
+    const p = (treeMeta.prefix || 'm');
+    return p.length > 6 ? p.split('-')[0].slice(0, 6) : p;   // clip a long prefix
+  }
+  function xpathPrefix() {
+    const mode = document.getElementById('yang-nc2-pfxmode').value;
+    if (mode === 'none') return '';
+    if (mode === 'short') return shortPrefix();
+    return treeMeta.prefix || 'x';
+  }
+  function buildXpathSelect(filled) {
+    const px = xpathPrefix();
+    const join = document.getElementById('yang-nc2-join').value || 'and';
+    const nodes = filled.map(f => f.node);
+    const list = commonListAncestor(nodes);
+    if (!list) {   // selections span different branches — union the full paths
+      return filled.map(f => '/' + dataChain(f.node)
+        .map(n => px ? `${px}:${n.name}` : n.name).join('/')).join(' | ');
+    }
+    const base = '/' + dataChain(list).map(n => px ? `${px}:${n.name}` : n.name).join('/');
+    const keyPreds = [], eq = [], cmp = [];
+    (list.key || '').split(/\s+/).filter(Boolean).forEach(k => {
+      const kn = (list.children || []).find(c => c.name === k);
+      const v = kn && kn._val ? (kn._val.value || '').trim() : '';
+      if (!v) return;
+      const key = px ? `${px}:${k}` : k;
+      if (isXpathExpr(v)) {
+        let e = v.trim();
+        const m = e.match(/^([A-Za-z-]+)\s*\(\s*([A-Za-z0-9_.:-]+)\s*,(.*)$/);
+        if (m && m[2] === k) e = `${m[1]}(${key},${m[3]}`;
+        if (/^[<>!=]=?/.test(e)) e = `${key}${e}`;
+        keyPreds.push(e);
+      } else keyPreds.push(`${key}="${v}"`);
     });
+    filled.forEach(f => {
+      const n = f.node;
+      if (n.is_key) return;
+      if (n.keyword !== 'leaf' && n.keyword !== 'leaf-list') return;
+      const v = String(f.value || '').trim();
+      if (!v) return;
+      const rel = relPathTo(n, list, px);
+      if (isXpathExpr(v)) {
+        if (/^[<>!=]=?/.test(v)) cmp.push(`${rel}${v.replace(/\s+/g, '')}`);
+        else cmp.push(v);
+      } else eq.push(`${rel}="${v}"`);
+    });
+    let out = base;
+    if (keyPreds.length) out += `[${keyPreds.join(' and ')}]`;
+    if (eq.length)       out += `[${eq.join(' and ')}]`;
+    if (cmp.length)      out += `[${cmp.join(' ' + join + ' ')}]`;
+    return out;
+  }
+
+  let listConds = null;   // v1.43.0: list node -> extra XPath conditions
+  function prefixedXpath(node) {
+    const chain = dataChain(node);
+    const px = treeMeta.prefix || 'x';
+    return '/' + chain.map(n => {
+      let seg = `${px}:${n.name}`;
+      if (n.keyword === 'list') {
+        const parts = [];
+        (n.key || '').split(/\s+/).filter(Boolean).forEach(k => {
+          const kn = (n.children || []).find(c => c.name === k);
+          const v = kn && kn._val ? (kn._val.value || '').trim() : '';
+          const p = keyPredicate(px, k, v);
+          parts.push(p.slice(1, -1));                 // strip the [ ]
+        });
+        const extra = (listConds && listConds.get(n)) || [];
+        extra.forEach(c => { if (!parts.includes(c)) parts.push(c); });
+        if (parts.length) seg += '[' + parts.join(' and ') + ']';
+      }
+      return seg;
+    }).join('/');
+  }
+  // v1.41.0: a node is INCLUDED if it has a value OR its select-checkbox is
+  // ticked. Ticked-without-value emits an empty element (<in-octets/>) —
+  // exactly how YANG Suite builds "fetch this field" filters.
+  function collectFilled() {
+    const out = [];
+    (function walk(n) {
+      const selected = !!(n._sel && n._sel.checked);
+      let v = null;
+      if (n._val) {
+        if (n._val.type === 'checkbox') { if (n._val.checked) v = ''; }
+        else if (n._val.value && n._val.value.trim() !== '') v = n._val.value.trim();
+      }
+      if (v === null && selected) v = '';           // selected, no value -> empty element
+      if (v !== null && !n.is_key) out.push({node: n, value: v});
+      (n.children || []).forEach(walk);
+    })(currentTree || {});
+    return out;
+  }
+  // v1.40.0: collect the tree values into (xpath, value) cfgs — shared by
+  // Explore's Build buttons and the NETCONF-YANG tab's "Build RPC".
+  function collectCfgs() {
+    if (!currentTree) { setStatus('Load a module in Explore-YANG first', true); return null; }
+    // v1.40.0 fix: guard stale/missing tree meta (caused "undefined:bgp")
+    if (!treeMeta.module || !treeMeta.namespace) {
+      setStatus('Module metadata missing — reload the module in Explore-YANG', true);
+      return null;
+    }
+    const filled = collectFilled();
+    if (!filled.length) {
+      setStatus('Fill values (or tick checkboxes) in the Explore-YANG tree first — list keys included', true);
+      return null;
+    }
+    // v1.43.0: a value on a NON-KEY leaf must become an XPath CONDITION on the
+    // nearest list ancestor — otherwise it was silently dropped (that's why
+    // oper-status=UP and in-octets>0 had no effect on the xpath filter).
+    //   [starts-with(oc-if:name,"Gigabit") and oc-if:state/oc-if:oper-status="UP"]
+    const px = treeMeta.prefix || 'x';
+    const conds = new Map();          // list node -> [condition strings]
+    filled.forEach(f => {
+      const n = f.node;
+      if (n.is_key) return;                       // keys already ride in predicates
+      if (n.keyword !== 'leaf' && n.keyword !== 'leaf-list') return;
+      const v = String(f.value || '').trim();
+      if (!v) return;                             // ticked-only -> just fetch it
+      // nearest LIST ancestor
+      let anc = n._parent, relative = [n.name];
+      while (anc && anc.keyword && anc.keyword !== 'list') {
+        relative.unshift(anc.name);
+        anc = anc._parent;
+      }
+      if (!anc || anc.keyword !== 'list') return; // no list ancestor -> nothing to filter on
+      relative = relative.map(s => `${px}:${s}`).join('/');
+      let cond;
+      if (isXpathExpr(v)) {
+        if (/^[<>!=]=?/.test(v)) cond = `${relative}${v.replace(/\s+/g, '')}`;   // ">0"
+        else cond = v;                                                          // full expr
+      } else {
+        cond = `${relative}="${v}"`;
+      }
+      if (!conds.has(anc)) conds.set(anc, []);
+      const arr = conds.get(anc);
+      if (!arr.includes(cond)) arr.push(cond);
+    });
+    listConds = conds;                            // consumed by prefixedXpath()
+    const cfgs = filled.map(f => ({xpath: prefixedXpath(f.node), value: f.value}));
+    listConds = null;
+    const unkeyed = cfgs.filter(c => c.xpath.includes('{'));
+    if (unkeyed.length) {
+      setStatus('Fill the KEY leaf(s) of every list you set values in — missing: ' +
+                unkeyed[0].xpath.match(/\{[^}]+\}/)[0], true);
+      return null;
+    }
+    const readOnly = filled.every(f => f.node.config === false);
+    const aug = !!filled.find(f => dataChain(f.node).some(n => n.augmented_from));
+    return {cfgs, filled, readOnly, aug};   // v1.43.1: filled needed for xpath collapse
+  }
+
+  async function buildRpc(mode) {
+    const c = collectCfgs();
+    if (!c) return;
+    // v1.40.0: never propose edit-config for read-only (config false) data
+    if (mode === 'edit-config' && c.readOnly) {
+      setStatus('Those nodes are read-only (config false) — building a get filter instead.', true);
+      mode = 'get';
+    }
+    setStatus('Building RPC…');
+    try {
+      const d = await api('/api/yang/build-rpc', {method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({namespace: treeMeta.namespace, prefix: treeMeta.prefix || 'x', mode, cfgs: c.cfgs})});
+      const op = mode === 'edit-config' ? 'edit-config' : (c.readOnly ? 'get' : 'get-config');
+      const items = [{kind: 'netconf', operation: op, payload: d.xml,
+        note: `${treeMeta.module} — built from ${c.cfgs.length} tree value(s)` +
+              (c.aug ? ' ⚠ contains augmented nodes: verify xmlns' : '')}];
+      await api('/api/yang/apis/add', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({items})});
+      // also load the full <rpc> into the NETCONF-YANG builder, ready to run
+      document.getElementById('yang-nc2-op').value = op;
+      await ncBuildRpc(true);
+      setStatus(`${op} built from ${c.cfgs.length} value(s) — open NETCONF-YANG to review and ▶ Run` +
+                (c.aug ? '. Note: augmented-module nodes may need their own xmlns.' : ''));
+    } catch (e) { setStatus(e.message, true); }
+  }
+  document.getElementById('yang-build-edit').addEventListener('click', () => buildRpc('edit-config'));
+  document.getElementById('yang-build-get').addEventListener('click', () => buildRpc('get'));
+
+  // ============ v1.45.0: collapsible sections ============
+  // Any element marked data-ysec="Title" gets wrapped in a header + body so it
+  // can be folded away. State persists in localStorage. Collapsing is purely
+  // visual — nothing is unmounted, so ticked nodes / filled values / the loaded
+  // tree all survive.
+  const YSEC_KEY = 'hitech.yang.sections';
+  function ysecState() {
+    try { return JSON.parse(localStorage.getItem(YSEC_KEY) || '{}'); } catch (e) { return {}; }
+  }
+  function ysecSave(st) {
+    try { localStorage.setItem(YSEC_KEY, JSON.stringify(st)); } catch (e) {}
+  }
+  function initSections() {
+    const st = ysecState();
+    document.querySelectorAll('[data-ysec]').forEach(el => {
+      if (el.dataset.ysecReady) return;
+      const title = el.dataset.ysec;
+      const sec = document.createElement('div');
+      sec.className = 'ysec';
+      sec.dataset.ysecTitle = title;
+      const hd = document.createElement('div');
+      hd.className = 'ysec-hd';
+      hd.innerHTML = `<span class="ysec-caret">▼</span><span>${escapeHtml(title)}</span>`;
+      const bd = document.createElement('div');
+      bd.className = 'ysec-bd';
+      el.parentNode.insertBefore(sec, el);
+      sec.appendChild(hd);
+      sec.appendChild(bd);
+      bd.appendChild(el);
+      el.dataset.ysecReady = '1';
+      const collapsed = (title in st) ? st[title] : (el.dataset.ysecCollapsed === '1');
+      if (collapsed) { sec.classList.add('collapsed'); hd.querySelector('.ysec-caret').textContent = '▶'; }
+      hd.addEventListener('click', () => {
+        const now = sec.classList.toggle('collapsed');
+        hd.querySelector('.ysec-caret').textContent = now ? '▶' : '▼';
+        const s = ysecState(); s[title] = now; ysecSave(s);
+      });
+    });
+  }
+  function setAllSections(collapsed) {
+    const s = ysecState();
+    document.querySelectorAll('.ysec').forEach(sec => {
+      sec.classList.toggle('collapsed', collapsed);
+      const c = sec.querySelector('.ysec-caret');
+      if (c) c.textContent = collapsed ? '▶' : '▼';
+      s[sec.dataset.ysecTitle] = collapsed;
+    });
+    ysecSave(s);
+  }
+
+  // Node detail folds to a thin strip on the right so the tree gets the width
+  function initDetailToggle() {
+    const pane = document.getElementById('yang-detail-pane');
+    if (!pane || document.getElementById('yang-detail-toggle')) return;
+    const t = document.createElement('div');
+    t.id = 'yang-detail-toggle';
+    t.title = 'Collapse / expand the Node detail panel';
+    t.textContent = '⟨ Node detail';
+    pane.insertBefore(t, pane.firstChild);
+    const key = 'hitech.yang.detailCollapsed';
+    const apply = (c) => {
+      pane.classList.toggle('detail-collapsed', c);
+      t.textContent = c ? '⟩ Node detail' : '⟨ Node detail';
+      try { localStorage.setItem(key, c ? '1' : '0'); } catch (e) {}
+    };
+    apply(localStorage.getItem(key) === '1');
+    t.addEventListener('click', () => apply(!pane.classList.contains('detail-collapsed')));
+  }
+
+  // ============ v1.42.0: shared YANG tree, mounted in BOTH tabs ============
+  // One tree instance, one selection state. We physically MOVE the tree pane
+  // (#yang-split) between the Explore host and the NETCONF-YANG host, so the
+  // ticks/values you set are the same ones Build RPC uses — no duplicate code,
+  // no divergent state.
+  const treeSplit = document.getElementById('yang-split');
+  const exploreHost = treeSplit ? treeSplit.parentElement : null;
+  // v1.42.5: remember where the tree sits in the Explore host so we can put it
+  // back in exactly the same place (a marker beats fragile sibling lookups).
+  const treeAnchor = document.createComment('yang-tree-anchor');
+  if (treeSplit && exploreHost) exploreHost.insertBefore(treeAnchor, treeSplit);
+  function mountTree(where) {
+    if (!treeSplit) return;
+    const host = where === 'nc'
+      ? document.getElementById('yang-nc2-treehost')
+      : exploreHost;
+    if (!host || treeSplit.parentElement === host) return;
+    if (where === 'nc') host.appendChild(treeSplit);
+    else exploreHost.insertBefore(treeSplit, treeAnchor.nextSibling);
+  }
+
+  // NETCONF-YANG set/module pickers mirror Explore's (same sets, same modules)
+  let ncModules = [];
+  async function loadNcSets() {
+    try {
+      const d = await api('/api/yang/sets');
+      const sel = document.getElementById('yang-nc2-set');
+      const prev = sel.value;
+      sel.innerHTML = (d.sets || []).map(s => `<option value="${escapeHtml(s.name)}">${escapeHtml(s.name)}</option>`).join('')
+                      || '<option value="">(no sets — build one in Repo)</option>';
+      if (prev) sel.value = prev;
+      fillNcModules(d.sets || []);
+    } catch (e) { ncStatus(e.message, true); }
+  }
+  function fillNcModules(sets) {
+    const s = (sets || []).find(x => x.name === document.getElementById('yang-nc2-set').value);
+    ncModules = s ? [...s.modules].sort() : [];
+    renderNcModuleList();
+  }
+  function renderNcModuleList() {
+    const q = (document.getElementById('yang-nc2-modfilter').value || '').toLowerCase();
+    const sel = document.getElementById('yang-nc2-module');
+    const shown = ncModules.filter(f => !q || f.toLowerCase().includes(q));
+    sel.innerHTML = shown.map(f =>
+      `<option value="${escapeHtml(f)}">${escapeHtml(f.replace(/\.yang$/, '').replace('@', ' @ '))}</option>`).join('');
+  }
+  document.getElementById('yang-nc2-modfilter').addEventListener('input', renderNcModuleList);
+  document.getElementById('yang-nc2-set').addEventListener('change', async () => {
+    const d = await api('/api/yang/sets');
+    fillNcModules(d.sets || []);
+  });
+  document.getElementById('yang-nc2-load').addEventListener('click', async () => {
+    const setName = document.getElementById('yang-nc2-set').value;
+    const file = document.getElementById('yang-nc2-module').value;
+    if (!setName || !file) { ncStatus('Pick a set and a module first', true); return; }
+    ncStatus('Loading module tree…');
+    mountTree('nc');                       // mount BEFORE rendering into it
+    const ok = await loadModuleTree(setName, file);
+    ncStatus(ok ? 'Tree loaded — tick nodes / fill values, then Build RPC'
+                : 'Could not load that module — see the message above the tree.', !ok);
+  });
+
+  // ============ v1.42.4: XML pretty-print + highlight (self-contained) ============
+  function xmlIndent(xml) {
+    let s = (xml || '').trim();
+    if (!s) return '';
+    // collapse existing whitespace between tags, then re-indent
+    s = s.replace(/>\s+</g, '><');
+    let out = '', depth = 0;
+    const toks = s.split(/(<[^>]+>)/).filter(t => t.length);
+    for (let i = 0; i < toks.length; i++) {
+      const tok = toks[i];
+      if (!tok.startsWith('<')) continue;          // text handled with its open tag
+      const isDecl  = /^<\?/.test(tok);
+      const isClose = /^<\//.test(tok);
+      const isSelf  = /\/>$/.test(tok);
+      if (isClose) depth = Math.max(depth - 1, 0);
+      let line = '  '.repeat(depth) + tok;
+      // <leaf>text</leaf> stays on ONE line
+      if (!isDecl && !isClose && !isSelf &&
+          toks[i + 1] && !toks[i + 1].startsWith('<') &&
+          toks[i + 2] && /^<\//.test(toks[i + 2])) {
+        line += toks[i + 1] + toks[i + 2];
+        i += 2;
+      } else if (!isDecl && !isClose && !isSelf) {
+        depth++;
+      }
+      out += (out ? '\n' : '') + line;
+    }
+    return out;
+  }
+  function escapeHtmlRaw(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  // v1.43.0: single-pass tokenizer. The previous chained .replace() ran over
+  // its OWN output — the tag rule then matched inside the <span> tags it had
+  // just emitted, producing garbage like <style="color:#7dd3fc;"> in the pane.
+  // Here we tokenize the RAW xml first and escape each piece exactly once.
+  function xmlHighlight(indented) {
+    const C = {tag: '#7dd3fc', attr: '#fcd34d', val: '#a7f3d0', txt: '#e2e8f0', sel: '#fca5a5'};
+    const span = (color, text) => `<span style="color:${color};">${escapeHtmlRaw(text)}</span>`;
+    let out = '';
+    // split into tags and text
+    (indented || '').split(/(<[^>]*>)/).forEach(tok => {
+      if (!tok) return;
+      if (!tok.startsWith('<')) { out += span(C.txt, tok); return; }
+      // inside a tag: name, then attr="value" pairs
+      let rest = tok;
+      const open = rest.match(/^<\/?\??/)[0];
+      rest = rest.slice(open.length);
+      const nameM = rest.match(/^[\w:.-]+/);
+      const name = nameM ? nameM[0] : '';
+      rest = rest.slice(name.length);
+      out += escapeHtmlRaw(open) + span(C.tag, name);
+      // attributes
+      const attrRe = /\s+([\w:.-]+)\s*=\s*("([^"]*)"|'([^']*)')/g;
+      let m, last = 0;
+      while ((m = attrRe.exec(rest)) !== null) {
+        out += escapeHtmlRaw(rest.slice(last, m.index));
+        const key = m[1];
+        const quote = m[2][0];
+        let val = m[3] !== undefined ? m[3] : m[4];
+        const isSel = key === 'select';
+        if (isSel) val = val.split(' | ').join('\n           | ');   // readable union
+        out += ' ' + span(C.attr, key) + '=' + quote +
+               span(isSel ? C.sel : C.val, val) + quote;
+        last = m.index + m[0].length;
+      }
+      out += escapeHtmlRaw(rest.slice(last));
+    });
+    return out;
+  }
+  function showXml(el, xml) {
+    if (!xml) { el.textContent = '—'; return; }
+    el.innerHTML = xmlHighlight(xmlIndent(xml));
+  }
+
+  // ============ v1.40.0: NETCONF-YANG live RPC builder ============
+  let lastReplyRaw = '';
+  // v1.43.0: copy the PRETTY text (what you see), falling back to the raw reply
+  async function copyText(txt, btn) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(txt);
+      else {                                     // http:// pages have no async clipboard API
+        const ta = document.createElement('textarea');
+        ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); ta.remove();
+      }
+      btn.textContent = '✓'; setTimeout(() => btn.textContent = '📋 Copy', 900);
+    } catch (e) {
+      btn.textContent = '✕'; setTimeout(() => btn.textContent = '📋 Copy', 900);
+    }
+  }
+  document.getElementById('yang-nc2-reply-copy').addEventListener('click', (e) => {
+    const pretty = document.getElementById('yang-nc2-reply').innerText || '';
+    copyText(lastReplyRaw || pretty, e.target);
+  });
+  document.getElementById('yang-nc2-rpc-copy').addEventListener('click', (e) => {
+    copyText(document.getElementById('yang-nc2-rpc').value || '', e.target);
+  });
+  document.getElementById('yang-nc2-reply-wrap').addEventListener('change', (e) => {
+    document.getElementById('yang-nc2-reply').style.whiteSpace = e.target.checked ? 'pre-wrap' : 'pre';
+  });
+  function ncStatus(msg, err) {
+    const el = document.getElementById('yang-nc2-status');
+    el.textContent = msg || '';
+    el.style.color = err ? '#b91c1c' : '#64748b';
+  }
+  // v1.41.0: filter type only applies to get / get-config
+  function syncFilterEnabled() {
+    const op = document.getElementById('yang-nc2-op').value;
+    const f = document.getElementById('yang-nc2-filter');
+    f.disabled = (op === 'edit-config');
+    const xo = document.getElementById('yang-nc2-xopts');
+    if (xo) xo.style.display = (!f.disabled && f.value === 'xpath') ? 'block' : 'none';
+    f.title = f.disabled ? 'edit-config carries a <config> payload, not a filter'
+                         : 'subtree = XML skeleton filter. xpath = single select= expression (device must advertise :xpath).';
+  }
+  document.getElementById('yang-nc2-op').addEventListener('change', syncFilterEnabled);
+  document.getElementById('yang-nc2-filter').addEventListener('change', syncFilterEnabled);
+  syncFilterEnabled();
+
+  async function ncBuildRpc(quiet) {
+    const c = collectCfgs();
+    if (!c) return;
+    const op = document.getElementById('yang-nc2-op').value;
+    const target = document.getElementById('yang-nc2-target').value;
+    const filterType = document.getElementById('yang-nc2-filter').value;
+    if (op === 'edit-config' && c.readOnly) {
+      ncStatus('Selected nodes are read-only (config false) — edit-config is not valid for them.', true);
+      return;
+    }
+    // v1.42.4: subtree filters match values EXACTLY — they cannot express
+    // comparisons. ">0" was silently emitted as the literal text "&gt; 0".
+    if (filterType === 'subtree') {
+      const cmp = c.cfgs.find(x => /^\s*[<>!]=?\s*\S/.test(String(x.value || '')));
+      if (cmp) {
+        ncStatus('A comparison value (' + cmp.value + ') cannot be expressed in a SUBTREE filter — ' +
+                 'subtree matches values exactly. Switch Filter type to "xpath", or clear that value ' +
+                 'and just tick the node to fetch it.', true);
+        return;
+      }
+    }
+    if (!quiet) ncStatus('Building <rpc>…');
+    try {
+      // v1.43.1: xpath -> ONE collapsed select expression (not a per-leaf union)
+      let cfgs = c.cfgs;
+      let prefix = treeMeta.prefix || 'x';
+      if (filterType === 'xpath' && op !== 'edit-config') {
+        cfgs = [{xpath: buildXpathSelect(c.filled), value: ''}];
+        prefix = xpathPrefix();            // '' = unprefixed (default)
+      }
+      const d = await api('/api/yang/build-rpc-envelope', {method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({namespace: treeMeta.namespace, prefix,
+                              cfgs, operation: op, target,
+                              filter_type: op === 'edit-config' ? 'subtree' : filterType})});
+      document.getElementById('yang-nc2-rpc').value = d.xml;
+      const ft = op === 'edit-config' ? '' : ` (${filterType} filter)`;
+      ncStatus(`<rpc> built: ${op}${ft} from ${c.cfgs.length} selected node(s)` +
+               (c.aug ? ' — verify xmlns on augmented nodes' : '') +
+               (filterType === 'xpath' && op !== 'edit-config' ? ' · device must support the :xpath capability' : ''));
+    } catch (e) { ncStatus(e.message, true); }
+  }
+  // ============ v1.44.1: client-side lxml filter / extract on the reply ============
+  document.getElementById('yang-nc2-xf-run').addEventListener('click', async () => {
+    const out = document.getElementById('yang-nc2-xf-out');
+    const expr = document.getElementById('yang-nc2-xf').value.trim();
+    if (!lastReplyRaw) { out.innerHTML = '<span style="color:#b91c1c; font-size:12px;">Run an RPC first — there is no reply to filter.</span>'; return; }
+    if (!expr) { out.innerHTML = '<span style="color:#b91c1c; font-size:12px;">Enter an XPath expression.</span>'; return; }
+    out.innerHTML = '<span style="color:#64748b; font-size:12px;">filtering…</span>';
+    try {
+      const d = await api('/api/xpath-test', {method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({xml: lastReplyRaw, expr,
+                              ignore_ns: !document.getElementById('yang-nc2-xf-ns').checked})});
+      const items = d.results || d.matches || [];
+      const n = (d.count !== undefined) ? d.count : items.length;
+      out.innerHTML = `<div style="font-size:12px; color:#15803d; margin-bottom:4px;">${n} match(es)</div>` +
+        `<pre class="resizable" style="margin:0; height:200px; overflow:auto; background:#0f172a; color:#e2e8f0; font-size:12px; padding:8px; border-radius:6px; white-space:pre-wrap;">` +
+        escapeHtml(typeof items === 'string' ? items : items.map(x => typeof x === 'string' ? x : JSON.stringify(x)).join('\n')) + '</pre>';
+    } catch (e) { out.innerHTML = `<span style="color:#b91c1c; font-size:12px;">${escapeHtml(e.message)}</span>`; }
+  });
+
+  document.getElementById('yang-nc2-extract').addEventListener('click', async () => {
+    const out = document.getElementById('yang-nc2-xf-out');
+    const row = document.getElementById('yang-nc2-row').value.trim();
+    const colsRaw = document.getElementById('yang-nc2-cols').value.trim();
+    if (!lastReplyRaw) { out.innerHTML = '<span style="color:#b91c1c; font-size:12px;">Run an RPC first.</span>'; return; }
+    if (!row || !colsRaw) { out.innerHTML = '<span style="color:#b91c1c; font-size:12px;">Give a row element and at least one column (label = path).</span>'; return; }
+    const cols = colsRaw.split('\n').map(l => l.trim()).filter(Boolean).map(l => {
+      const i = l.indexOf('=');
+      return i < 0 ? {label: l, path: l} : {label: l.slice(0, i).trim(), path: l.slice(i + 1).trim()};
+    });
+    out.innerHTML = '<span style="color:#64748b; font-size:12px;">extracting…</span>';
+    try {
+      // one xpath-test call per column, scoped to the row element
+      const rows = [];
+      const rowsRes = await api('/api/xpath-test', {method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({xml: lastReplyRaw, expr: `//${row}`, ignore_ns: true})});
+      const count = rowsRes.count !== undefined ? rowsRes.count : (rowsRes.results || []).length;
+      for (let i = 1; i <= count; i++) {
+        const rec = {};
+        for (const c of cols) {
+          const r = await api('/api/xpath-test', {method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({xml: lastReplyRaw, expr: `(//${row})[${i}]/${c.path}/text()`, ignore_ns: true})});
+          const v = r.results || r.matches || [];
+          rec[c.label] = (v.length ? String(v[0]) : '');
+        }
+        rows.push(rec);
+      }
+      if (!rows.length) { out.innerHTML = '<span style="color:#b45309; font-size:12px;">No rows matched.</span>'; return; }
+      out.innerHTML =
+        `<div style="font-size:12px; color:#15803d; margin-bottom:4px;">${rows.length} row(s)</div>` +
+        '<div style="overflow:auto; max-height:260px;"><table style="border-collapse:collapse; font-size:12px; width:100%;">' +
+        '<tr>' + cols.map(c => `<th style="text-align:left; border-bottom:1px solid #cbd5e1; padding:4px 8px; background:#f1f5f9;">${escapeHtml(c.label)}</th>`).join('') + '</tr>' +
+        rows.map(r => '<tr>' + cols.map(c => `<td style="border-bottom:1px solid #e2e8f0; padding:4px 8px; font-family:ui-monospace,monospace;">${escapeHtml(r[c.label])}</td>`).join('') + '</tr>').join('') +
+        '</table></div>';
+    } catch (e) { out.innerHTML = `<span style="color:#b91c1c; font-size:12px;">${escapeHtml(e.message)}</span>`; }
+  });
+
+  // v1.44.1: build a complete <rpc> from a stored payload, adding <filter>/<config>
+  // when the record holds a bare data fragment (older saves did — that produced
+  // "XMLError: Element [{…}native] does not meet requirement" on Run).
+  // v1.44.1: put a freshly-built payload straight into the NETCONF RPC editor
+  function loadIntoNcEditor(op, payload, msg) {
+    const tab = document.querySelector('.yang-main-tab[data-ytab="nc"]');
+    if (tab) tab.click();                       // switch to NETCONF-YANG
+    document.getElementById('yang-nc2-op').value = op;
+    syncFilterEnabled();
+    document.getElementById('yang-nc2-rpc').value = wrapSavedPayload(op, payload);
+    ncStatus(msg || 'Loaded into the RPC editor');
+    document.getElementById('yang-nc2-rpc').scrollIntoView({block: 'center', behavior: 'smooth'});
+  }
+
+  function wrapSavedPayload(op, payload) {
+    const NC = 'urn:ietf:params:xml:ns:netconf:base:1.0';
+    const p = (payload || '').trim();
+    const isFilter = /^<\s*(?:\w+:)?filter[\s>]/i.test(p);
+    const isConfig = /^<\s*(?:\w+:)?config[\s>]/i.test(p);
+    const ind = t => t.replace(/^/gm, '      ');
+    let inner;
+    if (op === 'edit-config') {
+      inner = isConfig ? ind(p) : `      <config>\n${p.replace(/^/gm, '        ')}\n      </config>`;
+      return `<rpc xmlns="${NC}" message-id="101">\n  <edit-config>\n    <target><running/></target>\n${inner}\n  </edit-config>\n</rpc>`;
+    }
+    inner = isFilter ? ind(p) : `      <filter type="subtree">\n${p.replace(/^/gm, '        ')}\n      </filter>`;
+    if (op === 'get-config') {
+      return `<rpc xmlns="${NC}" message-id="101">\n  <get-config>\n    <source><running/></source>\n${inner}\n  </get-config>\n</rpc>`;
+    }
+    return `<rpc xmlns="${NC}" message-id="101">\n  <get>\n${inner}\n  </get>\n</rpc>`;
+  }
+
+  document.getElementById('yang-nc2-build').addEventListener('click', () => ncBuildRpc(false));
+  document.getElementById('yang-nc2-clear').addEventListener('click', () => {
+    document.getElementById('yang-nc2-rpc').value = '';
+    document.getElementById('yang-nc2-reply').textContent = '—';
+    ncStatus('');
+  });
+  document.getElementById('yang-nc2-run').addEventListener('click', async () => {
+    const rpc = document.getElementById('yang-nc2-rpc').value.trim();
+    const dev = document.getElementById('yang-nc2-dev').value;
+    const out = document.getElementById('yang-nc2-reply');
+    if (!rpc) { ncStatus('Build (or paste) an <rpc> first', true); return; }
+    if (!dev) { ncStatus('Pick a device first', true); return; }
+    if (rpc.includes('{')) { ncStatus('Replace the {key} placeholders in the RPC first', true); return; }
+    out.textContent = 'running…';
+    ncStatus('Sending RPC to ' + dev + '…');
+    try {
+      const d = await api('/api/yang/run-rpc', {method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({device_name: dev, rpc})});
+      lastReplyRaw = d.reply || JSON.stringify(d, null, 2);
+      showXml(out, lastReplyRaw);          // v1.42.4: indented + highlighted
+      ncStatus('Reply received in ' + (d.elapsed_s ?? '?') + 's');
+    } catch (e) { out.textContent = 'ERROR: ' + e.message; ncStatus(e.message, true); }
+  });
+
+  // ============ v1.38.0: Generate OpenAPI (Swagger-UI + download) ============
+  let lastSpec = null;
+  function nodeChain(node) {   // root→node data-node ancestry
+    const chain = [];
+    let n = node;
+    while (n && n.keyword) { if (DATA_KW.includes(n.keyword)) chain.unshift(n); n = n._parent; }
+    return chain;
+  }
+  // ============ v1.39.0: View raw module text ============
+  function exploreRepo() {
+    const setName = document.getElementById('yang-x-set').value;
+    const s = (typeof allSets !== 'undefined' ? allSets : []).find(x => x.name === setName);
+    return (s && s.repo) || currentRepo();
+  }
+  document.getElementById('yang-view-text').addEventListener('click', async () => {
+    const file = document.getElementById('yang-x-module').value;
+    const repo = exploreRepo();
+    if (!file || !repo) { setStatus('Pick a set and module first', true); return; }
+    setStatus('Loading module source…');
+    try {
+      const d = await api('/api/yang/module-text', {method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({repo, file})});
+      if (!d.text) { setStatus('Could not read module', true); return; }
+      openTextModal(file, d.text);
+      setStatus('');
+    } catch (e) { setStatus(e.message, true); }
+  });
+  let textModalRaw = '';
+  function openTextModal(file, text) {
+    textModalRaw = text;
+    document.getElementById('yang-text-title').textContent = file;
+    document.getElementById('yang-text-modal').style.display = 'block';
+    document.getElementById('yang-text-find').value = '';
+    renderModuleText('');
+  }
+  function renderModuleText(query) {
+    const body = document.getElementById('yang-text-body');
+    const lines = textModalRaw.split('\n');
+    const q = (query || '').toLowerCase();
+    const rows = lines.map((ln, i) => {
+      const hit = q && ln.toLowerCase().includes(q);
+      const num = String(i + 1).padStart(4, ' ');
+      return `<div style="display:flex; ${hit ? 'background:#334155;' : ''}"><span style="color:#475569; user-select:none; padding:0 10px; text-align:right; min-width:48px;">${num}</span><span style="color:#e2e8f0; white-space:pre; padding-right:16px;">${escapeHtml(ln)}</span></div>`;
+    }).join('');
+    body.innerHTML = `<div style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; line-height:1.5;">${rows}</div>`;
+    if (q) {
+      const first = body.querySelector('[style*="background:#334155"]');
+      if (first) first.scrollIntoView({block:'center'});
+    }
+  }
+  document.getElementById('yang-text-find').addEventListener('input', (e) => renderModuleText(e.target.value));
+  document.getElementById('yang-text-close').addEventListener('click', () => {
+    document.getElementById('yang-text-modal').style.display = 'none';
+  });
+  document.getElementById('yang-text-copy').addEventListener('click', (e) => {
+    navigator.clipboard.writeText(textModalRaw);
+    e.target.textContent = '✓ Copied'; setTimeout(() => e.target.textContent = '📋 Copy', 1000);
+  });
+
+  document.getElementById('yang-gen-openapi').addEventListener('click', async () => {
+    const node = lastSelNode;
+    if (!node) { setStatus('Select a data node in the tree first', true); return; }
+    if (!DATA_KW.includes(node.keyword)) { setStatus('Pick a container/list/leaf node', true); return; }
+    const dev = document.getElementById('yang-rc-dev');
+    let host = '';
+    try { if (!apiDevices.length) { const r = await fetch('/api/devices'); apiDevices = (await r.json()).devices || []; }
+          const d0 = apiDevices[0]; host = d0 ? (d0.host + ':443') : ''; } catch (e) {}
+    setStatus('Generating OpenAPI…');
+    try {
+      // v1.38.1: send the node's FULL subtree (deep, stripped of UI-only fields)
+      // so the generator can recurse like YANG Suite (a path per descendant).
+      function slim(n) {
+        const o = {name: n.name, keyword: n.keyword};
+        if (n.key) o.key = n.key;
+        if (n.is_key) o.is_key = true;
+        if (n.augmented_from) o.augmented_from = n.augmented_from;
+        if (n.datatype) o.datatype = n.datatype;
+        if (n.typeinfo) o.typeinfo = n.typeinfo;
+        if (n.description) o.description = n.description;
+        if (n.xpath) o.xpath = n.xpath;
+        if (n.truncated) o.truncated = true;
+        if (n.children && n.children.length) o.children = n.children.map(slim);
+        return o;
+      }
+      const chain = nodeChain(node);
+      const chainSlim = chain.map((n, i) => {
+        const o = slim(n);
+        if (i < chain.length - 1) delete o.children;   // ancestors: no subtree
+        return o;
+      });
+      const nodePayload = chainSlim[chainSlim.length - 1];  // full subtree here
+      const d = await api('/api/yang/openapi', {method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({node: nodePayload, chain: chainSlim, meta: treeMeta, host})});
+      lastSpec = d.spec;
+      openSwagger(d.spec, node.name);
+      const n = Object.keys(d.spec.paths || {}).length;
+      const truncated = (function has(x){ if (x.truncated) return true; return (x.children||[]).some(has); })(nodePayload);
+      setStatus('OpenAPI generated for ' + node.name + ' — ' + n + ' resource path(s)' +
+                (truncated ? ' ⚠ subtree was depth-limited; reload with Depth=unlimited for the complete API set' : ''));
+    } catch (e) { setStatus(e.message, true); }
+  });
+
+  function openSwagger(spec, name) {
+    document.getElementById('yang-openapi-title').textContent = name + ' — ' + Object.keys(spec.paths)[0];
+    document.getElementById('yang-openapi-modal').style.display = 'block';
+    const mount = document.getElementById('yang-swagger');
+    mount.innerHTML = '<div style="padding:16px; color:#64748b;">Rendering Swagger-UI…</div>';
+    const render = () => {
+      try {
+        window.SwaggerUIBundle({spec, domNode: mount, deepLinking: false,
+          tryItOutEnabled: true, defaultModelsExpandDepth: 0,
+          presets: [window.SwaggerUIBundle.presets.apis]});
+      } catch (e) {
+        mount.innerHTML = '<div style="padding:16px; color:#b91c1c;">Swagger-UI failed to render (' +
+          escapeHtml(String(e)) + '). Raw spec below — use ⬇ JSON / ⬇ YAML to download.</div>' +
+          '<pre style="padding:12px; font-size:11px; white-space:pre-wrap;">' + escapeHtml(JSON.stringify(spec, null, 2)) + '</pre>';
+      }
+    };
+    if (window.SwaggerUIBundle) { render(); return; }
+    // v1.38.2: load the local bundle once, on first open
+    const s = document.createElement('script');
+    s.src = '/static/swagger/swagger-ui-bundle.js';
+    s.onload = render;
+    s.onerror = () => {
+      mount.innerHTML = '<div style="padding:16px; color:#b91c1c;">Could not load Swagger-UI assets from /static/swagger/. ' +
+        'The spec is valid — download it with ⬇ JSON / ⬇ YAML and open in editor.swagger.io.</div>' +
+        '<pre style="padding:12px; font-size:11px; white-space:pre-wrap;">' + escapeHtml(JSON.stringify(spec, null, 2)) + '</pre>';
+    };
+    document.head.appendChild(s);
+  }
+  function download(text, fname, mime) {
+    const b = new Blob([text], {type: mime});
+    const u = URL.createObjectURL(b);
+    const a = document.createElement('a'); a.href = u; a.download = fname; a.click();
+    setTimeout(() => URL.revokeObjectURL(u), 2000);
+  }
+  document.getElementById('yang-openapi-close').addEventListener('click', () => {
+    document.getElementById('yang-openapi-modal').style.display = 'none';
+    document.getElementById('yang-swagger').innerHTML = '';
+  });
+  document.getElementById('yang-openapi-json').addEventListener('click', () => {
+    if (lastSpec) download(JSON.stringify(lastSpec, null, 2), (lastSpec.info.title.replace(/\\W+/g,'_')) + '.json', 'application/json');
+  });
+  document.getElementById('yang-openapi-yaml').addEventListener('click', () => {
+    if (lastSpec) download(toYaml(lastSpec), (lastSpec.info.title.replace(/\\W+/g,'_')) + '.yaml', 'text/yaml');
+  });
+  // minimal YAML emitter (objects/arrays/scalars) — enough for OpenAPI specs
+  function toYaml(obj, indent) {
+    indent = indent || 0;
+    const pad = '  '.repeat(indent);
+    if (obj === null) return 'null';
+    if (Array.isArray(obj)) {
+      if (!obj.length) return '[]';
+      return obj.map(v => (typeof v === 'object' && v !== null)
+        ? pad + '-\\n' + toYaml(v, indent + 1)
+        : pad + '- ' + yScalar(v)).join('\\n');
+    }
+    if (typeof obj === 'object') {
+      const keys = Object.keys(obj);
+      if (!keys.length) return '{}';
+      return keys.map(k => {
+        const v = obj[k];
+        if (typeof v === 'object' && v !== null && (Array.isArray(v) ? v.length : Object.keys(v).length))
+          return pad + yKey(k) + ':\\n' + toYaml(v, indent + 1);
+        if (typeof v === 'object' && v !== null)
+          return pad + yKey(k) + ': ' + (Array.isArray(v) ? '[]' : '{}');
+        return pad + yKey(k) + ': ' + yScalar(v);
+      }).join('\\n');
+    }
+    return yScalar(obj);
+  }
+  function yKey(k) { return /^[\\w-]+$/.test(k) ? k : JSON.stringify(k); }
+  function yScalar(v) {
+    if (typeof v === 'string') return /[:#{}\\[\\],&*!|>'"%@`\\n]/.test(v) ? JSON.stringify(v) : v;
+    return String(v);
+  }
+
+  // v1.34.3: derive paths from ancestry (nodes no longer carry them)
+  // v1.39.1: XPath is the SCHEMA path — it must include notification / rpc /
+  // action / input / output / choice / case nodes, not just data nodes.
+  // (dataChain filters to data keywords, so a notification's xpath came out "/".)
+  const SCHEMA_KW = ['container','list','leaf','leaf-list','anydata','anyxml',
+                     'choice','case','rpc','action','input','output','notification'];
+  function schemaChain(node) {
+    const chain = [];
+    let n = node;
+    while (n && n.keyword) { if (SCHEMA_KW.includes(n.keyword)) chain.unshift(n); n = n._parent; }
+    return chain;
+  }
+  function xpathOf(node) {
+    const chain = schemaChain(node);
+    return chain.length ? '/' + chain.map(n => n.name).join('/') : '/';
+  }
+  function rcOf(node) {
+    // RESTCONF data path: data nodes only (correct — RPCs/notifications have no data URI)
+    const chain = dataChain(node);
+    return chain.map((n, i) => {
+      if (i === 0) return `${treeMeta.module}:${n.name}`;
+      return n.augmented_from ? `${n.augmented_from}:${n.name}` : n.name;
+    }).join('/');
+  }
+
+  // ================= v1.34.0: API operation generation =================
+  const DATA_KW = ['container','list','leaf','leaf-list','anydata','anyxml'];
+  function dataChain(node) {
+    const chain = [];
+    let n = node;
+    while (n && n.keyword) { if (DATA_KW.includes(n.keyword)) chain.unshift(n); n = n._parent; }
+    return chain;
+  }
+  function segOf(n) {
+    const chain = dataChain(n);
+    if (chain[0] === n) return `${treeMeta.module}:${n.name}`;
+    return n.augmented_from ? `${n.augmented_from}:${n.name}` : n.name;
+  }
+  function keyPh(n) { return (n.key || '').split(/\s+/).filter(Boolean).map(k => '{' + k + '}').join(','); }
+  function rcUri(node, opts) {
+    // opts: {keyedTarget: bool, dropTarget: bool}
+    const chain = dataChain(node);
+    const parts = [];
+    chain.forEach((n, i) => {
+      const last = i === chain.length - 1;
+      if (last && opts.dropTarget) return;
+      let s = segOf(n);
+      if (n.keyword === 'list' && (!last || opts.keyedTarget)) {
+        const kp = keyPh(n);
+        if (kp) s += '=' + kp;
+      }
+      parts.push(s);
+    });
+    return '/restconf/data/' + parts.join('/');
+  }
+  function exVal(n) {
+    const ti = n.typeinfo || {};
+    if (ti.is_bool) return true;
+    if (ti.enums && ti.enums.length) return ti.enums[0];
+    const dt = n.datatype || '';
+    if (/int|byte|decimal/.test(dt)) return 0;
+    if (dt === 'empty') return [null];
+    return '{' + (dt || 'value') + '}';
+  }
+  function skeleton(node, depth) {
+    if (node.keyword === 'leaf') return exVal(node);
+    if (node.keyword === 'leaf-list') return [exVal(node)];
+    const obj = {};
+    (node.children || []).forEach(c => {
+      if (!DATA_KW.includes(c.keyword)) return;
+      if (depth >= 2 && (c.keyword === 'container' || c.keyword === 'list')) return;
+      const key = (c.augmented_from ? c.augmented_from + ':' : '') + c.name;
+      if (c.keyword === 'list') obj[key] = [skeleton(c, depth + 1)];
+      else obj[key] = skeleton(c, depth + 1);
+    });
+    return obj;
+  }
+  function rcPayload(node) {
+    const seg = segOf(node);
+    let body = skeleton(node, 0);
+    if (node.keyword === 'list') body = [body];
+    return JSON.stringify({[seg]: body}, null, 2);
+  }
+  function ncXml(node, mode) {
+    // mode: 'get' (subtree filter) | 'edit' (config skeleton)
+    const chain = dataChain(node);
+    if (!chain.length) return '';
+    const pad = n => '  '.repeat(n);
+    let target;
+    const keyEls = (node.key || '').split(/\s+/).filter(Boolean)
+      .map(k => `<${k}>{${k}}</${k}>`).join('');
+    if (mode === 'get') {
+      target = keyEls ? `<${node.name}>${keyEls}</${node.name}>` : `<${node.name}/>`;
+    } else {
+      const fields = (node.children || [])
+        .filter(c => c.keyword === 'leaf' && !c.is_key)
+        .slice(0, 6)
+        .map(c => `<${c.name}>${typeof exVal(c) === 'object' ? '' : exVal(c)}</${c.name}>`).join('');
+      target = `<${node.name}>${keyEls}${fields}</${node.name}>`;
+    }
+    let xml = target;
+    for (let i = chain.length - 2; i >= 0; i--) {
+      const n = chain[i];
+      const keys = (n.key || '').split(/\s+/).filter(Boolean).map(k => `<${k}>{${k}}</${k}>`).join('');
+      xml = `<${n.name}>${keys}${xml}</${n.name}>`;
+    }
+    const ns = treeMeta.namespace ? ` xmlns="${treeMeta.namespace}"` : '';
+    xml = xml.replace(`<${chain[0].name}>`, `<${chain[0].name}${ns}>`).replace(`<${chain[0].name}/>`, `<${chain[0].name}${ns}/>`);
+    if (mode === 'edit') return `<config>\n  ${xml}\n</config>`;
+    return xml;
+  }
+
+  function renderApiOps(node) {
+    const box = document.getElementById('yang-apiops');
+    if (!DATA_KW.includes(node.keyword)) { box.innerHTML = ''; return; }
+    const isList = node.keyword === 'list';
+    const writable = node.config !== false;
+    const ops = [];
+    if (isList) ops.push({m: 'GET', uri: rcUri(node, {keyedTarget: false}), note: 'collection (all entries)'});
+    ops.push({m: 'GET', uri: rcUri(node, {keyedTarget: true}), note: isList ? 'single entry' : ''});
+    if (writable) {
+      ops.push({m: 'POST', uri: rcUri(node, {dropTarget: true}) || '/restconf/data', payload: rcPayload(node), note: 'create under parent'});
+      ops.push({m: 'PUT', uri: rcUri(node, {keyedTarget: true}), payload: rcPayload(node), note: 'replace'});
+      ops.push({m: 'PATCH', uri: rcUri(node, {keyedTarget: true}), payload: rcPayload(node), note: 'merge'});
+      ops.push({m: 'DELETE', uri: rcUri(node, {keyedTarget: true})});
+    }
+    const mColor = {GET:'#15803d', POST:'#b45309', PUT:'#1d4ed8', PATCH:'#7c3aed', DELETE:'#b91c1c'};
+    box.innerHTML = '<div style="font-weight:700; color:#334155; margin-bottom:4px;">API operations</div>' +
+      ops.map((o, i) =>
+        `<div style="display:flex; gap:6px; align-items:flex-start; margin-bottom:4px;">
+           <span style="min-width:52px; text-align:center; font-size:10px; font-weight:700; color:#fff; background:${mColor[o.m]}; border-radius:3px; padding:2px 0;">${o.m}</span>
+           <div style="flex:1; min-width:0;">
+             <input class="yang-op-uri" data-i="${i}" value="${escapeHtml(o.uri)}" style="width:100%; font-family:ui-monospace,monospace; font-size:11px; padding:3px; box-sizing:border-box;">
+             ${o.payload ? `<details style="margin-top:2px;"><summary style="font-size:10px; color:#64748b; cursor:pointer;">payload skeleton</summary><textarea class="yang-op-payload" data-i="${i}" rows="6" style="width:100%; font-family:ui-monospace,monospace; font-size:11px; box-sizing:border-box;">${escapeHtml(o.payload)}</textarea></details>` : ''}
+             ${o.note ? `<div style="font-size:10px; color:#94a3b8;">${escapeHtml(o.note)}</div>` : ''}
+           </div>
+           <button class="small yang-op-add" data-i="${i}" title="Add to RESTCONF-YANG">➕</button>
+         </div>`).join('') +
+      `<div style="display:flex; gap:6px; margin-top:6px;">
+         <button id="yang-op-addall" class="small" style="background:#0e7c9e; color:#fff; border-color:#0e7c9e;">➕ Add all to RESTCONF-YANG</button>
+         <button id="yang-op-ncget" class="small">➕ NETCONF get filter</button>
+         ${writable ? '<button id="yang-op-ncedit" class="small">➕ NETCONF edit-config</button>' : ''}
+       </div>`;
+
+    const collect = (idxs) => idxs.map(i => {
+      const o = ops[i];
+      const uri = box.querySelector(`.yang-op-uri[data-i="${i}"]`).value;
+      const pl = box.querySelector(`.yang-op-payload[data-i="${i}"]`);
+      // v1.42.1: node.module was dropped from the compact tree -> "undefined:"
+      const mod = node.augmented_from || treeMeta.module || '';
+      return {kind: 'restconf', method: o.m, uri, payload: pl ? pl.value : null,
+              note: `${mod ? mod + ':' : ''}${node.name}${o.note ? ' — ' + o.note : ''}`};
+    });
+    // v1.42.3: visual confirmation — the button flips to a ✓ on success
+    const flash = (btn, ok) => {
+      if (!btn) return;
+      const old = btn.textContent;
+      btn.textContent = ok ? '✓' : '✕';
+      btn.style.background = ok ? '#15803d' : '#dc2626';
+      btn.style.color = '#fff';
+      btn.style.borderColor = ok ? '#15803d' : '#dc2626';
+      setTimeout(() => {
+        btn.textContent = old;
+        btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = '';
+      }, 1400);
+    };
+    const addItems = async (items, btn) => {
+      try {
+        await api('/api/yang/apis/add', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({items})});
+        flash(btn, true);
+        setStatus(items.length + ' operation(s) added — see RESTCONF-YANG / NETCONF-YANG tab');
+      } catch (e) { flash(btn, false); setStatus(e.message, true); }
+    };
+    box.querySelectorAll('.yang-op-add').forEach(b =>
+      b.addEventListener('click', () => addItems(collect([parseInt(b.dataset.i, 10)]), b)));
+    const allBtn = document.getElementById('yang-op-addall');
+    allBtn.addEventListener('click', () => addItems(collect(ops.map((_, i) => i)), allBtn));
+    const ncgBtn = document.getElementById('yang-op-ncget');
+    ncgBtn.addEventListener('click', async () => {
+      const payload = ncXml(node, 'get');
+      await addItems([{kind: 'netconf', operation: 'get', payload,
+                 note: `${node.augmented_from || treeMeta.module}:${node.name} — subtree filter`}], ncgBtn);
+      // v1.44.1: also LOAD it into the RPC editor and show the tab — the ✓ used
+      // to be the only feedback, with the result saved out of sight.
+      loadIntoNcEditor('get', payload,
+        'Loaded the get filter for ' + node.name + ' into the RPC editor — ▶ Run RPC');
+    });
+    const editBtn = document.getElementById('yang-op-ncedit');
+    if (editBtn) editBtn.addEventListener('click', async () => {
+      const payload = ncXml(node, 'edit');
+      await addItems([{kind: 'netconf', operation: 'edit-config', payload,
+                 note: `${node.augmented_from || treeMeta.module}:${node.name} — edit-config skeleton`}], editBtn);
+      loadIntoNcEditor('edit-config', payload,
+        'Loaded the edit-config skeleton for ' + node.name + ' into the RPC editor — review, then ▶ Run RPC');
+    });
+  }
+
+  // ================= v1.34.0: RESTCONF-YANG / NETCONF-YANG tabs =================
+  let apiDevices = [];
+  async function fillApiDevs(id) {
+    if (!apiDevices.length) {
+      try { const r = await fetch('/api/devices'); const d = await r.json(); apiDevices = d.devices || []; } catch (e) {}
+    }
+    const sel = document.getElementById(id);
+    if (sel && !sel.options.length)
+      sel.innerHTML = apiDevices.map(x => `<option value="${escapeHtml(x.name)}" data-host="${escapeHtml(x.host || '')}">${escapeHtml(x.name)}</option>`).join('');
+  }
+
+  async function renderApiList(which) {
+    const box = document.getElementById(which === 'rc' ? 'yang-rc-list' : 'yang-nc2-list');
+    box.innerHTML = '<span style="color:#94a3b8; font-size:12px;">loading…</span>';
+    let apis = [];
+    try { const d = await api('/api/yang/apis'); apis = (d.apis || []).filter(a => a.kind === (which === 'rc' ? 'restconf' : 'netconf')); }
+    catch (e) { box.innerHTML = ''; setStatus(e.message, true); return; }
+    if (!apis.length) { box.innerHTML = '<div style="color:#94a3b8; font-size:13px;">Nothing collected yet — select a node in Explore-YANG and use “API operations”.</div>'; return; }
+    const mColor = {GET:'#15803d', POST:'#b45309', PUT:'#1d4ed8', PATCH:'#7c3aed', DELETE:'#b91c1c'};
+    box.innerHTML = apis.map(a => `
+      <div class="yang-api-item" data-id="${a.id}" style="border:1px solid #e2e8f0; border-radius:6px; padding:8px; margin-bottom:8px;">
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="checkbox" class="yang-api-chk" data-id="${a.id}">
+          ${which === 'rc'
+            ? `<span style="min-width:52px; text-align:center; font-size:10px; font-weight:700; color:#fff; background:${mColor[a.method] || '#64748b'}; border-radius:3px; padding:2px 0;">${escapeHtml(a.method || '')}</span>
+               <input class="yang-api-uri" value="${escapeHtml(a.uri || '')}" style="flex:1; font-family:ui-monospace,monospace; font-size:11px; padding:4px;">`
+            : `<span style="min-width:80px; text-align:center; font-size:10px; font-weight:700; color:#fff; background:#0e7c9e; border-radius:3px; padding:2px 0;">${escapeHtml(a.operation || '')}</span>
+               <span style="flex:1; font-size:11px; color:#64748b;">${escapeHtml(a.note || '')}</span>`}
+          <button class="small yang-api-run" data-id="${a.id}" style="background:#15803d; color:#fff; border-color:#15803d;">▶ Run</button>
+          ${which === 'nc' ? `<button class="small yang-api-load" data-id="${a.id}" title="Load into the RPC editor above">⬆ Load</button>` : ''}
+          <button class="small yang-api-save" data-id="${a.id}">💾</button>
+        </div>
+        ${a.payload ? `<details style="margin-top:4px;"><summary style="font-size:11px; color:#64748b; cursor:pointer;">payload</summary><textarea class="yang-api-payload" rows="7" style="width:100%; font-family:ui-monospace,monospace; font-size:11px; box-sizing:border-box;">${escapeHtml(a.payload)}</textarea></details>` : ''}
+        ${which === 'rc' && rcRunMode === 'curl' ? `<details class="yang-api-curl-wrap" style="margin-top:4px;"><summary style="font-size:11px; color:#0e7c9e; cursor:pointer;">curl command <button class="small yang-api-curlcopy" data-id="${a.id}" style="font-size:10px; padding:0 6px;">📋 copy</button></summary><pre class="yang-api-curl" style="margin:4px 0 0; white-space:pre-wrap; word-break:break-all; background:#0f172a; color:#a7f3d0; font-size:11px; padding:8px; border-radius:4px;"></pre></details>` : ''}
+        ${which === 'rc' && a.note ? `<div style="font-size:10px; color:#94a3b8; margin-top:2px;">${escapeHtml(a.note)}</div>` : ''}
+        <pre class="yang-api-result resizable" style="display:none; margin-top:6px; height:280px; min-height:100px; overflow:auto; background:#0f172a; color:#e2e8f0; font-size:11px; padding:8px; border-radius:4px;"></pre>
+      </div>`).join('');
+
+    box.querySelectorAll('.yang-api-save').forEach(b => b.addEventListener('click', async () => {
+      const item = b.closest('.yang-api-item');
+      const fields = {};
+      const u = item.querySelector('.yang-api-uri'); if (u) fields.uri = u.value;
+      const p = item.querySelector('.yang-api-payload'); if (p) fields.payload = p.value;
+      await api('/api/yang/apis/update', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({id: parseInt(b.dataset.id, 10), fields})});
+      setStatus('Saved.');
+      if (which === 'rc') refreshCurl(item);
+    }));
+
+    // v1.37.0: build the equivalent curl for an rc item and fill its <pre>
+    function curlFor(item) {
+      const dev = document.getElementById('yang-rc-dev');
+      const host = dev.selectedOptions[0] ? dev.selectedOptions[0].dataset.host : '<device>';
+      const id = parseInt(item.dataset.id, 10);
+      const a = apis.find(x => x.id === id) || {};
+      const uri = (item.querySelector('.yang-api-uri') || {}).value || a.uri || '';
+      const pl = item.querySelector('.yang-api-payload');
+      const full = 'https://' + host + uri;
+      let c = `curl -sk -X ${a.method || 'GET'} \\\n`;
+      c += `  '${full}' \\\n`;
+      c += `  -u '<user>:<pass>' \\\n`;
+      c += `  -H 'Accept: ${rcMedia()}'`;
+      if (pl && pl.value.trim()) {
+        c += ` \\\n  -H 'Content-Type: ${rcMedia()}' \\\n`;
+        c += `  -d '${pl.value.replace(/'/g, "'\\''")}'`;
+      }
+      return c;
+    }
+    function refreshCurl(item) {
+      const pre = item.querySelector('.yang-api-curl');
+      if (pre) pre.textContent = curlFor(item);
+    }
+    box.querySelectorAll('.yang-api-item').forEach(refreshCurl);
+    box.querySelectorAll('.yang-api-curl-wrap summary').forEach(s =>
+      s.addEventListener('click', () => refreshCurl(s.closest('.yang-api-item'))));
+    box.querySelectorAll('.yang-api-uri').forEach(u =>
+      u.addEventListener('input', () => refreshCurl(u.closest('.yang-api-item'))));
+    box.querySelectorAll('.yang-api-curlcopy').forEach(b => b.addEventListener('click', (e) => {
+      e.preventDefault();
+      const pre = b.closest('.yang-api-item').querySelector('.yang-api-curl');
+      navigator.clipboard.writeText(pre.textContent); b.textContent = '✓'; setTimeout(() => b.textContent = '📋 copy', 900);
+    }));
+
+    // v1.40.0: load a saved NETCONF payload into the RPC editor
+    box.querySelectorAll('.yang-api-load').forEach(b => b.addEventListener('click', async () => {
+      const a = apis.find(x => x.id === parseInt(b.dataset.id, 10));
+      if (!a) return;
+      const op = a.operation || 'get';
+      document.getElementById('yang-nc2-op').value = op;
+      const pl = b.closest('.yang-api-item').querySelector('.yang-api-payload');
+      const payload = pl ? pl.value : (a.payload || '');
+      document.getElementById('yang-nc2-rpc').value = wrapSavedPayload(op, payload);
+      ncStatus('Loaded saved ' + op + ' into the RPC editor — review, then ▶ Run RPC');
+    }));
+
+    box.querySelectorAll('.yang-api-run').forEach(b => b.addEventListener('click', async () => {
+      const item = b.closest('.yang-api-item');
+      const out = item.querySelector('.yang-api-result');
+      out.style.display = 'block';
+      out.textContent = 'running…';
+      const a = apis.find(x => x.id === parseInt(b.dataset.id, 10));
+      try {
+        if (which === 'rc') {
+          const dev = document.getElementById('yang-rc-dev');
+          const devName = dev.value;
+          const host = dev.selectedOptions[0] ? dev.selectedOptions[0].dataset.host : '';
+          if (!devName || !host) { out.textContent = 'pick a device first'; return; }
+          const uri = item.querySelector('.yang-api-uri').value;
+          if (uri.includes('{')) { out.textContent = 'replace {key} placeholders in the URI first'; return; }
+          const pl = item.querySelector('.yang-api-payload');
+          const media = rcMedia();
+          const hdrs = {'Accept': media};
+          if (pl && pl.value && pl.value.trim()) hdrs['Content-Type'] = media;
+          if (rcRunMode === 'curl') {
+            const d = await api('/api/restconf-execute', {method:'POST', headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({method: a.method, uri: 'https://' + host + uri, as_curl: true,
+                headers: hdrs, auth_type: 'inventory', device_name: devName,
+                payload: pl ? pl.value : null, include_export: true})});
+            out.innerHTML = renderRcResult(d, true);
+          } else {
+            // v1.42.1: HTTPS = response only (no curl/python export blocks)
+            const d = await api('/api/restconf-execute', {method:'POST', headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({method: a.method, uri: 'https://' + host + uri,
+                headers: hdrs, auth_type: 'inventory', device_name: devName,
+                payload: pl ? pl.value : null, include_export: false})});
+            out.innerHTML = renderRcResult(d, false);
+          }
+        } else {
+          const devName = document.getElementById('yang-nc2-dev').value;
+          if (!devName) { out.textContent = 'pick a device first'; return; }
+          const pl = item.querySelector('.yang-api-payload');
+          const payload = pl ? pl.value : (a.payload || '');
+          if (payload.includes('{')) { out.textContent = 'replace {key} placeholders in the XML first'; return; }
+          // v1.44.2: stored records hold a BARE fragment (<native>…</native>).
+          // /api/netconf-send handed it straight to ncclient, which rejected it:
+          //   XMLError: Element [{…}native] does not meet requirement
+          // Wrap it into a full <rpc> (adding <filter>/<config>) and dispatch.
+          const rpcDoc = wrapSavedPayload(a.operation, payload);
+          const d = await api('/api/yang/run-rpc', {method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({device_name: devName, rpc: rpcDoc})});
+          lastReplyRaw = d.reply || JSON.stringify(d, null, 2);
+          showXml(out, lastReplyRaw);
+        }
+      } catch (e) { out.textContent = 'ERROR: ' + e.message; }
+    }));
+  }
+
+  document.getElementById('yang-rc-refresh').addEventListener('click', () => renderApiList('rc'));
+
+  // v1.37.0: RESTCONF-YANG run-mode toggle (HTTPS vs curl)
+  let rcRunMode = 'https';
+  document.querySelectorAll('.rc-mode').forEach(b => b.addEventListener('click', () => {
+    rcRunMode = b.dataset.mode;
+    document.querySelectorAll('.rc-mode').forEach(x => x.classList.toggle('active', x === b));
+    renderApiList('rc');            // curl blocks appear/disappear with the mode
+  }));
+  // v1.42.1: JSON/XML sets the yang-data media type (still editable by hand)
+  document.getElementById('yang-rc-format').addEventListener('change', (e) => {
+    document.getElementById('yang-rc-media').value =
+      e.target.value === 'xml' ? 'application/yang-data+xml' : 'application/yang-data+json';
+    renderApiList('rc');
+  });
+  // v1.42.1: status line + collapsible headers + pretty body (no export in HTTPS mode)
+  function renderRcResult(d, isCurl) {
+    if (d && d.ok === false) {
+      return `<span style="color:#fca5a5;">ERROR: ${escapeHtml(d.error || 'request failed')}</span>`;
+    }
+    if (isCurl) {
+      const code = (d.exit_code === 0) ? '#4ade80' : '#fca5a5';
+      return `<div style="color:${code}; margin-bottom:6px;">curl exit ${d.exit_code} — ${d.elapsed_ms ?? '?'} ms</div>` +
+             `<details open><summary style="cursor:pointer; color:#94a3b8;">command</summary><pre style="white-space:pre-wrap; margin:4px 0; color:#a7f3d0;">${escapeHtml(d.command || '')}</pre></details>` +
+             `<details open><summary style="cursor:pointer; color:#94a3b8;">output</summary><pre style="white-space:pre-wrap; margin:4px 0;">${escapeHtml(d.body || '')}</pre></details>` +
+             (d.stderr ? `<details><summary style="cursor:pointer; color:#fca5a5;">stderr</summary><pre style="white-space:pre-wrap;">${escapeHtml(d.stderr)}</pre></details>` : '');
+    }
+    const sc = d.status_code || 0;
+    const scColor = sc >= 200 && sc < 300 ? '#4ade80' : (sc >= 400 ? '#fca5a5' : '#fbbf24');
+    const hdrRows = Object.entries(d.headers || {})
+      .map(([k, v]) => `<div><span style="color:#94a3b8;">${escapeHtml(k)}:</span> ${escapeHtml(String(v))}</div>`).join('');
+    return `<div style="color:${scColor}; font-weight:700; margin-bottom:6px;">HTTP ${sc} · ${d.elapsed_ms ?? '?'} ms</div>` +
+      `<details><summary style="cursor:pointer; color:#94a3b8;">response headers (${Object.keys(d.headers || {}).length})</summary>` +
+      `<div style="font-size:11px; margin:4px 0 8px;">${hdrRows}</div></details>` +
+      `<div style="color:#94a3b8; margin-bottom:2px;">response body</div>` +
+      `<pre style="white-space:pre-wrap; margin:0;">${escapeHtml(prettyBody(d.body))}</pre>`;
+  }
+
+  function rcMedia() {
+    return (document.getElementById('yang-rc-media').value || '').trim()
+           || 'application/yang-data+json';
+  }
+  // v1.42.1: pretty-print a RESTCONF response body (JSON or XML)
+  function prettyBody(text) {
+    const t = (text || '').trim();
+    if (!t) return '(empty body)';
+    if (t.startsWith('{') || t.startsWith('[')) {
+      try { return JSON.stringify(JSON.parse(t), null, 2); } catch (e) { return t; }
+    }
+    if (t.startsWith('<')) {
+      try {
+        const doc = new DOMParser().parseFromString(t, 'application/xml');
+        if (doc.querySelector('parsererror')) return t;
+        const ser = new XMLSerializer().serializeToString(doc);
+        // simple indenter
+        let out = '', depth = 0;
+        ser.replace(/></g, '>\n<').split('\n').forEach(line => {
+          if (/^<\/.+/.test(line)) depth--;
+          out += '  '.repeat(Math.max(depth, 0)) + line + '\n';
+          if (/^<[^!?/][^>]*[^/]>$/.test(line)) depth++;
+        });
+        return out.trim();
+      } catch (e) { return t; }
+    }
+    return t;
+  }
+
+  // v1.37.0: drag-resize the tree | detail split
+  (function () {
+    const handle = document.getElementById('yang-split-handle');
+    const pane = document.getElementById('yang-detail-pane');
+    if (!handle || !pane) return;
+    let dragging = false, startX = 0, startW = 0;
+    handle.addEventListener('mousedown', (e) => {
+      dragging = true; startX = e.clientX; startW = pane.offsetWidth;
+      document.body.style.userSelect = 'none'; e.preventDefault();
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      const w = Math.max(260, Math.min(900, startW - (e.clientX - startX)));
+      pane.style.width = w + 'px';
+    });
+    window.addEventListener('mouseup', () => { dragging = false; document.body.style.userSelect = ''; });
+    handle.addEventListener('dblclick', () => { pane.style.width = '420px'; });  // reset
+  })();
+  document.getElementById('yang-nc2-refresh').addEventListener('click', () => renderApiList('nc'));
+  async function delChecked(which) {
+    const box = document.getElementById(which === 'rc' ? 'yang-rc-list' : 'yang-nc2-list');
+    const ids = [...box.querySelectorAll('.yang-api-chk:checked')].map(c => parseInt(c.dataset.id, 10));
+    if (!ids.length) { setStatus('Check item(s) to delete first', true); return; }
+    await api('/api/yang/apis/delete', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ids})});
+    renderApiList(which);
+  }
+  document.getElementById('yang-rc-delsel').addEventListener('click', () => delChecked('rc'));
+  document.getElementById('yang-nc2-delsel').addEventListener('click', () => delChecked('nc'));
+
+  // ============ v1.41.1: search RESULTS LIST (no mass auto-expand) ============
+  // The old behaviour expanded the ancestor chain of EVERY match — typing
+  // "router" opened 200+ branches and made the tree unusable. Now we list the
+  // matches and expand exactly one chain when you jump to a result.
+  let searchHits = [];
+  let searchIdx = -1;
+  let lastOpenedChain = [];
+
+  function nodePathStr(n) {
+    const parts = [];
+    let x = n;
+    while (x && x.name) { parts.unshift(x.name); x = x._parent; }
+    return '/' + parts.join('/');
+  }
+
+  function clearSearchHighlight() {
+    treeBox.querySelectorAll('.yt-row').forEach(r => r.style.outline = '');
+  }
+
+  function collapseLastChain() {
+    // tidy up: close the branch we opened for the previous jump
+    for (let i = lastOpenedChain.length - 1; i >= 0; i--) {
+      const a = lastOpenedChain[i];
+      if (a._ui && a._parent) a._ui.setOpen(false);   // never collapse the root
+    }
+    lastOpenedChain = [];
+  }
+
+  function jumpToMatch(i) {
+    if (!searchHits.length) return;
+    searchIdx = (i + searchHits.length) % searchHits.length;
+    const m = searchHits[searchIdx];
+    collapseLastChain();
+    clearSearchHighlight();
+    const chain = [];
+    let n = m;
+    while (n && n.name) { chain.unshift(n); n = n._parent; }
+    chain.forEach(a => {
+      if (a._ui) { a._ui.materialize(); if (a !== m) a._ui.setOpen(true); }
+    });
+    lastOpenedChain = chain.filter(a => a !== m);
+    if (m._ui) {
+      m._ui.row.style.outline = '2px solid #f59e0b';
+      m._ui.row.scrollIntoView({block: 'center'});
+      selectNode(m, m._ui.row);          // populate Node detail for the hit
+    }
+    renderSearchResults();
+  }
+
+  function renderSearchResults() {
+    const box = document.getElementById('yang-search-results');
+    if (!box) return;
+    if (!searchHits.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
+    box.style.display = 'block';
+    box.innerHTML =
+      `<div style="display:flex; align-items:center; gap:8px; padding:4px 8px; background:#f1f5f9; border-bottom:1px solid #e2e8f0;">
+         <b style="font-size:12px; color:#334155;">${searchHits.length} match(es)${searchHits.length >= 300 ? '+' : ''}</b>
+         <button id="yang-search-prev" class="small" style="padding:1px 8px;">‹ Prev</button>
+         <span style="font-size:12px; color:#64748b;">${searchIdx >= 0 ? (searchIdx + 1) + ' / ' + searchHits.length : '—'}</span>
+         <button id="yang-search-next" class="small" style="padding:1px 8px;">Next ›</button>
+         <div style="flex:1;"></div>
+         <button id="yang-search-close" class="small" style="padding:1px 8px;">✕</button>
+       </div>` +
+      searchHits.slice(0, 300).map((m, i) => `
+        <div class="yang-hit" data-i="${i}" style="display:flex; gap:8px; padding:3px 8px; cursor:pointer; font-size:12px; ${i === searchIdx ? 'background:#fef3c7;' : ''}"
+             onmouseover="this.style.background='#e0f2fe'" onmouseout="this.style.background='${i === searchIdx ? '#fef3c7' : 'transparent'}'">
+          <span style="color:#0e7c9e; font-weight:600; min-width:90px;">${escapeHtml(m.keyword)}</span>
+          <span style="color:#0f172a; font-family:ui-monospace,monospace;">${escapeHtml(nodePathStr(m))}</span>
+        </div>`).join('');
+    box.querySelectorAll('.yang-hit').forEach(el =>
+      el.addEventListener('click', () => jumpToMatch(parseInt(el.dataset.i, 10))));
+    const p = document.getElementById('yang-search-prev');
+    const n = document.getElementById('yang-search-next');
+    const c = document.getElementById('yang-search-close');
+    if (p) p.addEventListener('click', () => jumpToMatch(searchIdx - 1));
+    if (n) n.addEventListener('click', () => jumpToMatch(searchIdx + 1));
+    if (c) c.addEventListener('click', () => {
+      document.getElementById('yang-tree-search').value = '';
+      runTreeSearch();
+    });
+  }
+
+  // ============ v1.42.2: smart path-aware search ============
+  //   bgp                  name substring
+  //   bgp*  *bgp           name glob
+  //   //bgp                node named bgp at ANY depth
+  //   /native/router/bgp   absolute path (anchored at the tree root)
+  //   router/bgp           path suffix (path ends with these segments)
+  //   /native/*/bgp        '*' = one whole segment
+  function globToRe(seg) {
+    return new RegExp('^' + seg.split('*').map(s =>
+      s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('.*') + '$', 'i');
+  }
+  function parseSearchQuery(q, exact) {
+    q = (q || '').trim();
+    if (!q) return null;
+    if (q.startsWith('//')) return {kind: 'suffix', segs: q.slice(2).split('/').filter(Boolean)};
+    if (q.startsWith('/'))  return {kind: 'absolute', segs: q.slice(1).split('/').filter(Boolean)};
+    if (q.includes('/'))    return {kind: 'suffix', segs: q.split('/').filter(Boolean)};
+    return {kind: 'name', q, exact: !!exact, glob: q.includes('*')};
+  }
+  function pathSegsOf(node) {
+    const p = []; let x = node;
+    while (x && x.name) { p.unshift(x.name); x = x._parent; }
+    return p;
+  }
+  function nodeMatches(node, spec) {
+    if (!spec) return false;
+    if (spec.kind === 'name') {
+      const nm = node.name || '';
+      if (spec.glob) return globToRe(spec.q).test(nm);
+      return spec.exact ? nm.toLowerCase() === spec.q.toLowerCase()
+                        : nm.toLowerCase().includes(spec.q.toLowerCase());
+    }
+    const segs = pathSegsOf(node), want = spec.segs;
+    if (!want.length) return false;
+    if (spec.kind === 'absolute') {
+      if (segs.length !== want.length) return false;
+      return want.every((w, i) => globToRe(w).test(segs[i]));
+    }
+    if (segs.length < want.length) return false;
+    const tail = segs.slice(segs.length - want.length);
+    return want.every((w, i) => globToRe(w).test(tail[i]));
+  }
+
+  function runTreeSearch() {
+    const raw = document.getElementById('yang-tree-search').value.trim();
+    const exact = document.getElementById('yang-search-exact').checked;
+    clearSearchHighlight();
+    searchHits = []; searchIdx = -1;
+    if (!currentTree) { renderSearchResults(); return; }
+    if (!raw) {                              // clearing collapses back to top level
+      lastOpenedChain = [];
+      renderTree(currentTree);
+      renderSearchResults();
+      setStatus('');
+      return;
+    }
+    let spec = parseSearchQuery(raw, exact);
+    let note = '';
+    const collect = (sp) => {
+      const hits = [];
+      (function walk(n) {
+        if (hits.length >= 300) return;
+        if (n.name && nodeMatches(n, sp)) hits.push(n);
+        (n.children || []).forEach(walk);
+      })(currentTree);
+      return hits;
+    };
+    searchHits = collect(spec);
+    // an absolute path that matches nothing is usually a suffix the user meant
+    if (!searchHits.length && spec.kind === 'absolute') {
+      const alt = {kind: 'suffix', segs: spec.segs};
+      const hits = collect(alt);
+      if (hits.length) {
+        searchHits = hits; spec = alt;
+        note = ' (no absolute match from the root — showing path-suffix matches)';
+      }
+    }
+    const qlow = raw.toLowerCase();
+    searchHits.sort((a, b) => {
+      const ae = a.name.toLowerCase() === qlow ? 0 : 1;
+      const be = b.name.toLowerCase() === qlow ? 0 : 1;
+      if (ae !== be) return ae - be;
+      return nodePathStr(a).split('/').length - nodePathStr(b).split('/').length;
+    });
+    renderSearchResults();
+    setStatus(searchHits.length
+      ? searchHits.length + ' match(es)' + note + ' — click one to jump'
+      : 'No match for ' + raw);
+  }
+
+  document.getElementById('yang-tree-search').addEventListener('input', runTreeSearch);
+  document.getElementById('yang-search-exact').addEventListener('change', runTreeSearch);
+  document.getElementById('yang-tree-search').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); jumpToMatch(e.shiftKey ? searchIdx - 1 : searchIdx + 1); }
   });
 
   // copy buttons
@@ -6764,6 +9153,11 @@ function initV18Yang() {
       if (el && el.value) { navigator.clipboard.writeText(el.value); b.textContent = '✓'; setTimeout(()=>b.textContent='📋', 900); }
     });
   });
+
+  document.getElementById('yang-sec-collapse').addEventListener('click', () => setAllSections(true));
+  document.getElementById('yang-sec-expand').addEventListener('click', () => setAllSections(false));
+  initSections();          // v1.45.0
+  initDetailToggle();
 
   // lazy-load repos when the YANG nav is first shown
   loadRepos();

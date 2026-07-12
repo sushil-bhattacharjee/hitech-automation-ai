@@ -4,6 +4,7 @@ jinja2>=3.1
 pyyaml>=6.0
 lxml>=5.3
 pyang>=2.6   # v1.30.0: YANG Explorer parser
+python-multipart>=0.0.9   # v1.30.0: multipart form uploads (YANG .yang upload)
 ncclient>=0.6.16
 netmiko>=4.4
 httpx>=0.27
@@ -12,4 +13,3 @@ anthropic>=0.40
 
 # v1.15.0: optional — static lint for the Python pane (pyflakes also works)
 ruff
-python-multipart>=0.0.9   # v1.30.0: multipart form uploads (YANG .yang upload)
