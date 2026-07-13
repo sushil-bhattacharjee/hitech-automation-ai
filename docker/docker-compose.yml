@@ -1,0 +1,37 @@
+# hiTech Automation AI — container deployment
+#
+#   Core (no AI):   docker compose -f docker/docker-compose.yml up -d --build
+#   With AI:        WITH_AI=1 docker compose -f docker/docker-compose.yml up -d --build
+#   Stop:           docker compose -f docker/docker-compose.yml down
+#   Logs:           docker logs -f hitech_automation_ai
+#
+#   → http://<host>:7071
+#
+# NOTE: this uses the SAME port (7071) and the SAME state directory as a
+# systemd install, so run ONE of them at a time:
+#   systemctl --user stop hitech_automation_ai
+#
+services:
+  software_ai:
+    build:
+      context: ..
+      dockerfile: docker/software_ai/Dockerfile
+      args:
+        # export WITH_AI=1 to build the image with the optional AI stack
+        WITH_AI: ${WITH_AI:-0}
+    container_name: hitech_automation_ai
+    restart: unless-stopped          # comes back automatically after a reboot
+
+    # host networking: the app reaches lab devices (192.168.89.x) and Ollama
+    # exactly as it would from the host, with no port mapping or NAT in between.
+    network_mode: host
+
+    environment:
+      - OLLAMA_URL=${OLLAMA_URL:-http://192.168.89.102:11434}
+
+    volumes:
+      # Bind-mount the host state directory: your existing devices.yaml,
+      # secrets.yaml, YANG repositories, RESTCONF collections, saved XPath
+      # queries and audit log are used as-is, and anything the container writes
+      # persists on the host (and is shared with a systemd install).
+      - ${HOME}/.hitech_automation_ai:/root/.hitech_automation_ai

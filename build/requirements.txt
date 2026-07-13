@@ -8,8 +8,15 @@ python-multipart>=0.0.9   # v1.30.0: multipart form uploads (YANG .yang upload)
 ncclient>=0.6.16
 netmiko>=4.4
 httpx>=0.27
-chromadb>=0.5
-anthropic>=0.40
 
 # v1.15.0: optional — static lint for the Python pane (pyflakes also works)
 ruff
+
+# ---------------------------------------------------------------------------
+# AI features (AI Chat, agent tools, RAG) are OPTIONAL and live in
+# requirements-ai.txt. Everything else — NETCONF, RESTCONF, CLI, XPath, the
+# whole YANG workspace — runs without them.
+#
+#   Core only:  pip install -r requirements.txt
+#   With AI:    pip install -r requirements.txt -r requirements-ai.txt
+# ---------------------------------------------------------------------------

@@ -8,7 +8,10 @@ import re
 from dataclasses import dataclass, field
 from typing import Optional
 
-import rag_retriever
+try:                                   # v1.47.0: AI stack is optional
+    import rag_retriever
+except Exception:
+    rag_retriever = None
 from llm_providers import ToolCall
 
 log = logging.getLogger("agent.tools")

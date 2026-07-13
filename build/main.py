@@ -42,24 +42,60 @@ import httpx
 import yaml
 from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Form
 
-# RAG (optional — works without the vector DB built)
-import rag_retriever
+# ---------------------------------------------------------------------------
+# v1.47.0: the AI stack is OPTIONAL.
+# The entire network-automation workspace (NETCONF, RESTCONF, CLI, XPath, YANG,
+# RPC/OpenAPI builders) has no LLM dependency. Previously these were hard
+# imports, so a user who never wanted AI still had to install chromadb +
+# anthropic — and without them the server would not even start:
+#     ModuleNotFoundError: No module named 'chromadb'
+# Now a missing AI package disables the AI features and nothing else.
+#
+#   Core only:  pip install -r requirements.txt
+#   With AI:    pip install -r requirements.txt -r requirements-ai.txt
+# ---------------------------------------------------------------------------
+AI_IMPORT_ERROR = ""
 
-# LLM providers (v1.2.0)
-from llm_providers import (
-    AnthropicProvider,
-    ChatMessage as ProviderChatMessage,
-    OllamaProvider,
-    ProviderError,
-)
-from llm_providers.ollama_provider import set_runtime_num_ctx  # v1.10.0 (issue-5)
+try:
+    import rag_retriever
+    RAG_AVAILABLE = True
+except Exception as _e:                       # chromadb missing, etc.
+    rag_retriever = None
+    RAG_AVAILABLE = False
+    AI_IMPORT_ERROR = f"{type(_e).__name__}: {_e}"
 
-# Agent + tools (v1.3.0; v1.4.0 added NETCONF + approval; v1.5.0 added pyATS inventory)
-import agent as agent_mod
+try:
+    from llm_providers import (
+        AnthropicProvider,
+        ChatMessage as ProviderChatMessage,
+        OllamaProvider,
+        ProviderError,
+    )
+    from llm_providers.ollama_provider import set_runtime_num_ctx  # v1.10.0 (issue-5)
+    import agent as agent_mod
+    LLM_AVAILABLE = True
+except Exception as _e:                       # anthropic missing, etc.
+    AnthropicProvider = None
+    OllamaProvider = None
+    ProviderChatMessage = None
+
+    class ProviderError(Exception):
+        pass
+
+    def set_runtime_num_ctx(*_a, **_kw):
+        return None
+
+    agent_mod = None
+    LLM_AVAILABLE = False
+    if not AI_IMPORT_ERROR:
+        AI_IMPORT_ERROR = f"{type(_e).__name__}: {_e}"
+
+AI_AVAILABLE = LLM_AVAILABLE and RAG_AVAILABLE
+
 from tools import DeviceContext
 
 # ----------------------------- version ----------------------------- #
-APP_VERSION = "hitech_automation_ai.1.45.0"
+APP_VERSION = "hitech_automation_ai.1.48.1"
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from jinja2 import Environment, StrictUndefined, TemplateSyntaxError
@@ -2886,6 +2922,13 @@ async def api_netconf_xpath(req: NetconfXpathRequest):
     if not d:
         raise HTTPException(400, f"unknown device {req.device_name!r}")
 
+    # v1.48.1: the textarea preserves newlines/indentation. An XPath typed across
+    # several lines reached the device with an embedded newline, and IOS-XE
+    # answered with an empty <data/>. Whitespace between XPath tokens is
+    # insignificant, so collapse it (quoted literals are left untouched).
+    from tools.py_export import normalize_xpath as _norm_xp
+    req.xpath = _norm_xp(req.xpath)
+
     _audit.log_event("netconf_xpath_ui",
                     device=d.name, source=req.source, xpath=req.xpath)
 
@@ -3440,6 +3483,42 @@ def api_yang_run_rpc(req: YangRunRpcReq):
         return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
 
 
+# v1.48.0: export the on-screen query as a runnable ncclient script
+class PyExportReq(BaseModel):
+    device_name: str
+    source: str = "get"              # get | get-config
+    filter_type: str = "xpath"       # xpath | subtree | edit-config
+    xpath: str = ""
+    subtree_xml: str = ""
+    config_xml: str = ""
+    namespace: str = ""
+    module: str = ""
+    row_element: str = ""
+    columns: list[dict] = []
+
+
+@app.post("/api/export/python")
+def api_export_python(req: PyExportReq):
+    try:
+        from tools import py_export
+        d = _inventory.get_device(req.device_name)
+        host = d.host if d else req.device_name
+        port = getattr(d, "port_netconf", 830) if d else 830
+        code = py_export.generate(
+            device_name=req.device_name, host=host, port=port,
+            source=req.source, filter_type=req.filter_type,
+            xpath=req.xpath, subtree_xml=req.subtree_xml, config_xml=req.config_xml,
+            namespace=req.namespace, module=req.module,
+            row_element=req.row_element, columns=req.columns,
+        )
+        _audit.log_event("export_python", device=req.device_name,
+                         filter_type=req.filter_type)
+        return {"ok": True, "code": code,
+                "filename": f"{req.device_name}_{req.filter_type}_query.py"}
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
 class YangModDelReq(BaseModel):
     repo: str
     files: list[str]
@@ -3458,4 +3537,8 @@ def api_yang_module_delete(req: YangModDelReq):
 
 @app.get("/api/health")
 def health():
-    return {"ok": True, "version": APP_VERSION}
+    return {"ok": True, "version": APP_VERSION,
+            "ai_available": AI_AVAILABLE,
+            "llm_available": LLM_AVAILABLE,
+            "rag_available": RAG_AVAILABLE,
+            "ai_import_error": AI_IMPORT_ERROR or None}

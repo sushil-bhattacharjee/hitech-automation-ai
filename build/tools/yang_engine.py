@@ -1,4 +1,13 @@
-"""v1.36.0: embedded Cisco YANG Suite engine (Apache-2.0 pip packages), headless.
+"""NETCONF payload building — native lxml, with an optional YANG Suite accelerant.
+
+v1.46.0: the native lxml builder (build_payload_native / build_rpc_envelope) is
+the PRIMARY implementation and has no third-party dependencies beyond lxml.
+The Cisco YANG Suite engine packages (Apache-2.0: yangsuite, yangsuite-netconf,
+yangsuite-filemanager) are NOT required and are no longer in requirements.txt —
+if they happen to be installed, YSNetconfRPCBuilder / quickparser are used
+instead; otherwise everything falls back to the native code paths transparently.
+
+Original note (v1.36.0): embedded Cisco YANG Suite engine, headless.
 
 What we embed and why (evidence from prototyping against real 17.7.1 models):
   * ysnetconf.rpcbuilder.YSNetconfRPCBuilder — builds NETCONF <config>/<filter>

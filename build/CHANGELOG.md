@@ -1,5 +1,270 @@
 # CHANGELOG
 
+## hitech_automation_ai.1.48.1 — 2026-07-13
+
+### Fixed — issue-1: a multi-line XPath returned an empty `<data/>`
+The XPath textarea preserves newlines and indentation. An expression typed
+across several lines was sent to the device **with the newline still in it**,
+and IOS-XE answered with an empty `<data xmlns="…"/>`. Whitespace between XPath
+tokens is insignificant, so `/api/netconf-xpath` now **normalizes the
+expression** first (collapsing newlines and stray indentation, while leaving
+whitespace *inside quoted literals* untouched).
+
+### Fixed — issue-2: the exported script had an unterminated string literal
+The same embedded newline landed inside the generated Python:
+
+```python
+xpath_filter = (
+    '[oper-status="if-oper-state-ready"]
+    [v4-protocol-stats/out-pkts >0 ...]'      # SyntaxError
+)
+```
+
+The generator now normalizes the XPath before emitting it, so the literal is
+always well-formed. Every generated variant is asserted to parse as valid
+Python.
+
+### Fixed — issue-3: editing the credential defaults had no effect (auth failed)
+The generated `Device.__init__` guarded on `if host and username and password:`.
+Calling `Device()` leaves `host=None`, so the guard was **False** and it fell
+through to the environment variables — silently ignoring credentials edited into
+the signature, and failing with `AuthenticationException`.
+
+`Device` now resolves each field independently — *anything you pass wins, and
+whatever you leave as `None` comes from the environment*:
+
+```python
+self.host     = host     or os.environ.get("CAT8KV71_HOST", "192.168.89.71")
+self.username = username or os.environ.get("CAT8KV71_USER")
+self.password = password or os.environ.get("CAT8KV71_PASS")
+```
+
+…and it now **fails loudly** with a clear message when no credentials are found
+anywhere, instead of attempting the connection and dying inside ncclient.
+
+
+## hitech_automation_ai.1.48.0 — 2026-07-13
+
+### Added — 🐍 Export → Python (XPath module **and** NETCONF-YANG)
+Turns whatever you built on screen into a **complete, runnable ncclient
+script** — copy it into your own code and it works as-is.
+
+- **XPath module**: the query + the *Extract fields → table* columns become the
+  script's filter and its extraction loop.
+- **NETCONF-YANG**: follows the Operation and Filter type you selected —
+  `xpath`, `subtree`, or `edit-config`.
+
+| Filter type | Source | Generated call |
+|---|---|---|
+| xpath | get | `session.get(filter=("xpath", xpath_filter))` |
+| xpath | get-config | `session.get_config(source="running", filter=("xpath", …))` |
+| subtree | get / get-config | `subtree_filter = """…"""` + the matching call |
+| edit-config | — | `session.edit_config(target="running", config=config)` |
+
+Shaped after real working scripts:
+- **`Device.__init__` takes explicit args OR falls back to environment
+  variables** (`CAT8KV71_HOST/_USER/_PASS`) — env is the default, no Vault.
+- `session = manager.connect(...)` at module level.
+- The **raw XML dump is commented out** (replies can be enormous) — uncomment
+  when you want it; only the extracted table prints by default.
+- Namespace dict + `xpath_extract` as named variables; a per-column
+  `entry.find(...)` with an **"N/A" fallback** for optional elements.
+- Long XPath expressions are split into implicitly-concatenated chunks at the
+  `][` boundaries so they stay readable.
+- Subtree exports carry a comment showing where to do the **local filtering**
+  that subtree cannot express (OR / numeric comparisons).
+- `session.close_session()` commented at the end.
+
+Copy / Download .py from the modal. New `tools/py_export.py` (one generator,
+two callers, so they cannot drift) and `/api/export/python`.
+Every generated variant is verified to parse as valid Python.
+
+
+## hitech_automation_ai.1.47.4 — 2026-07-13
+
+### Fixed — leaf icon, and deprecated/obsolete colours
+- **The leaf icon is now actually a leaf**: a proper blade with a darker midrib,
+  instead of the thin crescent it was. `leaf-list` is the same blade, doubled.
+- **status: deprecated is yellow, status: obsolete is red.** They were both
+  rendering plain green because the recolor regex still targeted `#54a832` — a
+  colour that no longer exists anywhere in the v1.47.1 icon set, so it replaced
+  nothing. Recolouring now uses the current palette (`#8ac53e` blade,
+  `#5f9224` midrib) and is applied in the tree as well as the legend;
+  `deviation: not-supported` is grey.
+
+
+## hitech_automation_ai.1.47.3 — 2026-07-13
+
+### Fixed — Device reply had scrollbars instead of the RPC pane's resize grabber
+- `showXml()` correctly set `class="xmlview resizable xt"` — and then
+  `xtBuild()` immediately ran **`mountEl.className = 'xt'`**, which **wiped the
+  `resizable` class**. So the reply pane could only scroll while the RPC
+  textarea (a native `<textarea>`) kept its drag corner. The v1.46.1 "fix"
+  commented the line above and never checked the line below; this is the real
+  one: `classList.add('xt')` instead of replacing all classes.
+- The reply `<pre>` also gets an explicit `resize: both`, and both panes now
+  share the same height (340px) and minimum, so they line up and resize
+  identically.
+
+
+## hitech_automation_ai.1.47.2 — 2026-07-12
+
+### Changed — one Docker setup, lab-ready, with the same AI choice as pip
+- **Deleted `build/Dockerfile` and `build/docker-compose.yml`** — pre-rename
+  leftovers (container still called `netconf-sender`) that copied only `main.py`
+  + `templates/`, so the image would crash with
+  `ModuleNotFoundError: No module named 'tools'`. They were broken and
+  misleading; `docker/` is the only Docker setup now.
+- **`docker/` reworked for a real lab:**
+  - **port 7071** (was 8000) — same as the systemd install, so nothing else
+    changes.
+  - **`network_mode: host`** — the container reaches `192.168.89.x` devices and
+    Ollama exactly as the host does; no NAT, no port mapping.
+  - **`~/.hitech_automation_ai` bind-mounted** — your existing devices.yaml,
+    secrets, YANG repositories, collections and audit log are used as-is, and
+    are shared with a systemd install.
+  - **`WITH_AI=1` build arg** — the container honours the same AI / no-AI choice
+    as pip:
+    ```
+    docker compose -f docker/docker-compose.yml up -d --build            # core
+    WITH_AI=1 docker compose -f docker/docker-compose.yml up -d --build  # + AI
+    ```
+  - `restart: unless-stopped` — the app comes back by itself after a reboot.
+
+### Docs
+- **INSTALL.md §0b — "Two ways to RUN it — systemd or Docker (pick one)"**:
+  the full unit file for systemd (with `loginctl enable-linger`), the Docker
+  one-liners, a table explaining each compose setting, how to switch between
+  them, and the warning that both bind 7071 so only one may run at a time.
+
+
+## hitech_automation_ai.1.47.1 — 2026-07-12
+
+### Changed — icon set and legend redrawn to match Cisco YANG Suite
+- All 15 node icons redrawn as **original SVG** in YANG Suite's visual style:
+  circular-target *action*, green asterisk *anydata*, `</>` *anyxml*, arrow
+  *case*, forked *choice*, blue open-folder *container*, bracket *input* /
+  *output*, *leaf* and stacked *leaf-list*, *list* lines, three-circle *module*,
+  gift-box *notification*, envelope *rpc*, 3-D cube *submodule*. (Cisco's own
+  assets are under their EULA and are **not** copied.)
+- The **Tree Icon Legend** popup now matches Cisco's card: cyan header bar,
+  section bands (Node Icons / Node Support / Node Badges), striped rows.
+- The tree uses the same icon set, so node icons update everywhere.
+
+### Docs
+- **INSTALL.md**: new §0 "Fresh install — choose AI or no-AI", documenting the
+  two pip paths, what each gives you, how to check `/api/health` for
+  `ai_available`, and the Docker route.
+- **operation.md**: rewritten as a complete operation guide — **every module**
+  (NETCONF, RESTCONF, CLI, XPath, Python, the four YANG sub-tabs, AI Chat, Docs)
+  with at least one worked example against `cat8Kv71`, plus a map of where state
+  lives on disk.
+
+
+## hitech_automation_ai.1.47.0 — 2026-07-12
+
+### Fixed — Build RPC failed silently
+- With values filled but the list **key left empty**, the builder produced
+  `[name={name}]`, hit its own placeholder guard, and aborted — but the
+  explanation was written to the **Explore tab's** status line, invisible from
+  NETCONF-YANG. The RPC pane just stayed empty with no message anywhere.
+- **An empty list key now means "all entries"** — the predicate is simply
+  omitted, so the filter builds:
+  `/interfaces/interface[admin-status="if-state-up"][statistics/in-octets>0]`.
+- Every bail in `collectCfgs()` is now reported in **both** status lines, so it
+  can't fail silently again.
+
+### Changed — AI is now genuinely optional (install-time choice)
+Previously `main.py` hard-imported `rag_retriever` (→ chromadb) and the LLM
+providers (→ anthropic). A user who wanted no AI still had to install them —
+and without them the server **would not start at all**:
+`ModuleNotFoundError: No module named 'chromadb'`.
+
+```
+Core only (no AI):   pip install -r requirements.txt
+With AI:             pip install -r requirements.txt -r requirements-ai.txt
+```
+
+- Imports are guarded; `LLM_AVAILABLE` / `RAG_AVAILABLE` / `AI_AVAILABLE` flags
+  are exposed on `/api/health`.
+- The **AI Chat** entry point is greyed out with a tooltip naming the missing
+  package and the exact install command, instead of failing at request time.
+- **chromadb** and **anthropic** moved to the new **`requirements-ai.txt`**.
+- Verified by blocking both packages at import time: the app starts, reports
+  `ai_available: false`, and **all 108 routes** — NETCONF, RESTCONF, CLI, XPath,
+  the whole YANG workspace — remain registered and functional.
+
+
+## hitech_automation_ai.1.46.2 — 2026-07-12
+
+### Fixed — `RPCError: Invalid name: &gt;0` when reusing an XPath in the XPath tool
+An XPath copied out of an `<rpc>`'s `select="…"` attribute carries **XML
+entities** with it (`in-octets&gt;0`). The XPath tool takes a **raw XPath
+string, not XML**, so it forwarded `&gt;0` to the device, which rightly refused
+it. Two fixes, from both ends:
+- **📋 Copy XPath** button on the RPC pane copies **just the expression,
+  XML-unescaped** (and re-joins the multi-line union) — paste it straight into
+  the XPath tool, or into Python.
+- **The XPath tool auto-decodes XML entities** on paste/typing (and once more
+  before sending), showing a one-line note: *"XML entities decoded — this box
+  takes a raw XPath, not XML."* The confusion can't bite again.
+
+### Fixed — issue-1: Node detail stayed empty while working in the tree
+- Ticking a checkbox or typing a value now **also selects that node** (focus and
+  change both select), so Node detail, the RFC reference and the Generated paths
+  reflect what you are actually working on. The empty-state text now says how:
+  *"Click a node in the tree to see its properties, RFC reference and generated
+  paths."*
+
+
+## hitech_automation_ai.1.46.1 — 2026-07-12
+
+### Changed — Device reply tree polish
+- **2-space indent** (was 4). The dotted indent rails already carry the
+  structure, so the extra width was wasted.
+- **Repeated same-named siblings are colour-coded.** When a container holds
+  several children with the same element name (`<interface>`, `<neighbor>`,
+  `<process-id>`…), each instance gets its own left-border colour and a subtle
+  tint, cycling through six hues — so you can see at a glance where
+  GigabitEthernet1 ends and GigabitEthernet2 begins. Unique elements are left
+  untinted.
+- **The reply pane grows instead of scrolling**: taller by default (420px), no
+  max-height, and the drag-corner grabber is preserved in tree view (the `.xt`
+  class had been replacing `.resizable`), with the flex row aligned to the top
+  so the pane can expand freely.
+
+
+## hitech_automation_ai.1.46.0 — 2026-07-12
+
+### Added — Device reply is now an interactive XML tree
+- **Foldable elements**: every container/list gets a ▼/▶ caret (click the caret
+  or double-click the row). Leaves render inline —
+  `<in-octets>570474062</in-octets>`.
+- **4-space indent + dotted indent rails**, so parents / siblings / descendants
+  are unambiguous at a glance.
+- **Depth control**: ⊞ all / ⊟ all, plus a depth selector (1/2/3/4/6/all) —
+  collapse to level 3 to see the interfaces, then drill in.
+- **Count badges** on collapsed containers (`<interface> 4 children`), so you
+  know what's hidden.
+- **Find in reply** with prev/next stepping (`3 / 12`): matching elements are
+  highlighted, their ancestors auto-expanded and scrolled into view. Matches on
+  element names AND text values, so `GigabitEthernet2` finds the entry.
+- **📋 per element** — hover any row to copy just that subtree.
+- **Tree / Raw toggle** keeps the previous plain view (now also 4-space
+  indented); Copy + wrap unchanged.
+- Self-contained (no CDN), verified in jsdom against a real IOS-XE reply.
+
+### Changed — dependencies trimmed (as agreed)
+- `requirements.txt`: the **yangsuite / yangsuite-netconf / yangsuite-filemanager
+  / django** block is **removed**. They were never required — the RPC builder
+  falls back to a native lxml implementation (v1.42.3) and the dependency scan
+  to a regex parser. `yang_engine.py`'s docstring now says so instead of
+  claiming the engine is embedded.
+- **`docker/yangsuite/` deleted** — dead weight from the reverted v1.35.0
+  companion-container approach. `docker/` now contains only the app's own
+  Dockerfile + single-service compose.
+
+
 ## hitech_automation_ai.1.45.0 — 2026-07-12
 
 ### Added — collapsible sections in the YANG workspace

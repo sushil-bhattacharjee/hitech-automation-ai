@@ -1,5 +1,124 @@
 # hiTech Automation AI — Install & Setup
 
+## 0. Fresh install — choose AI or no-AI (v1.47.0+)
+
+The network-automation workspace (NETCONF, RESTCONF, CLI, XPath, and the full
+YANG workspace) has **no LLM dependency**. The AI features (AI Chat, agent
+tools, RAG) are optional and pull in heavier packages. Pick one:
+
+```bash
+git clone <repo> hitech-automation-ai && cd hitech-automation-ai
+python3 -m venv .venv && source .venv/bin/activate
+
+# ---- Path A: network automation only (no AI) -----------------------------
+pip install -r build/requirements.txt
+
+# ---- Path B: everything, including AI Chat / agent / RAG ------------------
+pip install -r build/requirements.txt -r build/requirements-ai.txt
+```
+
+Then run it:
+
+```bash
+cd build
+python -m uvicorn main:app --host 0.0.0.0 --port 7071
+# open http://<host>:7071
+```
+
+| | Path A (core) | Path B (with AI) |
+|---|---|---|
+| NETCONF / RESTCONF / CLI / XPath / YANG workspace | ✅ full | ✅ full |
+| AI Chat, agent tools, RAG | greyed out with an install hint | ✅ enabled |
+| Extra packages | — | `chromadb`, `anthropic` |
+| Server starts? | ✅ yes | ✅ yes |
+
+Check which mode you are in:
+
+```bash
+curl -s localhost:7071/api/health | python3 -m json.tool
+#   "ai_available": false,
+#   "ai_import_error": "ModuleNotFoundError: No module named 'chromadb'"
+```
+
+**Ollama note:** the Ollama provider needs no extra Python package (it is plain
+HTTP), but AI Chat as a whole is gated on the AI extras. Install Path B to use
+either Ollama or Anthropic.
+
+---
+
+## 0b. Two ways to RUN it — systemd or Docker (pick one)
+
+Both serve the app on **port 7071** and share the **same state directory**
+(`~/.hitech_automation_ai`), so devices, YANG repos and collections are
+identical either way. **Run only one at a time** — they would fight over the
+port.
+
+### Option 1 — systemd (recommended for development)
+
+Fast: unzip a new build and restart in seconds; no image rebuild.
+
+```bash
+# one-time
+mkdir -p ~/.config/systemd/user
+cat > ~/.config/systemd/user/hitech_automation_ai.service <<'EOF'
+[Unit]
+Description=hiTech Automation AI
+After=network-online.target
+
+[Service]
+WorkingDirectory=%h/DevnetExpert/mock3/software_ai/build
+ExecStart=%h/DevnetExpert/mock3/.venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 7071
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
+EOF
+
+systemctl --user daemon-reload
+systemctl --user enable --now hitech_automation_ai
+loginctl enable-linger $USER          # keep it running after logout / across reboots
+
+# every upgrade after that
+unzip -o hitech_automation_ai.<version>.zip
+systemctl --user restart hitech_automation_ai
+journalctl --user -u hitech_automation_ai -f
+```
+
+### Option 2 — Docker (recommended for distribution / a clean box)
+
+One command, no Python setup at all.
+
+```bash
+# core, no AI
+docker compose -f docker/docker-compose.yml up -d --build
+
+# with AI (installs chromadb + anthropic into the image)
+WITH_AI=1 docker compose -f docker/docker-compose.yml up -d --build
+
+docker logs -f hitech_automation_ai      # → http://<host>:7071
+docker compose -f docker/docker-compose.yml down
+```
+
+The compose file is configured for a lab:
+
+| Setting | Why |
+|---|---|
+| `network_mode: host` | the container reaches `192.168.89.x` devices and Ollama exactly as the host does — no NAT, no port mapping |
+| `~/.hitech_automation_ai` bind-mounted | your existing `devices.yaml`, secrets, YANG repositories and collections are used as-is; anything written persists on the host |
+| `restart: unless-stopped` | **after a reboot the app comes back on its own** — no command needed (Docker itself must start on boot: `sudo systemctl enable docker`). It stays down only if *you* ran `docker compose down`. |
+| port **7071** | same as systemd, so bookmarks and scripts don't change |
+
+**Switching between them**
+
+```bash
+systemctl --user stop hitech_automation_ai            # before starting the container
+# ...or...
+docker compose -f docker/docker-compose.yml down      # before starting systemd
+```
+
+Keeping both installed is fine — and useful: systemd for fast iteration, Docker
+for a reproducible deploy.
+
 ## 1. Upgrade from any earlier version
 
 ```bash
@@ -10,10 +129,10 @@ cp -r ~/DevnetExpert/mock3/software_ai/build \
       ~/DevnetExpert/mock3/software_ai/build.bak
 
 cd ~/DevnetExpert/mock3/software_ai
-unzip -o /path/to/hitech_automation_ai.1.8.0.zip
+unzip -o /path/to/hitech_automation_ai.<version>.zip
 
 source ~/DevnetExpert/mock3/.venv/bin/activate
-pip install -r build/requirements.txt --break-system-packages
+pip install -r build/requirements.txt            # add -r build/requirements-ai.txt for AI
 
 systemctl --user restart hitech_automation_ai
 ```
