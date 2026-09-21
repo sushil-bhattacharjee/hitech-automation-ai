@@ -1,0 +1,30 @@
+# hiTech Automation AI on a lab workstation.
+#
+# Separate from docker-compose.yml, which stays the public version. The
+# differences: fixed paths rather than ${HOME}, so running it under sudo
+# cannot silently mount /root's state instead; the code bind-mounted from the
+# git checkout, so a git pull updates it without rebuilding; and core only —
+# no AI stack, no Ollama.
+#
+#   docker compose -f docker/docker-compose.workstation.yml up -d
+#
+name: hitech-netauto
+
+services:
+  software_ai:
+    build:
+      context: ..
+      dockerfile: docker/software_ai/Dockerfile
+      args:
+        WITH_AI: "0"
+    image: hitech-netauto-software_ai:latest
+    container_name: hitech_automation_ai
+    restart: unless-stopped
+    network_mode: host      # so the workstation's DNAT to the lab devices applies
+    environment:
+      # The container runs as root and /app is the git checkout; without this
+      # it leaves root-owned __pycache__ directories that break the next pull.
+      - PYTHONDONTWRITEBYTECODE=1
+    volumes:
+      - /home/expert/.hitech_automation_ai:/root/.hitech_automation_ai
+      - /opt/hitech-netauto/build:/app
