@@ -1034,11 +1034,15 @@ def chat_config():
     return {
         "ollama_url": OLLAMA_URL,
         "default_model": OLLAMA_MODEL,
-        "rag_available": rag_retriever.rag_available(),
-        "rag_db_path": rag_retriever.rag_db_path(),
-        "rag_chunk_count": rag_retriever.rag_chunk_count(),
+        # rag_retriever is None without the AI extras — the core install on
+        # the lab workstations. Calling it unguarded made this endpoint fail
+        # with a 500, and the page's start-up stopped there, so the RESTCONF
+        # environments never appeared.
+        "rag_available": rag_retriever.rag_available() if rag_retriever else False,
+        "rag_db_path": rag_retriever.rag_db_path() if rag_retriever else None,
+        "rag_chunk_count": rag_retriever.rag_chunk_count() if rag_retriever else 0,
         "app_version": APP_VERSION,
-        "anthropic_available": _anthropic.is_available(),
+        "anthropic_available": _anthropic.is_available() if _anthropic else False,
     }
 
 
