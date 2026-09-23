@@ -1,0 +1,168 @@
+#!/bin/bash
+#
+# labcheck — is my lab working, and what do I do if it is not?
+#
+# Checks only what this workstation can reach, and suggests only things the
+# student can actually do. Nothing here needs gcloud or an admin account.
+#
+# Kept in the hitech-netauto repo and copied into place at every boot by
+# hitech-update, so an address can change with a push instead of a new
+# workstation image.
+#
+set -u
+
+BOLD=$'\e[1m'; DIM=$'\e[2m'; RED=$'\e[31m'; GRN=$'\e[32m'; YEL=$'\e[33m'; OFF=$'\e[0m'
+FIXES=()
+
+ok()   { printf "  ${GRN}●${OFF} %-22s %s\n" "$1" "${2:-}"; }
+bad()  { printf "  ${RED}●${OFF} %-22s ${DIM}%s${OFF}\n" "$1" "${2:-}"; }
+warn() { printf "  ${YEL}●${OFF} %-22s ${DIM}%s${OFF}\n" "$1" "${2:-}"; }
+head_() { printf "\n${BOLD}%s${OFF}\n" "$1"; }
+fix()  { FIXES+=("$1"); }
+
+# A device answers only if something behind the port speaks SSH. The proxy
+# on the router lab accepts connections before the device has booted, so a
+# plain connection test would say yes too early.
+ssh_up () {
+  timeout 6 bash -c "exec 3<>/dev/tcp/$1/22 && head -c 4 <&3" 2>/dev/null | grep -q "SSH-"
+}
+web_up () { 
+  local code
+  code=$(curl -sk -o /dev/null -w "%{http_code}" --max-time "${2:-8}" "$1" 2>/dev/null)
+  [ "$code" = "200" ] || [ "$code" = "302" ] || [ "$code" = "401" ]
+}
+port_up () { timeout "${3:-4}" bash -c "</dev/tcp/$1/$2" 2>/dev/null; }
+
+# Vault, Telegraf, InfluxDB and Grafana run on this workstation, answering on
+# 192.168.89.99 — an address that is the same in every lab, so exercises and
+# certificates can name it. GitLab stays on ctrlvm, by name.
+SELF=192.168.89.99
+
+printf "\n${BOLD}Your lab${OFF}  %s\n" "$(date '+%A %d %B %Y, %H:%M %Z')"
+
+# ------------------------------------------------------------ this machine
+head_ "On this workstation"
+
+if pgrep -f "ncs.smp" >/dev/null 2>&1 && port_up 127.0.0.1 9380 3; then
+  ok "NSO" "http://localhost:9380"
+else
+  bad "NSO" "not running"
+  fix "Start NSO:
+    source ~/nso-install/ncsrc
+    cd ~/ncs-run && ncs"
+fi
+
+ALIVE=$(cd ~/ncs-run 2>/dev/null && ncs-netsim is-alive 2>/dev/null)
+TOTAL=$(echo "$ALIVE" | grep -c "^DEVICE")
+UP=$(echo "$ALIVE" | grep -c "OK$")
+if [ "${TOTAL:-0}" -gt 0 ] && [ "$UP" = "$TOTAL" ]; then
+  ok "NSO netsim" "$UP of $TOTAL devices"
+elif [ "${TOTAL:-0}" -gt 0 ]; then
+  bad "NSO netsim" "$UP of $TOTAL devices"
+  fix "Start the netsim devices:
+    source ~/nso-install/ncsrc
+    cd ~/ncs-run && ncs-netsim start"
+else
+  bad "NSO netsim" "not running"
+  fix "Start the netsim devices:
+    source ~/nso-install/ncsrc
+    cd ~/ncs-run && ncs-netsim start"
+fi
+
+if docker info >/dev/null 2>&1; then
+  ok "Docker" "$(docker ps -q 2>/dev/null | wc -l) container(s) running"
+else
+  bad "Docker" "not running"
+  fix "Docker is not answering. Finish this lab and start a new one."
+fi
+
+# ------------------------------------------------------ routers and switches
+# Only shown when this lab includes them: the rules pointing at the router
+# lab exist only when it has been booked.
+if sudo -n iptables -t nat -L OUTPUT -n 2>/dev/null | grep -q "192.168.89.71" \
+   || ip route get 192.168.89.71 >/dev/null 2>&1; then
+
+  head_ "Routers and switches"
+  BOOTING=0
+  for pair in "cat8Kv71 192.168.89.71" "cat8Kv72 192.168.89.72" "nx9K73 192.168.89.73"; do
+    set -- $pair
+    if ssh_up "$2"; then
+      ok "$1" "$2"
+    else
+      bad "$1" "$2 — not answering"
+      BOOTING=1
+    fi
+  done
+  [ "$BOOTING" = "1" ] && fix "Routers take about ten minutes to boot after the
+    lab starts. If they are still quiet after that, remove the
+    Router/Switch Lab on the lab page and add it again."
+fi
+
+# ---------------------------------------------------------------- services
+head_ "Services"
+
+web_up https://gitlab.hitech.com/ 10 \
+  && ok "GitLab" "https://gitlab.hitech.com" \
+  || { bad "GitLab" "not answering"
+       fix "GitLab takes about five minutes to answer after a lab starts."; }
+
+web_up https://yangsuite.hitech.com/ 10 \
+  && ok "YangSuite" "https://yangsuite.hitech.com" \
+  || bad "YangSuite" "not answering"
+
+web_up http://$SELF:3000/login 6 \
+  && ok "Grafana" "http://$SELF:3000" \
+  || { bad "Grafana" "not answering"
+       fix "Grafana runs on this workstation and takes a minute to start
+    after your lab does. If it stays quiet, finish this lab and
+    start a new one."; }
+
+port_up $SELF 8086 4 \
+  && ok "InfluxDB 3" "http://$SELF:8086" \
+  || bad "InfluxDB 3" "not answering"
+
+V=$(curl -s --max-time 6 http://$SELF:8020/v1/sys/health 2>/dev/null)
+if echo "$V" | grep -q '"sealed":false'; then
+  ok "Vault" "http://$SELF:8020"
+elif echo "$V" | grep -q '"sealed":true'; then
+  bad "Vault" "sealed"
+  fix "Vault is sealed. It unseals itself when your lab starts, so this
+    is unusual — finish this lab and start a new one. If it happens
+    again, email sushil@hitech007.ai."
+else
+  bad "Vault" "not answering"
+  fix "Vault runs on this workstation and starts with your lab. If it
+    stays quiet, finish this lab and start a new one."
+fi
+
+# ACI, but only when this lab has it.
+#
+# The orchestrator writes apic-ip into this machine's metadata when it builds
+# an APIC for the session, so its presence is what says whether ACI was
+# booked. Checking only whether the APIC answers cannot tell "not booked"
+# from "booked and not up yet" — and staying silent in the second case left
+# students reading "Everything is up" while their APIC was still restoring.
+APIC_IP=$(curl -sf -H "Metadata-Flavor: Google" \
+  "http://169.254.169.254/computeMetadata/v1/instance/attributes/apic-ip" 2>/dev/null)
+
+if [ -n "$APIC_IP" ]; then
+  head_ "ACI"
+  if web_up https://192.168.89.95/ 8; then
+    ok "APIC" "https://192.168.89.95"
+  else
+    bad "APIC" "not answering yet"
+    fix "The APIC takes two or three minutes to come up after your lab starts.
+    If it is still quiet after five, email sushil@hitech007.ai."
+  fi
+fi
+
+# ------------------------------------------------------------------ advice
+if [ ${#FIXES[@]} -eq 0 ]; then
+  printf "\n${GRN}Everything is up.${OFF}\n\n"
+else
+  printf "\n${BOLD}What to do${OFF}\n"
+  for f in "${FIXES[@]}"; do printf "\n  %s\n" "$f"; done
+  printf "\n  ${DIM}Still stuck? The lab page at automation.hitech007.ai/lab
+  shows the same information, and you can remove and re-add a
+  part of your lab there.${OFF}\n\n"
+fi
