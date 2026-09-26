@@ -94,8 +94,11 @@ if sudo -n iptables -t nat -L OUTPUT -n 2>/dev/null | grep -q "192.168.89.71" \
     fi
   done
   [ "$BOOTING" = "1" ] && fix "Routers take about ten minutes to boot after the
-    lab starts. If they are still quiet after that, remove the
-    Router/Switch Lab on the lab page and add it again."
+    lab starts. The switch, nx9K73, is restarted once on purpose
+    after it first boots, so it goes quiet for about five minutes
+    and is ready around fifteen minutes in. If anything is still
+    quiet after twenty, remove the Router/Switch Lab on the lab
+    page and add it again."
 fi
 
 # ---------------------------------------------------------------- services
