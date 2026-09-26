@@ -176,6 +176,120 @@ sequenceDiagram
 | **audit** — append-only log | `tools/audit.py` — one JSON line per significant event to `~/.hitech_automation_ai/audit.log`: proof of what the agent did and who approved it. |
 | **stop** — cancellation + iteration cap | Stop button → `/api/agent-cancel` → checked at every loop and tool boundary; 8-iteration ceiling bounds runaway cost. |
 
+## 07 · Operation steps — one agentic + RAG question, file by file
+
+Traced through v1.48.1 with **Agentic ✓ + RAG ✓ + Ollama (qwen3-coder)** for: *"Is OSPF neighbor 10.0.12.21 FULL?"*
+
+
+**Phase 1 — request arrives**
+
+| # | File :: function | What happens |
+|---|---|---|
+| 1 | `build/main.py :: api_chat_agent()` | POST /api/chat-agent lands: messages, model, device_info, use_rag=True |
+| 2 | `build/main.py :: _resolve_provider(model)` | returns OllamaProvider (or AnthropicProvider) — the ONLY provider branch point |
+| 3 | `build/main.py` | builds DeviceContext (host/creds/ports) — passed to every tool later |
+
+**Phase 2 — RAG pre-fetch**
+
+| # | File :: function | What happens |
+|---|---|---|
+| 4 | `build/main.py :: _condition_rag_query()` | reshapes the raw question for retrieval (v1.16.3) |
+| 5 | `build/rag_retriever.py :: retrieve(query, k=8)` | the query side of RAG |
+| 6 | `build/rag_retriever.py :: embed_query()` | httpx POST OLLAMA_URL/api/embeddings, model nomic-embed-text — first Ollama call (embedding, not chat) |
+| 7 | `build/rag_retriever.py :: retrieve()` | ChromaDB similarity search in collection netconf_corpus → top-8 chunks + sources |
+| 8 | `build/main.py :: _expand_golden_chunks()` | FAQ hit → pull sibling chunks so the answer arrives whole (v1.17.0) |
+| 9 | `build/main.py` | chunks appended to AGENT_SYSTEM_PROMPT as REFERENCE DOCUMENTATION → system_prompt for EVERY iteration |
+
+**Phase 3 — agent loop starts**
+
+| # | File :: function | What happens |
+|---|---|---|
+| 10 | `build/main.py → build/agent.py :: run_agent()` | provider, model, history, system_prompt, DeviceContext, iteration cap |
+| 11 | `build/tools/definitions.py :: all_tool_definitions()` | AGENT_TOOLS + NETCONF + RESTCONF schemas = 18 ToolDefinitions |
+| 12 | `build/agent.py` | history assembled: system (with RAG block) + question → iteration 1 |
+
+**Phase 4 — iteration 1: LLM chooses a tool**
+
+| # | File :: function | What happens |
+|---|---|---|
+| 13 | `build/agent.py → build/llm_providers/ollama_provider.py :: OllamaProvider.chat()` | messages + 18 tool schemas |
+| 14 | `build/llm_providers/ollama_provider.py` | tools translated to Ollama function format → POST OLLAMA_URL/api/chat — qwen3-coder runs on the W11 host |
+| 15 | `build/llm_providers/base.py` | reply normalized into ChatResponse with ToolCall(name=get_state, arguments={xpath: /ospf-oper-data/ospfv2-instance/...}) |
+
+**Phase 5 — tool execution**
+
+| # | File :: function | What happens |
+|---|---|---|
+| 16 | `build/agent.py` | assistant turn + AgentStep(tool_call) recorded → calls executor |
+| 17 | `build/tools/executor.py :: execute_tool(call, ctx)` | looks up get_state in NETCONF_HANDLERS (build/tools/netconf_tools.py), invokes handler with DeviceContext |
+| 18 | `build/tools/netconf_tools.py` | ncclient session from the per-run session pool → NETCONF <get> with XPath filter → cat8Kv71:830 returns XML |
+| 19 | `build/tools/executor.py` | returns (xml_text, is_error=False) — device errors come back AS DATA, never as exceptions |
+| 20 | `build/agent.py` | result appended as role=tool message + AgentStep(tool_result) |
+
+**Phase 6 — iteration 2: LLM answers**
+
+| # | File :: function | What happens |
+|---|---|---|
+| 21 | `build/llm_providers/ollama_provider.py :: chat()` | same history PLUS the tool result — the model now sees the XML |
+| 22 | `build/agent.py` | reply has text, no tool_calls → final answer (focus-injection nudge if a small model stalls; hard cap 8 iterations) |
+| 23 | `build/agent.py` | AgentResult: answer, full step trace, token totals, cost_usd=None (Ollama is free) |
+
+**Phase 7 — response**
+
+| # | File :: function | What happens |
+|---|---|---|
+| 24 | `build/agent.py :: result_to_dict() → build/main.py → browser` | JSON out; UI renders answer + expandable trace |
+
+Two structural points the trace exposes: RAG appears once as pipeline (steps 4–9, before the loop) and stays available as the search_corpus tool (through step 17's dispatch into build/rag_retriever.py :: retrieve(k=5)) if the model chooses it mid-run. And Ollama serves two different jobs — embeddings (step 6) and chat (steps 14, 21) — same server, different models. A write-path run (propose_edit_config) diverges at step 17: the executor returns APPROVAL_PENDING, run_agent parks the state in _PausedRuns, and nothing touches the device until /api/agent/approve resumes it.
+
+
+## 08 · File tree
+
+```text
+hitech-automation-ai/
+├── build/                          # the application
+│   ├── main.py                     # FastAPI app · all endpoints · AGENT_SYSTEM_PROMPT · RAG injection
+│   ├── agent.py                    # ReAct loop: run_agent() · trace · _PausedRuns · cancellation
+│   ├── rag_builder.py              # RAG offline: chunk + embed + store (CLI)
+│   ├── rag_retriever.py            # RAG online: embed_query() + retrieve()
+│   ├── llm_providers/
+│   │   ├── __init__.py
+│   │   ├── base.py                 # ChatProvider contract · ChatMessage/ToolCall/ChatResponse
+│   │   ├── ollama_provider.py      # local brain — OLLAMA_URL/api/chat
+│   │   └── anthropic_provider.py   # cloud brain — messages.create + cost
+│   ├── tools/
+│   │   ├── definitions.py          # AGENT_TOOLS + all_tool_definitions() (18 total)
+│   │   ├── executor.py             # execute_tool() dispatch · APPROVAL_PENDING intercept
+│   │   ├── netconf_tools.py        # 6 NETCONF tools + NETCONF_HANDLERS + session pool
+│   │   ├── restconf_tools.py       # 7 RESTCONF tools
+│   │   ├── audit.py                # append-only JSONL audit log
+│   │   ├── inventory.py            # devices.yaml loader (flat + pyATS)
+│   │   ├── state_dir.py            # single source of truth for ~/.hitech_automation_ai
+│   │   ├── yang_engine.py          # ┐
+│   │   ├── yang_parser.py          # │ YANG Explorer machinery
+│   │   ├── yang_device.py          # │ (capabilities, tree, RFC refs,
+│   │   ├── yang_openapi.py         # │  OpenAPI + Python export)
+│   │   ├── yang_generate.py        # │
+│   │   ├── yang_rfc.py             # │
+│   │   ├── yang_store.py           # ┘
+│   │   ├── restconf_store.py       # saved RESTCONF collections (_netconfsw key)
+│   │   ├── restconf_tree.py        # Bruno-style nested tree
+│   │   ├── xpath_store.py          # saved XPath queries
+│   │   ├── py_export.py            # ncclient script generation
+│   │   └── ui_results.py           # result-pane helpers
+│   ├── templates/index.html        # the entire front-end (vanilla JS + CodeMirror)
+│   ├── static/                     # vendored codemirror · jq.wasm · swagger-ui
+│   ├── requirements.txt            # core deps
+│   ├── requirements-ai.txt         # optional: chromadb · anthropic
+│   ├── CHANGELOG.md · INSTALL.md · LLM_INTEGRATION.md · operation.md
+├── rag-corpus/                     # RAG knowledge: *.md notes + operation_faq.md (repo, not in zip)
+├── vector_db/                      # ChromaDB persistence (created by rag_builder.py, survives upgrades)
+├── docker/
+│   ├── docker-compose.yml          # host networking · :7071 · state bind-mount · WITH_AI arg
+│   └── software_ai/Dockerfile
+└── operation.md                    # operator guide
+```
+
 ---
 
 *hiTech Automation AI v1.48.1 · agent.py (ReAct) + llm_providers (Ollama/Anthropic) + tools (18) + rag_builder/rag_retriever (ChromaDB · nomic-embed-text)*

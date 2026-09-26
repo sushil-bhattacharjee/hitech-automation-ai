@@ -122,7 +122,9 @@ web_up http://$SELF:3000/login 6 \
 
 port_up $SELF 8086 4 \
   && ok "InfluxDB 3" "http://$SELF:8086" \
-  || bad "InfluxDB 3" "not answering"
+  || { bad "InfluxDB 3" "not answering"
+       fix "InfluxDB runs on this workstation and starts with your lab.
+    If it stays quiet, finish this lab and start a new one."; }
 
 V=$(curl -s --max-time 6 http://$SELF:8020/v1/sys/health 2>/dev/null)
 if echo "$V" | grep -q '"sealed":false'; then
