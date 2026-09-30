@@ -1,0 +1,9 @@
+# v1.50.0: collections for the Ansible page — installed all together into
+# ~/.hitech_automation_ai/ansible/collections  (latest compatible set;
+# ansible-galaxy resolves the dependencies between them).
+collections:
+  - name: cisco.ios          # IOS-XE: network_cli modules (ios_static_routes, ios_config, ...)
+  - name: cisco.nxos         # NX-OS
+  - name: cisco.aci          # APIC
+  - name: ansible.netcommon  # connections: network_cli, netconf, httpapi (RESTCONF); restconf_config, netconf_config
+  - name: ansible.utils

@@ -1,0 +1,8 @@
+# Optional AI stack for hiTech Automation AI.
+#   pip install -r requirements.txt -r requirements-ai.txt
+#
+# Without these the server still starts and every network-automation feature
+# works; only AI Chat / agent tools / RAG are disabled.
+
+chromadb>=0.5      # vector store for the RAG corpus
+anthropic>=0.40    # Claude provider (Ollama needs no extra package)

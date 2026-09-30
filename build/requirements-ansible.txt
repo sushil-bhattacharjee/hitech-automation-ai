@@ -1,0 +1,17 @@
+# v1.50.0: installed into the SEPARATE Ansible venv  <software_ai>/.vansible
+# (never into the app's own .venv). The Ansible page's "Install / repair"
+# button runs:
+#
+#   /usr/bin/python3.13 -m venv .vansible
+#   .vansible/bin/pip install -r build/requirements-ansible.txt
+#   .vansible/bin/ansible-galaxy collection install -r build/ansible-collections.yml \
+#        -p ~/.hitech_automation_ai/ansible/collections
+#
+ansible-core==2.19.3
+ncclient          # connection: netconf        (IOS-XE NETCONF)
+paramiko          # connection: network_cli    (SSH)
+xmltodict         # netconf/restconf parsing helpers
+jxmlease          # netconf_get / netconf_rpc XML -> dict
+cryptography      # APIC certificate (private_key) signature auth
+requests          # REST helpers used by several collections
+pyyaml

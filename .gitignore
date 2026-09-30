@@ -1,0 +1,12 @@
+.envrc
+.env
+*.env
+secrets.conf
+secrets.yaml
+devices.yaml
+vector_db/
+*.zip
+__pycache__/
+*.pyc
+.venv/
+.vansible/
