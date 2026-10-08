@@ -33,6 +33,7 @@ from __future__ import annotations
 # Imported first so the socket guard is in place before anything connects.
 from pathlib import Path
 import public_guard as _pg
+import remote_exec as _remote_exec
 
 import base64
 import json
@@ -2133,6 +2134,16 @@ async def api_python_execute(req: PythonExecuteRequest):
                      env_keys=sorted(set(list(user_env.keys()) + list(_env_layer.keys()))))  # keys only
 
     t0 = time.monotonic()
+    if _remote_exec.ENABLED:          # public site: on the runner, with only the user's variables
+        try:
+            r = await _remote_exec.acall("python", ["-"], {**_env_layer, **user_env},
+                                         stdin=code, timeout=req.timeout_seconds)
+        except Exception as e:
+            return {"ok": False, "error": f"runner: {e}", "elapsed_ms": int((time.monotonic() - t0) * 1000)}
+        if r.get("timeout"):
+            return {"ok": False, "error": f"timeout after {req.timeout_seconds}s", "elapsed_ms": r.get("elapsed_ms")}
+        return {"ok": True, "exit_code": r.get("rc"), "stdout": r.get("stdout", ""),
+                "stderr": r.get("stderr", ""), "elapsed_ms": r.get("elapsed_ms")}
     try:
         proc = await asyncio.create_subprocess_exec(
             sys.executable, "-",
@@ -2266,6 +2277,15 @@ async def api_python_run(req: PythonRunRequest):
         for f in req.files:
             with open(os.path.join(tmpdir, f.name), "w", encoding="utf-8") as fh:
                 fh.write(f.content)
+
+        if _remote_exec.ENABLED:      # public site: on the runner, with only the user's variables
+            r = await _remote_exec.acall("python", [req.entry], user_env, tree_dir=Path(tmpdir),
+                                         timeout=req.timeout_seconds)
+            if r.get("timeout"):
+                return {"ok": False, "error": f"timeout after {req.timeout_seconds}s",
+                        "elapsed_ms": r.get("elapsed_ms")}
+            return {"ok": True, "exit_code": r.get("rc"), "stdout": r.get("stdout", ""),
+                    "stderr": r.get("stderr", ""), "elapsed_ms": r.get("elapsed_ms")}
 
         run_env = {**os.environ, **user_env}  # box overrides service; service is fallback
 
@@ -3887,8 +3907,7 @@ def api_ans_role_init(req: AnsRoleReq):
             cwd = _ans.safe_path(req.project, req.parent)
             cwd.mkdir(parents=True, exist_ok=True)
         argv, _ = _ans.parse_cli(req.project, "ansible-galaxy role init " + shlex_quote(req.name))
-        cp = subprocess.run(argv, cwd=str(cwd), env=_ans.run_env(project=base),
-                            capture_output=True, text=True, timeout=60)
+        cp = _ans.run_capture(argv, cwd, _ans.run_env(project=base), base, 60, return_tree=True)
         if cp.returncode != 0:
             return {"ok": False, "error": (cp.stderr or cp.stdout).strip()[-600:]}
         _audit.log_event("ansible_role_init", project=req.project, role=req.name)

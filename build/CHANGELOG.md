@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## public site (gateway) — 2026-10-03
+
+### Added — free guest view on software-automation.hitech007.ai
+- No sign-in needed to use the app: each visitor gets a temporary workspace (signed cookie),
+  public-internet devices and websites only, deleted after 10 idle minutes.
+- Sign-in still needed for the AI assistant, Python, Ansible, lab devices and the account pages;
+  the page opens a sign-in panel when one of them is used.
+- Guards: per-address request and new-workspace limits, per-guest device-call limit, guest
+  workspaces capped (`MAX_GUESTS`) and always making room for signed-in users. `GUESTS=0` turns it off.
+
 ## hitech_automation_ai.1.50.0 — 2026-09-30
 
 ### Added — Ansible (left nav → Config Mgmt → 🅰 Ansible)

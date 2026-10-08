@@ -26,7 +26,7 @@ updates, reinstalls, and method switches.
 ## 1. Common first steps (both methods)
 
 ```bash
-git clone https://github.com/<you>/hitech-automation-ai.git ~/hitech-automation-ai
+git clone https://github.com/sushil-bhattacharjee/hitech-automation-ai.git ~/hitech-automation-ai
 cd ~/hitech-automation-ai
 mkdir -p ~/.hitech_automation_ai
 ```

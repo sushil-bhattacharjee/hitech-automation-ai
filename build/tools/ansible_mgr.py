@@ -38,6 +38,12 @@ import yaml
 
 from .state_dir import STATE_DIR
 
+try:                                  # public site: Ansible runs on the separate runner
+    import remote_exec as _remote
+    REMOTE = _remote.ENABLED
+except Exception:                     # pragma: no cover
+    _remote, REMOTE = None, False
+
 ANS_DIR = STATE_DIR / "ansible"
 PROJECTS = ANS_DIR / "projects"
 COLL_DIR = ANS_DIR / "collections"
@@ -128,7 +134,38 @@ def run_env(extra: Optional[dict] = None, project: Optional[Path] = None) -> dic
     return env
 
 
+_RUN_KEYS = {"PATH", "VIRTUAL_ENV", "PYTHONUNBUFFERED", "ANSIBLE_FORCE_COLOR", "ANSIBLE_NOCOLOR",
+             "ANSIBLE_HOST_KEY_CHECKING", "ANSIBLE_RETRY_FILES_ENABLED",
+             "ANSIBLE_COLLECTIONS_PATH", "ANSIBLE_ROLES_PATH"}
+
+
+def _user_env(env: dict) -> dict:
+    """The variables the user added — not this process's own environment."""
+    return {k: v for k, v in (env or {}).items()
+            if k not in _RUN_KEYS and os.environ.get(k) != v}
+
+
+def run_capture(argv: list[str], cwd: Path, env: dict, root: Path, timeout: int = 60,
+                return_tree: bool = False) -> subprocess.CompletedProcess:
+    """subprocess.run(capture_output) here, or on the runner (public site). With
+    return_tree, files the command made under root (e.g. a new role) come back."""
+    if not REMOTE:
+        return subprocess.run(argv, cwd=str(cwd), env=env, capture_output=True, text=True, timeout=timeout)
+    try:
+        r = _remote.call(os.path.basename(argv[0]), argv[1:], _user_env(env), tree_dir=root,
+                         timeout=timeout, return_tree=return_tree, cwd=cwd)
+    except Exception as e:
+        raise AnsError(f"runner: {e}")
+    if r.get("tree"):
+        _remote.extract_tree(r["tree"], root)
+    rc = r.get("rc")
+    return subprocess.CompletedProcess(argv, 124 if rc is None else rc,
+                                       r.get("stdout", ""), r.get("stderr", "") or ("timeout" if rc is None else ""))
+
+
 def _bin(name: str) -> str:
+    if REMOTE:
+        return name                   # resolved on the runner
     p = VBIN / name
     if not p.exists():
         raise AnsError(f"{name} not found in {VENV} — click ⚙ Install / repair first")
@@ -138,6 +175,14 @@ def _bin(name: str) -> str:
 # ------------------------------------------------------------------ status
 
 def status() -> dict:
+    if REMOTE:
+        try:
+            out = _remote.status()
+        except Exception as e:
+            out = {"ok": True, "installed": False, "error": f"runner: {e}"}
+        out.update({"venv": "runner (public site)", "remote": True,
+                    "collections_dir": "runner (public site)", "projects_dir": str(PROJECTS)})
+        return out
     out = {"ok": True, "venv": str(VENV), "installed": (VBIN / "ansible-playbook").exists(),
            "collections_dir": str(COLL_DIR), "projects_dir": str(PROJECTS)}
     if not out["installed"]:
@@ -176,6 +221,8 @@ def _pick_python() -> str:
 
 def setup_steps() -> list[list[str]]:
     """The exact commands 'Install / repair' runs, in order."""
+    if REMOTE:
+        raise AnsError("Ansible and its collections are already installed on the public site")
     py = os.environ.get("HITECH_VANSIBLE_PYTHON") or _pick_python()
     steps = []
     if not (VBIN / "python").exists():
@@ -350,6 +397,11 @@ def _stream(job: Job, argv_list: list[list[str]], cwd: Path, env: dict) -> None:
             if job.cancelled:
                 break
             job.add("$ " + shlex.join(argv))
+            if REMOTE:
+                job.rc = _stream_remote(job, argv, cwd, env)
+                if job.rc != 0:
+                    break
+                continue
             job.proc = subprocess.Popen(argv, cwd=str(cwd), env=env, stdout=subprocess.PIPE,
                                         stderr=subprocess.STDOUT, text=True, bufsize=1,
                                         start_new_session=True)
@@ -378,6 +430,26 @@ def _stream(job: Job, argv_list: list[list[str]], cwd: Path, env: dict) -> None:
         if job.cancelled:
             job.add("■ stopped by user")
         job.done = True
+
+
+def _stream_remote(job: Job, argv: list[str], cwd: Path, env: dict) -> int:
+    """One command on the runner, output line by line into the job. Files the run
+    made or changed in the project (backups, vault edits, new roles) come back."""
+    rc = 1
+    try:
+        for d in _remote.stream(os.path.basename(argv[0]), argv[1:], _user_env(env), tree_dir=cwd,
+                                extra=job.cleanup, timeout=JOB_TIMEOUT, return_tree=True):
+            if "o" in d:
+                job.add(d["o"])
+            if "rc" in d:
+                rc = 1 if d["rc"] is None else d["rc"]
+                if d.get("tree"):
+                    _remote.extract_tree(d["tree"], cwd)
+            if job.cancelled:          # closing the connection stops it on the runner
+                break
+    except Exception as e:
+        job.add(f"✖ runner: {e}")
+    return rc
 
 
 def _kill(job: Job) -> None:
@@ -509,8 +581,13 @@ def list_tags(project: str, playbook: str, inventory: str, devices=None) -> list
     argv, cleanup, base = build_playbook_argv(
         project, {"playbook": playbook, "inventory": inventory, "mode": "tags"}, devices)
     try:
-        cp = subprocess.run(argv, cwd=str(base), env=run_env(project=base),
-                            capture_output=True, text=True, timeout=90)
+        if REMOTE:
+            r = _remote.call(os.path.basename(argv[0]), argv[1:], {}, tree_dir=base,
+                             extra=cleanup, timeout=90)
+            cp = subprocess.CompletedProcess(argv, r.get("rc") or 0, r.get("stdout", ""), r.get("stderr", ""))
+        else:
+            cp = subprocess.run(argv, cwd=str(base), env=run_env(project=base),
+                                capture_output=True, text=True, timeout=90)
     finally:
         for f in cleanup:
             try:

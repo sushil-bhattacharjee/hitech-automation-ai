@@ -171,8 +171,24 @@ DENIED_MESSAGE = ("This feature runs code on the server, so it is switched off o
                   "the public site. Install the software to use it.")
 
 
-def is_denied(path: str) -> bool:
+# With the runner (a separate service with no keys, no user data and no Google
+# permissions) these run there instead of here, so they can be switched on.
+RUNNER = bool(os.environ.get("RUNNER_UDS") and os.environ.get("RUNNER_TOKEN"))
+RUNNER_PATHS = frozenset({"/api/python-execute", "/api/python-run"})
+RUNNER_PREFIXES = ("/api/ansible/",)
+STILL_DENIED = frozenset({"/api/ansible/setup"})     # nothing to install: the runner has it
+
+
+def runner_allows(path: str) -> bool:
+    """A path that is fine once the runner does the executing."""
     p = path.rstrip("/")
+    return p not in STILL_DENIED and (p in RUNNER_PATHS or (p + "/").startswith(RUNNER_PREFIXES))
+
+
+def is_denied(path: str, runner: bool | None = None) -> bool:
+    p = path.rstrip("/")
+    if (RUNNER if runner is None else runner) and runner_allows(p):
+        return False
     return p in DENIED_PATHS or (p + "/").startswith(DENIED_PREFIXES)
 
 

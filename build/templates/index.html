@@ -10111,6 +10111,20 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('maximize-chat-btn').addEventListener('click', toggleMaximizeChat);
   document.getElementById('chat-send-btn').addEventListener('click', sendChat);
   document.getElementById('chat-clear-btn').addEventListener('click', clearChat);
+  // A <datalist> only suggests entries that match what is already typed, so a
+  // filled-in model showed just itself. Empty the box while choosing; put the
+  // old value back if nothing new was picked.
+  ['chat-model', 'chat-model-b'].forEach(id => {
+    const mi = document.getElementById(id);
+    if (!mi) return;
+    mi.addEventListener('focus', () => {
+      mi.dataset.prev = mi.value;
+      if (mi.value) { mi.placeholder = mi.value; mi.value = ''; }
+    });
+    mi.addEventListener('blur', () => {
+      if (!mi.value.trim() && mi.dataset.prev) mi.value = mi.dataset.prev;
+    });
+  });
   // Update badge/banner whenever the user changes the model
   document.getElementById('chat-model').addEventListener('input', () => {
     updateModelBadgeAndBanner();
