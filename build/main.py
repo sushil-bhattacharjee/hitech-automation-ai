@@ -101,7 +101,7 @@ AI_AVAILABLE = LLM_AVAILABLE and RAG_AVAILABLE
 from tools import DeviceContext
 
 # ----------------------------- version ----------------------------- #
-APP_VERSION = "hitech_automation_ai.1.50.0"
+APP_VERSION = "hitech_automation_ai.1.52.0"
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from jinja2 import Environment, StrictUndefined, TemplateSyntaxError
@@ -1276,6 +1276,21 @@ async def api_agent_cancel(req: AgentCancelRequest):
     """Mark an agent run for cancellation. Run exits at next iteration boundary."""
     ok = agent_mod.request_cancel(req.run_id)
     return {"ok": ok, "run_id": req.run_id}
+
+
+@app.on_event("shutdown")
+async def _cml_mcp_shutdown():
+    """v1.51.0: stop cml-mcp with the app."""
+    from tools import mcp_bridge
+    await mcp_bridge.shutdown()
+
+
+@app.get("/api/cml-mcp/status")
+async def cml_mcp_status():
+    """v1.51.0: is Cisco Modeling Labs (cml-mcp) configured and connected, and which tools."""
+    from tools import mcp_bridge
+    await mcp_bridge.ensure_ready()
+    return mcp_bridge.status()
 
 
 @app.get("/api/agent-tools")

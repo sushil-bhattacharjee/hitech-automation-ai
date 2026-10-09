@@ -1,5 +1,52 @@
 # CHANGELOG
 
+## hitech_automation_ai.1.52.0 — 2026-10-10
+
+### Added — Cisco Modeling Labs in the AI agent on the public site
+- **Gateway CML proxy** (`gateway.py`, unix socket `CML_MCP_SOCKET`): for a signed-in user with
+  lab access and a running routers/switches lab, the gateway runs one cml-mcp (stdio) pointed
+  at THAT user's CML and passes on only the safe tools. The CML login (`CML_ADMIN_PASSWORD`,
+  Secret Manager `cml-admin-password`) stays in the gateway; workers never see it.
+- **Worker bridge** (`tools/mcp_bridge.py`): in public mode it talks to the gateway socket
+  (`CML_MCP_UDS`/`CML_MCP_TOKEN`) instead of starting a server; tools appear once the lab's CML
+  answers and disappear when it ends.
+- **Image** (`docker/public/Dockerfile`): cml-mcp 0.32.2 on its own Python 3.12 (uv), no pyATS
+  — so no console CLI tool on the public site.
+- ● CML pill shown on the public site for lab users (grey = no lab running).
+
+## hitech_automation_ai.1.51.2 — 2026-10-10
+
+### Added
+- **CML status pill** in the AI Chat bar (next to 🤖 Agentic): green = cml-mcp connected,
+  red = configured but down (hover for the error), grey = not configured. Click to re-check or
+  reconnect; refreshes every minute. Hidden on the public site.
+
+## hitech_automation_ai.1.51.1 — 2026-10-10
+
+### Fixed — CML lab lookup with small models
+- Models sometimes passed the lab title as `cml_get_cml_labs`' `user` (owner) filter and then
+  reported "no labs". The bridge now retries without the filter when it finds nothing and says
+  so; the system hint tells models to list all labs and match by `lab_title`.
+
+## hitech_automation_ai.1.51.0 — 2026-10-10
+
+### Added — Cisco Modeling Labs in the AI agent (cml-mcp)
+- **MCP bridge** (`tools/mcp_bridge.py`): the agent can use
+  [cml-mcp](https://pypi.org/project/cml-mcp) — labs, nodes, links, consoles, packet captures —
+  as `cml_*` tools. Built-in MCP client (JSON-RPC over stdio or streamable HTTP), no new Python
+  dependency. stdio starts `uvx --python 3.12 cml-mcp[pyats]` itself (cml-mcp needs Python 3.12+).
+- **Safe set only**: reads (labs, nodes, links, interfaces, console log, status, capture overview)
+  and `show`/`ping`/`traceroute` through `cml_send_cli_command` run directly; starting/stopping
+  nodes, links and labs, link conditioning, packet captures and any config-mode CLI go through
+  the approval modal. Delete/wipe, users/groups, permissions and topology building are never offered.
+- Configure in `~/.hitech_automation_ai/cml_mcp.yaml` (or `CML_URL`, `CML_USERNAME`,
+  `CML_PASSWORD`, `HITECH_CML_MCP=1`); check with `GET /api/cml-mcp/status`. Off by default,
+  and always off on the public site (PUBLIC_MODE) until the gateway provides it.
+
+### Fixed
+- Approving a **RESTCONF** proposal in the agent now applies it (the approval was recorded in
+  the NETCONF store, so `apply_restconf_change` found it still pending).
+
 ## public site (gateway) — 2026-10-03
 
 ### Added — free guest view on software-automation.hitech007.ai

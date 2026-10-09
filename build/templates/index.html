@@ -764,7 +764,7 @@
     </div>
   </div>
   <div class="v18-nav-footer">
-    <span id="v18-version-badge">v1.50.0</span>
+    <span id="v18-version-badge">v1.52.0</span>
   </div>
 </aside>
 <!-- v1.20.1: single drag bar on the merged sidebar's right edge -->
@@ -2316,6 +2316,8 @@ out-octets = state/counters/out-octets</textarea>
       <input id="chat-use-agent" type="checkbox">
       🤖 Agentic
     </label>
+    <!-- v1.51.2: Cisco Modeling Labs (cml-mcp) status — click to re-check / reconnect -->
+    <span id="chat-cml-status" class="cml-pill" style="display:none;" title="Cisco Modeling Labs (cml-mcp)"><span class="cml-dot"></span> CML</span>
     <label style="margin-left:10px;" id="chat-compare-wrap" title="Send the same prompt to two models and compare answers">
       <input id="chat-compare-mode" type="checkbox">
       ⚖️ Compare
@@ -10798,5 +10800,54 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 
+<!-- v1.51.2: cml-mcp status pill in the AI chat bar (v1.52.0: also on the public site for lab users) -->
+<style>
+  .cml-pill { margin-left:10px; display:inline-flex; align-items:center; gap:5px; padding:2px 8px;
+              border:1px solid var(--border, #cbd5e1); border-radius:999px; font-size:12px; cursor:pointer;
+              user-select:none; background:#fff; }
+  .cml-pill .cml-dot { width:8px; height:8px; border-radius:50%; background:#94a3b8; }
+  .cml-pill.ok .cml-dot { background:#16a34a; }
+  .cml-pill.err .cml-dot { background:#dc2626; }
+  .cml-pill.busy .cml-dot { background:#f59e0b; }
+</style>
+<script>
+(function () {
+  const pill = document.getElementById('chat-cml-status');
+  if (!pill) return;
+  async function check() {
+    pill.className = 'cml-pill busy';
+    try {
+      const r = await fetch('/api/cml-mcp/status', { cache: 'no-store' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const s = await r.json();
+      // public site: only for signed-in users with lab access (the gateway offers it)
+      if (s.public && !s.enabled) { pill.style.display = 'none'; return; }
+      pill.style.display = '';
+      if (!s.enabled) {
+        pill.className = 'cml-pill';
+        pill.lastChild.textContent = ' CML off';
+        pill.title = 'Cisco Modeling Labs (cml-mcp) is not configured — see ~/.hitech_automation_ai/cml_mcp.yaml';
+      } else if (s.connected) {
+        pill.className = 'cml-pill ok';
+        pill.lastChild.textContent = ' CML';
+        pill.title = (s.public ? 'Cisco Modeling Labs — your lab\'s CML' : `cml-mcp running (${s.transport}) — ${s.cml_url}`) +
+                     `\n${(s.tools || []).length} tools available to Agentic mode\nClick to re-check`;
+      } else {
+        pill.className = s.public ? 'cml-pill' : 'cml-pill err';   // public: usually just no lab running
+        pill.lastChild.textContent = s.public ? ' CML off' : ' CML down';
+        pill.title = (s.public ? '' : `cml-mcp not connected — ${s.cml_url}\n`) + `${s.error || ''}\nClick to retry`;
+      }
+    } catch (e) {
+      pill.style.display = '';
+      pill.className = 'cml-pill err';
+      pill.lastChild.textContent = ' CML ?';
+      pill.title = 'Could not read /api/cml-mcp/status: ' + e.message;
+    }
+  }
+  pill.addEventListener('click', check);
+  check();
+  setInterval(check, 60000);
+})();
+</script>
 </body>
 </html>

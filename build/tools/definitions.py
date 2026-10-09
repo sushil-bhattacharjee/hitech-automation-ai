@@ -139,4 +139,6 @@ def get_tool_definitions() -> list[ToolDefinition]:
     """
     from .netconf_tools import get_netconf_tool_definitions
     from .restconf_tools import RESTCONF_TOOLS
-    return list(AGENT_TOOLS) + list(get_netconf_tool_definitions()) + list(RESTCONF_TOOLS)
+    from . import mcp_bridge              # v1.51.0: Cisco Modeling Labs via cml-mcp (when connected)
+    return (list(AGENT_TOOLS) + list(get_netconf_tool_definitions()) + list(RESTCONF_TOOLS)
+            + mcp_bridge.tool_definitions())

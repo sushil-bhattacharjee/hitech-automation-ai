@@ -307,3 +307,30 @@ Output streams live; takes a few minutes. Re-click any time to repair / update.
 ├── collections/     ← RESTCONF collections
 └── xpath/           ← saved XPath queries
 ```
+
+---
+
+## Cisco Modeling Labs in the AI agent (v1.51.0)
+
+The agent can work with a **Cisco Modeling Labs** server through
+[cml-mcp](https://pypi.org/project/cml-mcp): list labs and nodes, read consoles, run `show`
+commands on nodes, start/stop nodes and links, capture packets.
+
+1. Install **uv** (it runs cml-mcp with its own Python 3.12): `curl -LsSf https://astral.sh/uv/install.sh | sh`
+2. Create `~/.hitech_automation_ai/cml_mcp.yaml`:
+   ```yaml
+   enabled: true
+   cml_url: https://192.168.89.100      # your CML
+   username: admin
+   verify_ssl: false                    # CML ships a self-signed certificate
+   # password: prefer the environment: CML_PASSWORD=...
+   # For `show` commands on nodes (pyATS) also set PYATS_USERNAME / PYATS_PASSWORD.
+   ```
+   Or an already running cml-mcp in HTTP mode: `transport: http` and `http_url: http://127.0.0.1:9000/mcp`.
+3. Check: `curl -s localhost:7071/api/cml-mcp/status` → `"connected": true` and the tool list.
+   The first start downloads cml-mcp (about a minute).
+
+In the AI chat (agent mode) ask e.g. *"Which nodes in my CML lab are stopped?"* or
+*"Run show ip route on cat8Kv71 in CML"*. Anything that changes the lab opens the approval
+window first. Delete/wipe, users and licensing are never available to the agent.
+

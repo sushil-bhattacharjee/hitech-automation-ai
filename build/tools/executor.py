@@ -379,6 +379,11 @@ async def execute_tool(call: ToolCall, ctx: DeviceContext) -> tuple[str, bool]:
         "apply_restconf_change": tool_apply_restconf_change,
     }
 
+    # v1.51.0: Cisco Modeling Labs tools (cml_*) through the MCP bridge
+    from . import mcp_bridge
+    if mcp_bridge.handles(call.name):
+        return await mcp_bridge.execute(call.name, call.arguments or {})
+
     if call.name in NETCONF_HANDLERS:
         try:
             result = await NETCONF_HANDLERS[call.name](call.arguments or {})

@@ -135,6 +135,12 @@ async def run_agent(
     When omitted, a private UUID is used.
     """
 
+    try:                                   # v1.51.0: connect cml-mcp if configured
+        from tools import mcp_bridge
+        if await mcp_bridge.ensure_ready() and mcp_bridge.tool_definitions():
+            system_prompt = (system_prompt or "") + mcp_bridge.SYSTEM_HINT
+    except Exception:
+        log.exception("cml-mcp bridge")
     tools = get_tool_definitions()
     history: list[ChatMessage] = []
 
@@ -471,6 +477,37 @@ async def continue_agent(run_id: str, approved: bool) -> AgentResult:
             iterations=0,
             stopped_reason="error",
         )
+
+    pid = paused.pending_proposal_id
+    # v1.51.0: Cisco Modeling Labs (mcpprop_) and RESTCONF (rcprop_) proposals have
+    # their own stores; before this, every approval went to the NETCONF store, so an
+    # approved RESTCONF change was never applied.
+    if pid.startswith(("mcpprop_", "rcprop_")):
+        if pid.startswith("mcpprop_"):
+            from tools import mcp_bridge
+            tool_message, is_err = await mcp_bridge.decide(pid, approved)
+            step_tool = "cml_apply" if approved else "cml_proposal"
+        else:
+            from tools.restconf_tools import (set_restconf_decision, tool_apply_restconf_change,
+                                              get_restconf_proposal)
+            set_restconf_decision(pid, approved)
+            if approved:
+                res = await tool_apply_restconf_change({"proposal_id": pid})
+                tool_message = f"User approved proposal {pid}. apply_restconf_change result: {res}"
+                is_err = isinstance(res, str) and res.startswith("[")
+            else:
+                rp = get_restconf_proposal(pid)
+                tool_message = (f"User REJECTED proposal {pid} for device "
+                                f"{rp.device_name if rp else '(unknown)'}. Do NOT retry the same change. "
+                                "Explain to the user what was rejected and ask how they'd like to proceed.")
+                is_err = False
+            step_tool = "apply_restconf_change" if approved else "propose_restconf"
+        audit.log_event("agent_resumed", run_id=run_id, proposal_id=pid, approved=approved)
+        paused.trace.append(AgentStep(kind="tool_result", iteration=paused.iteration,
+                                      tool_name=step_tool, tool_result=tool_message, is_error=is_err))
+        paused.history.append(ChatMessage(role="tool", content=tool_message,
+                                          tool_call_id=paused.pending_tool_call_id))
+        return await _continue_loop(paused)
 
     # Record decision in the netconf module's pending store
     set_proposal_decision(paused.pending_proposal_id, approved)

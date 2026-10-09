@@ -2,7 +2,10 @@
 
 Network automation in one web app: **NETCONF, RESTCONF, CLI, XPath, YANG Explorer and
 certificates (PKI)**, with Python and Ansible runners and an optional **AI assistant with
-RAG** over network-automation study material. FastAPI, served on port **7071**.
+RAG** over network-automation study material. In agentic mode the assistant can also drive
+**Cisco Modeling Labs** through [cml-mcp](https://pypi.org/project/cml-mcp) — labs, nodes,
+links, consoles, packet captures — with your approval for every change (see
+[operation.md](operation.md)). FastAPI, served on port **7071**.
 
 ## Try it online — no install
 
@@ -12,7 +15,8 @@ RAG** over network-automation study material. FastAPI, served on port **7071**.
   APIs on the public internet, in a temporary workspace of your own.
 - Signed in: the AI assistant, Python, Ansible, a workspace that keeps your work, and your
   own lab routers, switches and APIC (with a lab account at
-  [lab-automation.hitech007.ai](https://lab-automation.hitech007.ai)).
+  [lab-automation.hitech007.ai](https://lab-automation.hitech007.ai)) — the assistant can
+  then work with your lab's CML too.
 
 ## Run it yourself
 
