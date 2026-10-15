@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## hitech_automation_ai.1.56.1 — 2026-10-16
+
+### Added
+- Ansible and Terraform file trees: folders collapse / expand — click ▾ / ▸ or double-click the folder
+  (remembered per project).
+
 ## hitech_automation_ai.1.56.0 — 2026-10-16
 
 ### Added — starter set (saved work every install starts with)

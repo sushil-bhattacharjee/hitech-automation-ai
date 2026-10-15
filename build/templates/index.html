@@ -771,7 +771,7 @@
     </div>
   </div>
   <div class="v18-nav-footer">
-    <span id="v18-version-badge">v1.56.0</span>
+    <span id="v18-version-badge">v1.56.1</span>
   </div>
 </aside>
 <!-- v1.20.1: single drag bar on the merged sidebar's right edge -->
@@ -1595,6 +1595,8 @@ out-octets = state/counters/out-octets</textarea>
 .ans-tree div { padding:3px 6px; border-radius:4px; cursor:pointer; white-space:nowrap; }
 .ans-tree div:hover { background:rgba(100,116,139,.12); }
 .ans-tree div.sel { background:#dbeafe; color:#1e40af; }
+.ans-tree .tw { display:inline-block; width:14px; text-align:center; color:#64748b; cursor:pointer; font-weight:400; }
+.ans-tree .tw:hover { color:#2563eb; }
 .ans-tree .d { font-weight:600; color:#475569; } .ans-tree .r { font-weight:600; color:#7c3aed; }
 .ans-hint { font-size:11.5px; color:#64748b; padding:6px 12px 10px; }
 .ans-hint code { background:#f1f5f9; border-radius:4px; padding:0 4px; color:#0f172a; }
@@ -10671,6 +10673,16 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <script>
+/* v1.56.1: collapsible folders in the Ansible / Terraform trees (remembered per project) */
+function treeShut(page, proj) {
+  try { return new Set(JSON.parse(localStorage.getItem('hitech.' + page + '.shut.' + proj) || '[]')); } catch (e) { return new Set(); }
+}
+function treeToggle(page, proj, path) {
+  const s = treeShut(page, proj);
+  if (s.has(path)) s.delete(path); else s.add(path);
+  try { localStorage.setItem('hitech.' + page + '.shut.' + proj, JSON.stringify([...s])); } catch (e) {}
+}
+
 /* v1.53.0: copy a run's output as plain text (works on http:// too, where navigator.clipboard is missing) */
 function copyOut(preId, btnId) {
   const o = document.getElementById(preId);
@@ -10788,10 +10800,11 @@ function copyPlain(text, b) {
         const ra = d.roles.includes(prefix + a), rb = d.roles.includes(prefix + b);
         return ra === rb ? a.localeCompare(b) : (ra ? -1 : 1);
       }).forEach(name => {
-        const path = prefix + name, isRole = d.roles.includes(path);
-        h += '<div class="' + (isRole ? 'r' : 'd') + (SELDIR === path ? ' sel' : '') + '" data-dir="' + esc(path) + '" style="padding-left:' + (8 + depth * 16) + 'px">' +
+        const path = prefix + name, isRole = d.roles.includes(path), shut = treeShut('ans', PROJ).has(path);
+        h += '<div class="' + (isRole ? 'r' : 'd') + (SELDIR === path ? ' sel' : '') + '" data-dir="' + esc(path) + '" style="padding-left:' + (2 + depth * 16) + 'px">' +
+             '<span class="tw" data-tog="' + esc(path) + '" title="' + (shut ? 'expand' : 'collapse') + '">' + (shut ? '▸' : '▾') + '</span>' +
              (isRole ? '🧩 ' : '📁 ') + esc(name) + '/' + (isRole ? ' <span class="ans-dim" style="font-weight:400">role</span>' : '') + '</div>';
-        walk(n.dirs[name], path + '/', depth + 1);
+        if (!shut) walk(n.dirs[name], path + '/', depth + 1);
       });
       n.files.sort((a, b) => a.path.localeCompare(b.path)).forEach(f => {
         if (f.path.endsWith('/.keep') || f.path === '.keep') return;
@@ -10804,7 +10817,13 @@ function copyPlain(text, b) {
     el.innerHTML = h;
     fillRunSelectors();
   }
+  $('ans-tree').addEventListener('dblclick', (e) => {     // double-click a folder: collapse / expand
+    const dd = e.target.closest('[data-dir]'); if (!dd || !dd.dataset.dir) return;
+    treeToggle('ans', PROJ, dd.dataset.dir); loadTree();
+  });
   $('ans-tree').addEventListener('click', (e) => {
+    const tg = e.target.closest('[data-tog]');
+    if (tg) { treeToggle('ans', PROJ, tg.dataset.tog); loadTree(); return; }
     const f = e.target.closest('[data-f]'), dd = e.target.closest('[data-dir]');
     if (f) openFile(f.dataset.f);
     else if (dd) { SELDIR = dd.dataset.dir; loadTree(); }
@@ -11215,9 +11234,10 @@ function copyPlain(text, b) {
             (d.state ? ' <span class="ans-dim" style="font-weight:400">· has state</span>' : '') + '</div>';
     const walk = (n, prefix, depth) => {
       Object.keys(n.dirs).sort().forEach(name => {
-        const path = prefix + name;
-        h += '<div class="d' + (SELDIR === path ? ' sel' : '') + '" data-dir="' + esc(path) + '" style="padding-left:' + (8 + depth * 16) + 'px">📁 ' + esc(name) + '/</div>';
-        walk(n.dirs[name], path + '/', depth + 1);
+        const path = prefix + name, shut = treeShut('tf', PROJ).has(path);
+        h += '<div class="d' + (SELDIR === path ? ' sel' : '') + '" data-dir="' + esc(path) + '" style="padding-left:' + (2 + depth * 16) + 'px">' +
+             '<span class="tw" data-tog="' + esc(path) + '" title="' + (shut ? 'expand' : 'collapse') + '">' + (shut ? '▸' : '▾') + '</span>📁 ' + esc(name) + '/</div>';
+        if (!shut) walk(n.dirs[name], path + '/', depth + 1);
       });
       n.files.sort((a, b) => a.path.localeCompare(b.path)).forEach(f => {
         const nm = f.path.split('/').pop();
@@ -11230,7 +11250,13 @@ function copyPlain(text, b) {
     el.innerHTML = h;
     fillVarFiles();
   }
+  $('tf-tree').addEventListener('dblclick', (e) => {      // double-click a folder: collapse / expand
+    const dd = e.target.closest('[data-dir]'); if (!dd || !dd.dataset.dir) return;
+    treeToggle('tf', PROJ, dd.dataset.dir); loadTree();
+  });
   $('tf-tree').addEventListener('click', (e) => {
+    const tg = e.target.closest('[data-tog]');
+    if (tg) { treeToggle('tf', PROJ, tg.dataset.tog); loadTree(); return; }
     const f = e.target.closest('[data-f]'), dd = e.target.closest('[data-dir]');
     if (f) openFile(f.dataset.f);
     else if (dd) { SELDIR = dd.dataset.dir; loadTree(); }
