@@ -101,7 +101,7 @@ AI_AVAILABLE = LLM_AVAILABLE and RAG_AVAILABLE
 from tools import DeviceContext
 
 # ----------------------------- version ----------------------------- #
-APP_VERSION = "hitech_automation_ai.1.52.0"
+APP_VERSION = "hitech_automation_ai.1.56.0"
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from jinja2 import Environment, StrictUndefined, TemplateSyntaxError
@@ -122,6 +122,11 @@ log = logging.getLogger("hitech_automation_ai")
 app = FastAPI(title="hiTech_Automation_AI", version="1.0")
 _pg.require_worker_key(app)   # no-op unless PUBLIC_MODE=1
 templates = Jinja2Templates(directory="templates")
+
+# v1.56.0: saved work every install starts with (build/starter/); the public site seeds from its bucket
+if not _pg.PUBLIC_MODE:
+    from tools import starter as _starter
+    _starter.seed()
 
 # v1.15.0: serve vendored assets (CodeMirror for the Python pane). Optional dir —
 # the app still boots if ./static is missing; the Python editor falls back to a textarea.
@@ -2337,6 +2342,38 @@ async def api_python_run(req: PythonRunRequest):
         _py_shutil.rmtree(tmpdir, ignore_errors=True)
 
 
+class PythonFormatRequest(BaseModel):
+    content: str = Field(default="", max_length=2_000_000)
+
+
+@app.post("/api/python-format")
+async def api_python_format(req: PythonFormatRequest):
+    """v1.54.0: ✨ Format in the Python editors — `ruff format -` on the text (nothing runs)."""
+    import asyncio
+    proc = None
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            sys.executable, "-m", "ruff", "format", "--isolated", "--stdin-filename", "main.py", "-",
+            stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+        out, err = await asyncio.wait_for(proc.communicate(req.content.encode()), timeout=20)
+    except FileNotFoundError:
+        return {"ok": False, "error": "ruff is not installed in the app venv (pip install ruff)"}
+    except asyncio.TimeoutError:
+        try:
+            proc.kill()
+            await proc.wait()
+        except Exception:
+            pass
+        return {"ok": False, "error": "ruff format timed out"}
+    if proc.returncode != 0:
+        e = err.decode("utf-8", "replace").strip()
+        if "No module named ruff" in e:
+            return {"ok": False, "error": "ruff is not installed in the app venv (pip install ruff)"}
+        lines = [l for l in e.splitlines() if l.strip()]
+        return {"ok": False, "error": "not formatted — fix the syntax error first: " + (lines[0][:200] if lines else "ruff format failed")}
+    return {"ok": True, "content": out.decode("utf-8", "replace")}
+
+
 @app.post("/api/python-lint")
 async def api_python_lint(req: PythonLintRequest):
     """v1.15.0: static checks on the pasted files, before running.
@@ -3979,6 +4016,177 @@ def api_ans_job_cancel(job_id: str):
         return {"ok": True}
     except Exception as e:
         return _ans_err(e)
+
+
+# =====================================================================
+# v1.53.0: Terraform — tools/terraform_mgr.py does the work. Terraform 1.13.3 and
+# the CiscoDevNet/aci 2.17.0 provider (exam versions) from <software_ai>/.vterraform,
+# or on the public site from the runner. Jobs share Ansible's job machinery.
+# =====================================================================
+from tools import terraform_mgr as _tf
+
+
+class TfProjReq(BaseModel):
+    project: str
+    starter: bool = True
+
+
+class TfFileReq(BaseModel):
+    project: str
+    path: str
+    content: str = ""
+    template: str = ""
+
+
+class TfPathReq(BaseModel):
+    project: str
+    path: str
+
+
+class TfRunReq(BaseModel):
+    project: str
+    action: str                  # init | fmt | validate | plan | apply | destroy | output | show | state | providers | version
+    targets: list[str] = Field(default_factory=list)
+    var_file: str = ""
+    recursive: bool = False
+    as_json: bool = False
+    env: dict = Field(default_factory=dict)
+
+
+class TfCliReq(BaseModel):
+    project: str
+    command: str
+    env: dict = Field(default_factory=dict)
+
+
+def _tf_err(e: Exception):
+    if isinstance(e, (_tf.TfError, _ans.AnsError)):
+        return {"ok": False, "error": str(e)}
+    log.exception("terraform endpoint failed")
+    return JSONResponse({"ok": False, "error": f"{type(e).__name__}: {e}"}, status_code=200)
+
+
+def _tf_call(fn, event: str = "", **audit):
+    try:
+        out = fn()
+        if event:
+            _audit.log_event(event, **audit)
+        return out if isinstance(out, dict) else {"ok": True}
+    except Exception as e:
+        return _tf_err(e)
+
+
+@app.get("/api/terraform/status")
+def api_tf_status():
+    return _tf_call(_tf.status)
+
+
+@app.post("/api/terraform/setup")
+def api_tf_setup():
+    """Install / repair .vterraform: Terraform 1.13.3 + aci 2.17.0 mirror (background job)."""
+    return _tf_call(lambda: {"ok": True, "job": _tf.run_setup().id}, "terraform_setup")
+
+
+@app.get("/api/terraform/projects")
+def api_tf_projects():
+    return _tf_call(lambda: {"ok": True, "projects": _tf.list_projects()})
+
+
+@app.post("/api/terraform/project/create")
+def api_tf_project_create(req: TfProjReq):
+    return _tf_call(lambda: _tf.create_project(req.project, req.starter),
+                    "terraform_project_create", project=req.project)
+
+
+@app.post("/api/terraform/project/delete")
+def api_tf_project_delete(req: TfProjReq):
+    return _tf_call(lambda: _tf.delete_project(req.project), "terraform_project_delete", project=req.project)
+
+
+@app.get("/api/terraform/tree/{project}")
+def api_tf_tree(project: str):
+    return _tf_call(lambda: _tf.tree(project))
+
+
+@app.get("/api/terraform/file")
+def api_tf_file_get(project: str, path: str):
+    return _tf_call(lambda: _tf.read_file(project, path))
+
+
+@app.post("/api/terraform/file/save")
+def api_tf_file_save(req: TfFileReq):
+    return _tf_call(lambda: _tf.write_file(req.project, req.path, req.content))
+
+
+@app.post("/api/terraform/file/create")
+def api_tf_file_create(req: TfFileReq):
+    body = _tf.FILE_TEMPLATES.get(req.template, "") if req.template else req.content
+    return _tf_call(lambda: _tf.write_file(req.project, req.path, body, create_only=True),
+                    "terraform_file_create", project=req.project, path=req.path)
+
+
+@app.post("/api/terraform/file/upload")
+async def api_tf_file_upload(project: str = Form(...), folder: str = Form(""),
+                             files: list[UploadFile] = File(...)):
+    try:
+        saved = []
+        for f in files:
+            rel = (folder.strip("/") + "/" if folder.strip("/") else "") + os.path.basename(f.filename or "")
+            _tf.write_bytes(project, rel, await f.read())
+            saved.append(rel)
+        _audit.log_event("terraform_upload", project=project, count=len(saved))
+        return {"ok": True, "saved": saved}
+    except Exception as e:
+        return _tf_err(e)
+
+
+@app.post("/api/terraform/folder/create")
+def api_tf_folder_create(req: TfPathReq):
+    return _tf_call(lambda: _tf.make_dir(req.project, req.path))
+
+
+@app.post("/api/terraform/path/delete")
+def api_tf_path_delete(req: TfPathReq):
+    return _tf_call(lambda: _tf.delete_path(req.project, req.path),
+                    "terraform_delete", project=req.project, path=req.path)
+
+
+@app.post("/api/terraform/run")
+def api_tf_run(req: TfRunReq):
+    def go():
+        job = _tf.run_action(req.project, req.action, req.model_dump(), req.env)
+        return {"ok": True, "job": job.id}
+    return _tf_call(go, "terraform_run", project=req.project, action=req.action,
+                    env_keys=",".join(req.env))
+
+
+@app.post("/api/terraform/cli")
+def api_tf_cli(req: TfCliReq):
+    import re as _re
+    logged = _re.sub(r"(-var[= ]+['\"]?[^=\s]+=)\S+", r"\1***", req.command)[:300]   # no -var values in the log
+    return _tf_call(lambda: {"ok": True, "job": _tf.run_cli(req.project, req.command, req.env).id},
+                    "terraform_cli", project=req.project, command=logged)
+
+
+class TfValidateReq(BaseModel):
+    project: str
+    env: dict = Field(default_factory=dict)
+
+
+@app.post("/api/terraform/validate")
+def api_tf_validate(req: TfValidateReq):
+    """v1.54.0: terraform validate -json after a save — errors are shown on their lines."""
+    return _tf_call(lambda: _tf.validate(req.project, req.env))
+
+
+@app.get("/api/terraform/job/{job_id}")
+def api_tf_job(job_id: str, since: int = 0):
+    return _tf_call(lambda: _ans.job_poll(job_id, since))
+
+
+@app.post("/api/terraform/job/{job_id}/cancel")
+def api_tf_job_cancel(job_id: str):
+    return _tf_call(lambda: _tf.cancel(job_id))
 
 
 @app.get("/api/health")

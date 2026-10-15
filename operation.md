@@ -293,6 +293,38 @@ Output streams live; takes a few minutes. Re-click any time to repair / update.
 - **Scope:** the CLI allowlist makes intent explicit, but Ansible itself can run commands on localhost (`shell`/`command` modules). This is a lab tool running as your user, not a sandbox.
 - Files: `~/.hitech_automation_ai/ansible/projects/<project>/` (survive upgrades).
 
+## 11. Terraform *(v1.53.0)*
+
+ACI with Terraform, at the CCIE Automation v1.1 exam versions: **Terraform 1.13.3** and the
+**CiscoDevNet/aci 2.17.0** provider. Left nav → **Config Mgmt → 🟪 Terraform**.
+
+**First use (installed app):** the status line shows *Terraform not installed* → click
+**⚙ Install / repair**. It downloads Terraform 1.13.3 (releases.hashicorp.com) and the aci 2.17.0
+provider (GitHub), checks both against their published SHA256SUMS and puts them in
+`<software_ai>/.vterraform/` — `bin/terraform`, a provider mirror and a `terraformrc` that makes
+Terraform take providers **only** from that mirror. A `terraform` already on your PATH is used if
+`.vterraform` is missing (the status shows its version in amber if it is not 1.13.3).
+
+| Area | What you get |
+|---|---|
+| Project tree | ＋ Project (optionally with the ACI example: `main.tf`, `variables.tf`, `outputs.tf`, `terraform.tfvars`), ＋ File / Folder, ⬆ Upload, 🗑 delete (with nothing selected: the whole project). `terraform.tfstate` and `.terraform.lock.hcl` appear after runs. |
+| Editor | Tab = 2 spaces, **Ctrl+S** saves, unsaved changes flagged. |
+| ▶ Actions | init · fmt · validate · **plan** · **apply** · **destroy** · output · show · state list · providers · version; optional `-target` (comma-separated) and `-var-file`; env vars (`TF_VAR_<name>`, `TF_LOG`). apply / destroy ask first and run with `-auto-approve`. |
+| ⌘ CLI | `terraform <subcommand>` only (init, validate, plan, apply, destroy, fmt, output, show, state, providers, graph, import, refresh, taint, workspace, test, version). No pipes / `;` / `&&`; no `-chdir`, `-plugin-dir`, `-state*`, `-backup`; `-out` / `-var-file` must stay inside the project. ↑/↓ history. |
+| Output | live, colour-coded (`+` create, `~` update, `-` destroy, errors red), **■ Stop**. |
+
+- Commands that need providers run `terraform init` first, so you never have to remember it.
+- One run per project at a time (two runs on one state file would corrupt it).
+- **■ Stop** sends Ctrl-C and gives Terraform 30 s to finish and save its state before killing it.
+- The example uses `var.apic_url` (default `https://192.168.89.95`), `var.apic_username`, `var.apic_password` (in `terraform.tfvars`).
+- Files: `~/.hitech_automation_ai/terraform/projects/<project>/` (survive upgrades).
+
+**Public site (software-automation.hitech007.ai):** runs on the runner like Ansible.
+`var.apic_url` is set to **your** running APIC for every run (`TF_VAR_apic_url`), so use
+`url = var.apic_url` in the provider — a fixed `https://192.168.89.95` does not reach your lab
+there. apply / destroy cannot be stopped there (the state would be lost); workspaces are not kept
+between runs; state files over 5 MB are refused.
+
 ## Where state lives
 
 ```

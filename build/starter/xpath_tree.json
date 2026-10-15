@@ -1,0 +1,183 @@
+{
+  "version": 1,
+  "scope": "xpath",
+  "root": {
+    "id": "root",
+    "type": "folder",
+    "name": "XPATH",
+    "children": [
+      {
+        "id": "nee2bba0d9af5",
+        "type": "folder",
+        "name": "ios-xe",
+        "children": [
+          {
+            "id": "ne295fd41afc7",
+            "type": "request",
+            "name": "Gi | in/out-octates>0",
+            "request": {
+              "kind": "xpath",
+              "device_name": "cat8Kv71",
+              "source": "state",
+              "expr": "/interfaces/interface[starts-with(name, \"GigabitEthernet\")]\n[state/admin-status=\"UP\"][state/oper-status=\"UP\"]\n[state/counters/out-octets > 0 or state/counters/in-octets > 0]"
+            }
+          },
+          {
+            "id": "n203bee56489e",
+            "type": "request",
+            "name": "bgp | prefixes",
+            "request": {
+              "name": "bgp | prefixes",
+              "kind": "xpath",
+              "xpath": {
+                "device_name": "cat8Kv71",
+                "source": "state",
+                "expr": "/bgp-state-data/neighbors/neighbor\n"
+              }
+            }
+          },
+          {
+            "id": "n242d904ad3fd",
+            "type": "request",
+            "name": "bgp | rcv-updates>1",
+            "request": {
+              "name": "bgp | rcv-updates>1",
+              "kind": "xpath",
+              "xpath": {
+                "device_name": "cat8Kv71",
+                "source": "state",
+                "expr": "/bgp-state-data/neighbors/neighbor[neighbor-id='10.0.13.31'][bgp-neighbor-counters/received/updates>1]/description"
+              },
+              "filters": {
+                "xf_expr": "//description",
+                "xf_ns": false,
+                "ex_row": "interface",
+                "ex_cols": "name = name\ndescription = config/description\nin-octets = state/counters/in-octets\nout-octets = state/counters/out-octets"
+              }
+            }
+          },
+          {
+            "id": "n7ad8c073f54a",
+            "type": "request",
+            "name": "Gi | in/out-octets>0",
+            "request": {
+              "name": "Gi | in/out-octets>0",
+              "kind": "xpath",
+              "xpath": {
+                "device_name": "cat8Kv71",
+                "source": "state",
+                "expr": "/interfaces/interface[starts-with(name,\"Gigabit\")][state/oper-status=\"UP\" and state/admin-status=\"UP\"][state/counters/in-octets>0 or state/counters/out-octets>0]"
+              },
+              "filters": {
+                "xf_expr": "",
+                "xf_ns": false,
+                "ex_row": "interface",
+                "ex_cols": "name = name\ndescription = config/description\nin-octets = state/counters/in-octets\nout-octets = state/counters/out-octets"
+              }
+            }
+          },
+          {
+            "id": "n80cf3fb5f77a",
+            "type": "request",
+            "name": "Gi | in/out-pkts>0",
+            "request": {
+              "name": "Gi | in/out-pkts>0",
+              "kind": "xpath",
+              "xpath": {
+                "device_name": "cat8Kv71",
+                "source": "state",
+                "expr": "/interfaces/interface[starts-with(name,\"Gi\")][v4-protocol-stats/in-pkts>0 or v4-protocol-stats/out-pkts>0]\n"
+              },
+              "filters": {
+                "xf_expr": "",
+                "xf_ns": false,
+                "ex_row": "interface",
+                "ex_cols": "name = name\ndescription = config/description\nin-pkts= v4-protocol-stats/in-pkts\nin-pkts= v4-protocol-stats/out-pkts"
+              }
+            }
+          },
+          {
+            "id": "n08db10ea1810",
+            "type": "request",
+            "name": "ospfv2-neighbor | state",
+            "request": {
+              "name": "ospfv2-neighbor | state",
+              "kind": "xpath",
+              "xpath": {
+                "device_name": "cat8Kv71",
+                "source": "state",
+                "expr": "/ospf-oper-data/ospfv2-instance/ospfv2-area/ospfv2-interface/ospfv2-neighbor[address=\"10.0.12.21\"]/state\n"
+              },
+              "filters": {
+                "xf_expr": "",
+                "xf_ns": false,
+                "ex_row": "interface",
+                "ex_cols": "name = name\ndescription = config/description\nin-octets = state/counters/in-octets\nout-octets = state/counters/out-octets"
+              }
+            }
+          },
+          {
+            "id": "nd1df447aa78d",
+            "type": "request",
+            "name": "bgp | current-prefixes",
+            "request": {
+              "name": "bgp | current-prefixes",
+              "kind": "xpath",
+              "xpath": {
+                "device_name": "cat8Kv71",
+                "source": "state",
+                "expr": "/bgp-state-data/neighbors/neighbor[vrf-name=\"default\"][as=\"65002\"][connection/state=\"established\"][prefix-activity/received/current-prefixes < 15]/description\n"
+              },
+              "filters": {
+                "xf_expr": "",
+                "xf_ns": false,
+                "ex_row": "interface",
+                "ex_cols": "name = name\ndescription = config/description\nin-octets = state/counters/in-octets\nout-octets = state/counters/out-octets"
+              }
+            }
+          },
+          {
+            "id": "ndae866471b49",
+            "type": "request",
+            "name": "ospfv2-neighbor",
+            "request": {
+              "name": "ospfv2-neighbor",
+              "kind": "xpath",
+              "xpath": {
+                "device_name": "cat8Kv71",
+                "source": "state",
+                "expr": "/ospf-oper-data/ospfv2-instance/ospfv2-area/ospfv2-interface/ospfv2-neighbor[address=\"10.0.12.21\" or \"10.0.13.31\"]\n"
+              },
+              "filters": {
+                "xf_expr": "//ospfv2-interface[ospfv2-neighbor/state=\"ospf-nbr-full\"]/name/text()",
+                "xf_ns": false,
+                "ex_row": "ospfv2-interface",
+                "ex_cols": "name = name\nnbr-addr = ospfv2-neighbor/address\nstate = ospfv2-neighbor/state\n"
+              }
+            }
+          },
+          {
+            "id": "n45c529f23fb5",
+            "type": "request",
+            "name": "Gi | bytes>0 | Openconfg",
+            "request": {
+              "name": "Gi | bytes>0 | Openconfg",
+              "kind": "xpath",
+              "xpath": {
+                "device_name": "cat8Kv71",
+                "source": "state",
+                "expr": "    /interfaces/interface[starts-with(name,\"Gigabit\") and state/oper-status=\"UP\"\n    and (state/counters/in-octets or state/counters/out-octets)]"
+              },
+              "filters": {
+                "xf_expr": "//interfaces/interface[starts-with(name,\"Gigabit\") and state/oper-status=\"UP\" and (state/counters/in-octets > 0 or state/counters/out-octets > 0)]",
+                "xf_ns": false,
+                "ex_row": "interface",
+                "ex_cols": "name = name\ndescription = config/description\nin-octets = state/counters/in-octets\nout-octets = state/counters/out-octets"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

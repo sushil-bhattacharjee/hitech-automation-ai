@@ -13,6 +13,12 @@
 <link rel="stylesheet" href="/static/codemirror/codemirror.css">
 <script src="/static/codemirror/codemirror.js"></script>
 <script src="/static/codemirror/python.js"></script>
+<!-- v1.54.0: code checks in every editor (modes, lint, hints) — vendored, works offline -->
+<link rel="stylesheet" href="/static/codemirror/addons.css">
+<script src="/static/codemirror/addons.js"></script>
+<script src="/static/js-yaml/js-yaml.min.js"></script>
+<script src="/static/hitech-editor.js"></script>
+<script src="/static/hitech-split.js"></script>
 <!-- v1.18.0: jq compiled to wasm (browser-side response filtering). 404s harmlessly if absent → Server engine still works. -->
 <script src="/static/jq/jq.js"></script>
 <style>
@@ -694,6 +700,7 @@
     <a href="#" class="v18-nav-item"        data-target="xpath"    title="NETCONF XPath query">🎯 XPath</a>
     <a href="#" class="v18-nav-item"        data-target="python"   title="Multi-file Python runner (runs on this VM)">🐍 Python</a>
     <a href="#" class="v18-nav-item"        data-target="ansible"  title="Ansible projects, roles, playbooks — form runner + CLI (.vansible)">🅰 Ansible</a>
+    <a href="#" class="v18-nav-item"        data-target="terraform" title="Terraform 1.13.3 + CiscoDevNet/aci 2.17.0 — init / plan / apply / destroy + CLI">🟪 Terraform</a>
     <a href="#" class="v18-nav-item"        data-target="yang"     title="YANG Explorer — import models, browse the tree, generate RESTCONF/XPath">🌲 YANG</a>
     <div class="v18-nav-group">Security</div>
     <a href="#" class="v18-nav-item"        data-target="pki"      title="Private CA, CSR, signing, verify — with .sh / .py export">🔐 Certificates</a>
@@ -764,7 +771,7 @@
     </div>
   </div>
   <div class="v18-nav-footer">
-    <span id="v18-version-badge">v1.52.0</span>
+    <span id="v18-version-badge">v1.56.0</span>
   </div>
 </aside>
 <!-- v1.20.1: single drag bar on the merged sidebar's right edge -->
@@ -1318,7 +1325,18 @@ pre.result-pane.pane-expanded { height: auto !important; }
                   title="Generate a runnable ncclient script from this query + the Extract-fields columns">🐍 Export → Python</button>
           <span id="xpath-meta" style="font-size:11px; color:#64748b; margin-left:10px;"></span>
         </div>
-        <h3 style="font-size:13px; margin-top:10px;">Result (XML)</h3>
+        <div style="display:flex; align-items:center; gap:10px; margin-top:10px;">
+          <h3 style="font-size:13px; margin:0;">Result (XML)</h3>
+          <button id="xpath-paste-toggle" class="small" type="button" title="Paste XML from anywhere (a device reply, a file, show … | format xml) and use Extract fields / XPath filter on it">✎ Paste my own XML</button>
+          <span id="xpath-paste-meta" style="font-size:11px; color:#64748b;"></span>
+        </div>
+        <div id="xpath-paste-box" style="display:none; margin:6px 0 8px;">
+          <textarea id="xpath-paste-ta" rows="12" placeholder="Paste XML here — a NETCONF &lt;rpc-reply&gt;, &lt;data&gt;…&lt;/data&gt;, a saved file … Several top-level elements are fine."></textarea>
+          <div style="display:flex; gap:8px; margin-top:4px;">
+            <button id="xpath-paste-use" class="small" type="button" style="background:#2563eb; color:white; border-color:#2563eb;">Use as Result (XML) ↓</button>
+            <button id="xpath-paste-cancel" class="small" type="button">Close</button>
+          </div>
+        </div>
         <pre id="xpath-result" class="result-pane" data-pane-kind="xml" style="background:#0f172a; color:#e2e8f0; padding:10px; height:500px; overflow:auto; font-size:11px;">(run a query)</pre>
 
         <!-- v1.10.0 (issue-2): client-side field extractor -->
@@ -1493,6 +1511,7 @@ out-octets = state/counters/out-octets</textarea>
             <span class="ans-dim" id="ans-edtype"></span>
             <span id="ans-dirty" class="ans-dirty" style="display:none">● unsaved</span>
             <span style="flex:1"></span>
+            <button type="button" class="ans-btn ans-s" id="ans-copyfile" title="Copy this file's text (including unsaved changes)">⧉ Copy</button>
             <button type="button" class="ans-btn" id="ans-save">💾 Save <span class="ans-dim" style="color:#cbd5e1">Ctrl+S</span></button>
           </div>
           <textarea id="ans-ed" spellcheck="false" disabled placeholder="select a file"></textarea>
@@ -1548,6 +1567,7 @@ out-octets = state/counters/out-octets</textarea>
 
         <div class="ans-outbar">
           <span id="ans-jobinfo" class="ans-dim"></span><span style="flex:1"></span>
+          <button type="button" class="ans-btn ans-s" id="ans-copy" title="Copy the whole output as plain text">⧉ Copy</button>
           <button type="button" class="ans-btn ans-r" id="ans-stop" disabled>■ Stop</button>
           <button type="button" class="ans-btn ans-s" id="ans-clear">Clear</button>
         </div>
@@ -1603,11 +1623,132 @@ out-octets = state/counters/out-octets</textarea>
 .ans-envrow input:not([type=checkbox]) { padding:4px 6px; border:1px solid #cbd5e1; border-radius:5px; font-size:12.5px; }
 .ans-cmd { font-family:"JetBrains Mono",Consolas,monospace; font-size:12px; background:rgba(100,116,139,.08); border:1px solid var(--border,#e2e8f0); border-radius:5px; padding:8px 10px; margin:0 12px 10px; white-space:pre-wrap; word-break:break-all; }
 .ans-outbar { display:flex; align-items:center; gap:8px; padding:8px 12px; border-top:1px solid var(--border,#e2e8f0); }
-.ans-out { background:#0b1220; color:#e2e8f0; font-family:"JetBrains Mono",Consolas,monospace; font-size:12px; line-height:1.5; padding:12px; min-height:160px; max-height:480px; overflow:auto; white-space:pre-wrap; margin:0; resize:vertical; }
+.split-grid { display:grid; gap:8px; grid-template-columns:minmax(0,1fr); }
+.split-grid[data-n="2"] { grid-template-columns:repeat(2, minmax(0,1fr)); }
+.split-grid[data-n="3"] { grid-template-columns:repeat(3, minmax(0,1fr)); }
+.split-grid[data-n="4"] { grid-template-columns:repeat(2, minmax(0,1fr)); }
+.split-grid > .ans-card.split-act { box-shadow:0 0 0 2px #2563eb; }
+.split-bar { display:flex; align-items:center; gap:4px; font-size:11.5px; color:#64748b; margin:0 0 4px; }
+.split-bar button { border:1px solid #cbd5e1; background:#f8fafc; color:#334155; border-radius:4px; padding:1px 7px; font-size:11.5px; cursor:pointer; }
+.split-bar button.on { background:#2563eb; color:#fff; border-color:#2563eb; }
+.split-bar .split-hint { margin-left:8px; color:#94a3b8; }
+.split-handle { cursor:col-resize; border-radius:4px; align-self:stretch; min-height:120px; }
+.split-handle:hover { background:rgba(37,99,235,.15); }
+.split-collapse { border:1px solid #cbd5e1; background:#f8fafc; border-radius:4px; width:22px; height:20px; line-height:16px; padding:0; cursor:pointer; font-weight:700; color:#334155; }
+.ans-card.split-collapsed > :not(.ans-h) { display:none; }
+.ans-card.split-collapsed .ans-h { writing-mode:vertical-rl; padding:8px 6px; border-bottom:0; }
+.ans-card.split-collapsed .ans-h select { display:none; }
+.ans-card.split-collapsed .split-collapse { writing-mode:horizontal-tb; }
+.split-col { min-width:0; }
+.split-grid .CodeMirror.hied, .ans-out { resize:both !important; max-width:100%; min-width:200px; }
+.ans-out { background:#0b1220; color:#e2e8f0; font-family:"JetBrains Mono",Consolas,monospace; font-size:12px; line-height:1.5; padding:12px; min-height:160px; height:300px; overflow:auto; white-space:pre-wrap; margin:0; resize:vertical; }
 .ans-out .o-ok { color:#86efac; } .ans-out .o-ch { color:#fcd34d; } .ans-out .o-fa { color:#fca5a5; } .ans-out .o-hd { color:#7dd3fc; } .ans-out .o-dim { color:#64748b; } .ans-out .o-sk { color:#94a3b8; }
 .ans-recap { width:100%; border-collapse:collapse; font-size:12.5px; }
 .ans-recap td, .ans-recap th { padding:6px 10px; border-top:1px solid var(--border,#e2e8f0); text-align:left; }
 .ans-recap th { color:#64748b; font-weight:600; font-size:11.5px; }
+</style>
+
+<!-- v1.53.0: Terraform (reuses the .ans-* styles above) -->
+<section id="v18-terraform-section" class="v18-section">
+  <main>
+    <section class="panel">
+      <h2 style="margin-bottom:2px;">🟪 Terraform</h2>
+      <p class="ans-intro">ACI with Terraform — the CCIE Automation v1.1 versions: <b>Terraform 1.13.3</b> and the
+        <b>CiscoDevNet/aci 2.17.0</b> provider (providers come only from the local mirror). Edit <code>.tf</code> files,
+        then init → plan → apply → destroy, or type <code>terraform …</code> in the CLI tab.
+        Files: <code id="tf-projdir">~/.hitech_automation_ai/terraform/projects</code></p>
+
+      <div class="ans-status" id="tf-status"><span class="ans-dim">checking Terraform…</span></div>
+
+      <div class="ans-work">
+        <div class="ans-card">
+          <div class="ans-h">📁 Project
+            <select id="tf-proj" style="margin-left:auto;font-size:12px;max-width:170px"></select>
+          </div>
+          <div class="ans-tb">
+            <button type="button" id="tf-new-proj">＋ Project</button>
+            <button type="button" id="tf-new-file">＋ File</button>
+            <button type="button" id="tf-new-dir">＋ Folder</button>
+            <button type="button" id="tf-upload">⬆ Upload</button>
+            <button type="button" id="tf-del" style="background:#dc2626" title="Delete selected file/folder">🗑</button>
+            <input type="file" id="tf-upload-in" multiple style="display:none">
+          </div>
+          <div class="ans-tree" id="tf-tree"><span class="ans-dim">no project yet — click ＋ Project</span></div>
+          <div class="ans-hint">A new project starts with an ACI tenant + VRF example. <code>terraform.tfstate</code> appears after apply —
+            it is how Terraform knows what it created (destroy needs it).</div>
+        </div>
+
+        <div class="ans-card">
+          <div class="ans-edhead">
+            <code id="tf-edname">(no file)</code>
+            <span class="ans-dim" id="tf-edtype"></span>
+            <span id="tf-dirty" class="ans-dirty" style="display:none">● unsaved</span>
+            <span style="flex:1"></span>
+            <button type="button" class="ans-btn ans-s" id="tf-copyfile" title="Copy this file's text (including unsaved changes)">⧉ Copy</button>
+            <button type="button" class="ans-btn" id="tf-save">💾 Save <span class="ans-dim" style="color:#cbd5e1">Ctrl+S</span></button>
+          </div>
+          <textarea id="tf-ed" class="tf-ed" spellcheck="false" disabled placeholder="select a file"></textarea>
+        </div>
+      </div>
+
+      <div class="ans-card" style="margin-top:12px">
+        <div class="ans-rtabs" id="tf-rtabs">
+          <div class="act" data-rt="form">▶ Actions</div>
+          <div data-rt="cli">⌘ CLI</div>
+        </div>
+
+        <div id="tf-rt-cli" style="display:none">
+          <div class="ans-hint" style="padding:8px 12px">Runs in <b id="tf-clicwd">project/</b>. Only <code>terraform &lt;subcommand&gt;</code>
+            (init, validate, plan, apply, destroy, fmt, output, show, state, providers, graph, import, refresh, workspace, version…) —
+            no pipes / ; / &amp;&amp;. <code>apply</code>/<code>destroy</code> get <code>-auto-approve</code> (you confirm here instead);
+            commands that need providers run <code>terraform init</code> first. ↑ ↓ history. Environment variables from the Actions tab apply here too.</div>
+          <div class="ans-cli"><span class="ans-ps" id="tf-ps">$</span>
+            <input id="tf-clin" placeholder="e.g. terraform plan -target=aci_tenant.demo" autocomplete="off" spellcheck="false"></div>
+        </div>
+
+        <div id="tf-rt-form">
+          <div class="ans-runrow">
+            <div><label>-target (optional, comma-separated)</label><input id="tf-targets" placeholder="aci_tenant.demo" style="width:260px"></div>
+            <div><label>-var-file (optional)</label><select id="tf-varfile"></select></div>
+          </div>
+          <details class="ans-det"><summary>Environment variables (e.g. TF_VAR_apic_password, TF_LOG)</summary>
+            <div style="padding:0 12px 10px">
+              <div class="ans-hint" style="padding:0 0 6px">TF_VAR_&lt;name&gt; sets variable &lt;name&gt;. Values marked secret are never stored in the browser.</div>
+              <div id="tf-envs"></div>
+              <button type="button" class="ans-btn ans-s" id="tf-add-env">＋ env var</button>
+            </div>
+          </details>
+          <div class="ans-cmd" id="tf-cmd"></div>
+          <div class="ans-runrow" style="padding-top:0">
+            <button type="button" class="ans-btn ans-s" data-act="init">init</button>
+            <button type="button" class="ans-btn ans-s" data-act="fmt">fmt</button>
+            <button type="button" class="ans-btn ans-s" data-act="validate">validate</button>
+            <button type="button" class="ans-btn" data-act="plan">📋 plan</button>
+            <button type="button" class="ans-btn ans-g" data-act="apply">▶ apply</button>
+            <button type="button" class="ans-btn ans-r" data-act="destroy">💥 destroy</button>
+            <span style="width:10px"></span>
+            <button type="button" class="ans-btn ans-s" data-act="output">output</button>
+            <button type="button" class="ans-btn ans-s" data-act="show">show</button>
+            <button type="button" class="ans-btn ans-s" data-act="state">state list</button>
+            <button type="button" class="ans-btn ans-s" data-act="providers">providers</button>
+            <button type="button" class="ans-btn ans-s" data-act="version">version</button>
+          </div>
+        </div>
+
+        <div class="ans-outbar">
+          <span id="tf-jobinfo" class="ans-dim"></span><span style="flex:1"></span>
+          <button type="button" class="ans-btn ans-s" id="tf-copy" title="Copy the whole output as plain text">⧉ Copy</button>
+          <button type="button" class="ans-btn ans-r" id="tf-stop" disabled>■ Stop</button>
+          <button type="button" class="ans-btn ans-s" id="tf-clear">Clear</button>
+        </div>
+        <pre class="ans-out" id="tf-out"><span class="ans-dim">output appears here</span></pre>
+      </div>
+    </section>
+  </main>
+</section>
+<style>
+#tf-ed { width:100%; height:380px; border:0; resize:vertical; padding:10px 12px; font-family:"JetBrains Mono",Consolas,monospace; font-size:12.5px; line-height:1.5; background:#0f172a; color:#e2e8f0; outline:none; border-radius:0 0 8px 8px; tab-size:2; box-sizing:border-box; }
+#tf-tree div.st { color:#7c3aed; }
 </style>
 
 <!-- v1.49.0: Certificates (private PKI) -->
@@ -4263,6 +4404,7 @@ function initV18Nav() {
     yang:     document.getElementById('v18-yang-section'),
     pki:      document.getElementById('v18-pki-section'),   // v1.49.0
     ansible:  document.getElementById('v18-ansible-section'),   // v1.50.0
+    terraform: document.getElementById('v18-terraform-section'), // v1.53.0
   };
   const isTransport = (t) => Object.prototype.hasOwnProperty.call(panes, t);
   const valid = (t) => isTransport(t) || Object.prototype.hasOwnProperty.call(sections, t);
@@ -4680,6 +4822,10 @@ function rcPrettyPayload() {
   if (!ta) return;
   const raw = ta.value;
   if (!raw.trim()) { if (msg) msg.textContent = 'payload is empty'; return; }
+  if (window.HiEd && ta._hiedCm) {               // v1.54.0: JSON or XML, {{ vars }} kept
+    HiEd.format(ta).then(r => { if (msg) { msg.style.color = r.ok ? '#16a34a' : '#dc2626'; msg.textContent = r.ok ? '✓ formatted' : r.msg; if (r.ok) setTimeout(() => { msg.textContent = ''; }, 1500); } });
+    return;
+  }
   const tokens = [];
   // mask the double-brace var occurrences with a unique sentinel string value
   const masked = raw.replace(/\{\{\s*[^}]+?\s*\}\}/g, (m) => {
@@ -5042,7 +5188,7 @@ function initV18XpathExtract() {
     const meta = document.getElementById('xpath-x-meta');
     const outDiv = document.getElementById('xpath-x-out');
     const row = document.getElementById('xpath-x-row').value.trim();
-    if (!xmlText || xmlText.trim().startsWith('(')) { meta.textContent = 'Run an XPath query first.'; outDiv.innerHTML = ''; return; }
+    if (!xmlText || xmlText.trim().startsWith('(')) { meta.textContent = 'Run an XPath query first — or ✎ Paste my own XML.'; outDiv.innerHTML = ''; return; }
     if (!row) { meta.textContent = 'Enter a row element.'; outDiv.innerHTML = ''; return; }
     const cols = [];
     document.getElementById('xpath-x-cols').value.split('\n').forEach(line => {
@@ -5169,6 +5315,37 @@ function initV18XqStore() {
   xqLoadProjects();
 }
 
+/* v1.55.0: paste XML from anywhere into Result(XML) — then Extract fields / XPath filter work on it */
+function initV18XpathPaste() {
+  const tog = document.getElementById('xpath-paste-toggle');
+  if (!tog) return;
+  const box = document.getElementById('xpath-paste-box'), ta = document.getElementById('xpath-paste-ta');
+  const meta = document.getElementById('xpath-paste-meta');
+  let attached = false;
+  tog.addEventListener('click', () => {
+    const show = box.style.display === 'none';
+    box.style.display = show ? '' : 'none';
+    if (show && !attached && window.HiEd) { HiEd.attach(ta, { lang: 'xml', height: '260px' }); attached = true; }
+    if (show) { const res = document.getElementById('xpath-result'); const cur = res && res.dataset.raw;
+                if (!ta.value.trim() && cur && !cur.trim().startsWith('(')) ta.value = cur;   // start from the last result
+                ta.focus(); }
+  });
+  document.getElementById('xpath-paste-cancel').addEventListener('click', () => { box.style.display = 'none'; });
+  document.getElementById('xpath-paste-use').addEventListener('click', () => {
+    const txt = ta.value.trim();
+    if (!txt) { meta.textContent = 'nothing pasted'; meta.style.color = '#dc2626'; return; }
+    const errs = window.HiEd ? HiEd._lint.xml(txt) : [];
+    const res = document.getElementById('xpath-result');
+    setResult(res, txt, 'xml');
+    meta.style.color = errs.length ? '#d97706' : '#16a34a';
+    meta.textContent = (errs.length ? '⚠ not valid XML (line ' + (errs[0].from.line + 1) + ') — filters may fail · ' : '✔ ') +
+                       'pasted data in Result (' + txt.split('\n').length + ' lines) — now use Extract fields or XPath filter';
+    box.style.display = 'none';
+    const x = document.getElementById('xpath-extract'); if (x && !x.open) x.open = true;
+    const f = document.getElementById('xpath-filter-tool'); if (f && !f.open) f.open = true;
+  });
+}
+
 function initV18XpathFilter() {
   const runBtn = document.getElementById('xpath-f-run');
   if (!runBtn) return;
@@ -5180,7 +5357,7 @@ function initV18XpathFilter() {
     const copyBtn = document.getElementById('xpath-f-copy');
     const expr = document.getElementById('xpath-f-expr').value.trim();
     copyBtn.style.display = 'none';
-    if (!xmlText || xmlText.trim().startsWith('(')) { meta.textContent = 'Run an XPath query first.'; out.textContent = ''; return; }
+    if (!xmlText || xmlText.trim().startsWith('(')) { meta.textContent = 'Run an XPath query first — or ✎ Paste my own XML.'; out.textContent = ''; return; }
     if (!expr) { meta.textContent = 'Enter an XPath expression.'; out.textContent = ''; return; }
     meta.textContent = 'Running...'; out.textContent = '';
     try {
@@ -6262,9 +6439,10 @@ function initV18PyProjPane() {
       extraKeys: { Tab: (c) => c.replaceSelection('    ', 'end') },
     });
     cm.setSize('100%', '360px');
+    if (window.HiEd) HiEd.enhance(cm, { lang: 'python', files: () => proj.files, fileName: () => proj.active });
   }
   const getCode = () => cm ? cm.getValue() : ta.value;
-  const setCode = (v) => { if (cm) { cm.setValue(v); } else { ta.value = v; } };
+  const setCode = (v) => { if (cm) { pySplitBefore(); cm.setValue(v); pySplitAfter(); } else { ta.value = v; } };
 
   let saveTimer = null;
   function persist() {
@@ -6299,6 +6477,7 @@ function initV18PyProjPane() {
       b.addEventListener('dblclick', () => renameFile(f.name));
       tabbar.insertBefore(b, addBtn);
     });
+    pySplitRefresh();
     const sel = document.getElementById('py2-entry');
     sel.innerHTML = '';
     proj.files.filter(f => f.name.endsWith('.py')).forEach(f => {
@@ -6312,6 +6491,7 @@ function initV18PyProjPane() {
     proj.active = name;
     const f = proj.files.find(f => f.name === name);
     setCode(f ? f.content : '');
+    if (cm && window.HiEd) HiEd.setLang(cm, HiEd.langFor(name, 'yaml'));
     renderTabs(); persist();
   }
   const NAME_RE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$/;
@@ -6332,6 +6512,7 @@ function initV18PyProjPane() {
     if (proj.files.find(f => f.name === name)) { alert('File already exists.'); return; }
     const f = proj.files.find(f => f.name === oldName);
     f.name = name;
+    pyExtra.forEach(x => { if (x.file === oldName) x.file = name; });
     if (proj.entry === oldName) proj.entry = name;
     if (proj.active === oldName) proj.active = name;
     renderTabs(); persist();
@@ -6479,6 +6660,81 @@ function initV18PyProjPane() {
       box.style.color = '#fca5a5';
     }
   });
+
+  // v1.55.0: 1–4 panes — the extra ones show other files of this project (same file = same text)
+  const pyExtra = [];                       // {file, cm, linked, card, sel}
+  function pySplitBefore() {                // main editor is about to load another file: detach
+    pyExtra.forEach(x => { if (x.linked) { try { x.cm.getDoc().unlinkDoc(cm.getDoc()); } catch (e) {} x.linked = false; } });
+  }
+  function pySplitAfter() {                 // panes showing the main editor's file share its text
+    pyExtra.forEach(x => { if (x.file === proj.active) pyShow(x); });
+  }
+  function pyShow(x) {
+    if (x.linked) { try { x.cm.getDoc().unlinkDoc(cm.getDoc()); } catch (e) {} x.linked = false; }
+    if (x.file === proj.active) { x.cm.swapDoc(cm.getDoc().linkedDoc({ sharedHist: true })); x.linked = true; }
+    else { const f = proj.files.find(f => f.name === x.file); x.cm.swapDoc(CodeMirror.Doc(f ? f.content : '')); }
+    if (window.HiEd) HiEd.setLang(x.cm, HiEd.langFor(x.file, 'yaml'));
+    if (x.sel) x.sel.value = x.file;
+  }
+  function pySplitRefresh() {               // file list changed (add / rename / delete / load)
+    pyExtra.forEach(x => {
+      if (!proj.files.find(f => f.name === x.file)) {
+        const used = new Set(pyExtra.map(p => p.file));
+        x.file = (proj.files.find(f => f.name !== proj.active && !used.has(f.name)) || proj.files.find(f => f.name === proj.active) || proj.files[0]).name;
+        pyShow(x);
+      }
+      x.sel.innerHTML = '';
+      proj.files.forEach(f => x.sel.add(new Option(f.name, f.name)));
+      x.sel.value = x.file;
+    });
+  }
+  if (cm && window.HiEd) {
+    const wrapEl = document.getElementById('py2-editor-wrap');
+    const grid = document.createElement('div');
+    grid.className = 'split-grid'; grid.id = 'py2-split';
+    wrapEl.parentNode.insertBefore(grid, wrapEl); grid.appendChild(wrapEl);
+    const bar = document.createElement('div');
+    bar.className = 'split-bar';
+    bar.innerHTML = '<span>View:</span>' + [1, 2, 3, 4].map(n => '<button type="button" data-n="' + n + '">' + ['▭', '◫', '▥', '⊞'][n - 1] + ' ' + n + '</button>').join('') +
+                    '<span class="split-hint">extra panes show other files of this project — pick one in each</span>';
+    grid.parentNode.insertBefore(bar, grid);
+    function addPane() {
+      const card = document.createElement('div');
+      card.style.cssText = 'border:1px solid #d1d5db; min-width:0;';
+      card.innerHTML = '<div style="display:flex; gap:6px; align-items:center; padding:3px 6px; border-bottom:1px solid #e5e7eb; font-size:12px;">📄 <select class="small" style="font-size:12px; max-width:220px;"></select></div>';
+      const t = document.createElement('textarea'); card.appendChild(t);
+      grid.appendChild(card);
+      const x = { file: '', card, sel: card.querySelector('select'), linked: false, cm: null };
+      x.cm = HiEd.attach(t, { lang: 'python', height: '360px', files: () => proj.files, fileName: () => x.file });
+      x.cm.on('change', () => {
+        if (x.linked) return;               // the main editor's change handler saves it
+        const f = proj.files.find(f => f.name === x.file);
+        if (f) { f.content = x.cm.getValue(); persist(); }
+      });
+      x.sel.addEventListener('change', () => {
+        // one extra pane per file (the main editor's file may be shown anywhere — it is linked)
+        if (x.sel.value !== proj.active && pyExtra.some(p => p !== x && p.file === x.sel.value)) {
+          alert(x.sel.value + ' is already open in another pane'); x.sel.value = x.file; return;
+        }
+        x.file = x.sel.value; pyShow(x);
+      });
+      pyExtra.push(x);
+      const used = new Set([proj.active].concat(pyExtra.map(p => p.file)));
+      x.file = (proj.files.find(f => !used.has(f.name)) || proj.files.find(f => f.name === proj.active) || proj.files[0]).name;
+      pySplitRefresh(); pyShow(x);
+    }
+    function setCount(n) {
+      while (pyExtra.length > n - 1) { const x = pyExtra.pop(); if (x.linked) { try { x.cm.getDoc().unlinkDoc(cm.getDoc()); } catch (e) {} } x.card.remove(); }
+      while (pyExtra.length < n - 1) addPane();
+      grid.dataset.n = String(n);
+      bar.querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.dataset.n === n));
+      try { localStorage.setItem('hitech.py2.split', String(n)); } catch (e) {}
+      setTimeout(() => { cm.refresh(); pyExtra.forEach(x => x.cm.refresh()); }, 30);
+    }
+    bar.addEventListener('click', (e) => { const b = e.target.closest('button[data-n]'); if (b) setCount(+b.dataset.n); });
+    let n0 = 1; try { n0 = +(localStorage.getItem('hitech.py2.split') || 1); } catch (e) {}
+    setTimeout(() => setCount(Math.max(1, Math.min(4, n0 || 1))), 0);
+  }
 
   // first paint
   renderTabs();
@@ -10036,6 +10292,7 @@ function initV18All() {
   initV18XpathPane();
   initV18XpathExtract();   // v1.10.0 (issue-2)
   initV18XpathFilter();    // v1.13.0: real-XPath filter on Result(XML)
+  initV18XpathPaste();     // v1.55.0: paste your own XML into Result(XML)
   initV18XqStore();        // v1.14.0: saved XPath queries
   seedHeaderDatalists();   // v1.8.1: populate header key/value dropdowns from localStorage
   decorateResultPanes();   // v1.8.1: add copy + expand toolbar to all result panes
@@ -10049,6 +10306,18 @@ function initV18All() {
   if (attachChk && typeof updateTokenCounter === 'function') attachChk.addEventListener('change', updateTokenCounter);
   decorateResultPanes();      // v1.16.0 issue-1: defensive second pass (idempotent)
   initPanelResize();          // v1.16.2: drag-resize on section panels
+  initCodeEditors();          // v1.54.0: code checks in every editor
+}
+
+/* v1.54.0: the remaining code boxes become checked editors (textarea API kept — see static/hitech-editor.js) */
+function initCodeEditors() {
+  if (!window.HiEd) return;
+  [['rc-payload', 'payload'], ['rc-vars', 'vars'], ['nc-xml-payload', 'xml'], ['nc-jinja-tpl', 'jinja-xml'],
+   ['nc-jinja-vars', 'vars'], ['cli-jinja-tpl', 'jinja'], ['cli-jinja-vars', 'vars'], ['py-code', 'python'],
+   ['yang-nc2-rpc', 'xml']].forEach(([id, lang]) => {
+    const ta = document.getElementById(id);
+    if (ta) { try { HiEd.attach(ta, { lang, noFormat: id === 'rc-payload' }); } catch (e) { console.warn('editor', id, e); } }
+  });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -10402,6 +10671,26 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <script>
+/* v1.53.0: copy a run's output as plain text (works on http:// too, where navigator.clipboard is missing) */
+function copyOut(preId, btnId) {
+  const o = document.getElementById(preId);
+  copyPlain(o.dataset.fresh === '0' ? o.textContent : '', document.getElementById(btnId));
+}
+function copyPlain(text, b) {
+  const label = b.dataset.label || (b.dataset.label = b.innerHTML);
+  const done = (ok, msg) => { b.textContent = msg || (ok ? '✔ Copied' : '✖ Copy failed'); setTimeout(() => b.innerHTML = label, 1500); };
+  if (!text) return done(false, 'nothing to copy');
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => done(true), () => done(fallback()));
+  } else done(fallback());
+  function fallback() {
+    const ta = document.createElement('textarea'); ta.value = text;
+    ta.style.cssText = 'position:fixed;left:-9999px;top:0'; document.body.appendChild(ta); ta.select();
+    let ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+    ta.remove(); return ok;
+  }
+}
+
 /* ===================== v1.50.0: Ansible ===================== */
 (function () {
   const $ = (id) => document.getElementById(id);
@@ -10456,12 +10745,16 @@ document.addEventListener('DOMContentLoaded', () => {
     sel.innerHTML = ps.length ? ps.map(p => '<option>' + esc(p) + '</option>').join('') : '<option value="">(none)</option>';
     const want = select || LS('hitech.ans.proj');
     if (want && ps.includes(want)) sel.value = want;
+    if (SPLIT && (sel.value || '') !== PROJ && PROJ) {     // other project: no pane may keep the old one's files
+      if (SPLIT.anyDirty() && !confirm('Discard unsaved changes in the open files?')) { sel.value = PROJ; return; }
+      SPLIT.clearAll();
+    }
     PROJ = sel.value || '';
     await loadTree();
   }
   $('ans-proj').onchange = async () => {
-    if (dirty && !confirm('Discard unsaved changes in ' + CUR + '?')) { $('ans-proj').value = PROJ; return; }
-    PROJ = $('ans-proj').value; LS('hitech.ans.proj', PROJ); CUR = ''; SELDIR = ''; setEditor(null); await loadTree();
+    if ((SPLIT ? SPLIT.anyDirty() : dirty) && !confirm('Discard unsaved changes?')) { $('ans-proj').value = PROJ; return; }
+    PROJ = $('ans-proj').value; LS('hitech.ans.proj', PROJ); CUR = ''; SELDIR = ''; if (SPLIT) SPLIT.clearAll(); else setEditor(null); await loadTree();
   };
 
   function kind(f) {
@@ -10518,8 +10811,15 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ---------------- editor ----------------
+  const ansEdOpts = { lang: 'text', height: '380px',
+      files: () => [{ name: (CUR || 'main.py').split('/').pop(), content: $('ans-ed').value }],
+      fileName: () => (CUR || 'main.py').split('/').pop() };
+  const ansCm = window.HiEd ? HiEd.attach($('ans-ed'), ansEdOpts) : null;
+  let SPLIT = null;
+  if (window.HiEd) HiEd.attach($('ans-ev'), { lang: 'yaml', height: '70px', noBar: true });
   function setEditor(path, content, binary) {
     const ed = $('ans-ed');
+    if (window.HiEd && HiEd.cmOf(ed)) HiEd.setLang(HiEd.cmOf(ed), binary ? 'text' : HiEd.langFor(path || ''));
     CUR = path || ''; dirty = false; $('ans-dirty').style.display = 'none';
     $('ans-edname').textContent = path || '(no file)';
     $('ans-edtype').textContent = path ? kind(path) : '';
@@ -10527,11 +10827,14 @@ document.addEventListener('DOMContentLoaded', () => {
     ed.value = binary ? '(binary file — not editable here)' : (content || '');
   }
   async function openFile(path) {
+    if (SPLIT) { const k = SPLIT.paneWith(path); if (k >= 0 && k !== SPLIT.act()) { SPLIT.activate(k); return; } }
     if (dirty && path !== CUR && !confirm('Discard unsaved changes in ' + CUR + '?')) return;
+    const k0 = SPLIT ? SPLIT.act() : 0, proj0 = PROJ;
     const d = await api('/api/ansible/file?project=' + encodeURIComponent(PROJ) + '&path=' + encodeURIComponent(path));
     if (!d.ok) return outErr(d.error);
-    setEditor(path, d.content, d.binary);
-    SELDIR = path.includes('/') ? path.split('/').slice(0, -1).join('/') : '';
+    if (PROJ !== proj0) return;                      // project changed meanwhile
+    const put = () => { setEditor(path, d.content, d.binary); SELDIR = path.includes('/') ? path.split('/').slice(0, -1).join('/') : ''; };
+    if (SPLIT) SPLIT.run(k0, put); else put();
     loadTree();
   }
   $('ans-ed').addEventListener('input', () => { if (!dirty) { dirty = true; $('ans-dirty').style.display = ''; } });
@@ -10546,13 +10849,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); save(); }
   });
   async function save() {
-    if (!CUR || $('ans-ed').disabled) return;
-    const d = await api('/api/ansible/file/save', { project: PROJ, path: CUR, content: $('ans-ed').value });
-    if (!d.ok) return outErr(d.error);
-    dirty = false; $('ans-dirty').style.display = 'none';
-    if (CUR === $('ans-pb').value) loadTags();
+    if (!CUR || $('ans-ed').disabled) return true;
+    const k0 = SPLIT ? SPLIT.act() : 0, content = $('ans-ed').value, path = CUR;
+    const d = await api('/api/ansible/file/save', { project: PROJ, path, content });
+    if (!d.ok) { outErr(d.error); return false; }
+    const done = () => { if ($('ans-ed').value === content) { dirty = false; $('ans-dirty').style.display = 'none'; } };
+    if (SPLIT) SPLIT.run(k0, done); else done();
+    if (path === $('ans-pb').value) loadTags();
+    return true;
   }
-  $('ans-save').onclick = save;
+  $('ans-save').onclick = () => save();
+  $('ans-copyfile').onclick = () => copyPlain(CUR && !$('ans-ed').disabled ? $('ans-ed').value : '', $('ans-copyfile'));
 
   // ---------------- create / delete / upload ----------------
   function modal(title, bodyHtml, onOk) {
@@ -10608,7 +10915,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!confirm('Delete ' + PROJ + '/' + target + (CUR ? '' : '/  (folder and everything in it)') + ' ?\nThis cannot be undone.')) return;
     const d = await api('/api/ansible/path/delete', { project: PROJ, path: target });
     if (!d.ok) return outErr(d.error);
-    if (CUR) setEditor(null); SELDIR = ''; loadTree();
+    if (SPLIT) SPLIT.forget(target); else if (CUR) setEditor(null); SELDIR = ''; loadTree();
   };
   $('ans-upload').onclick = () => $('ans-upload-in').click();
   $('ans-upload-in').onchange = async () => {
@@ -10706,7 +11013,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('#ans-rt-form [data-mode]').forEach(b => b.onclick = async () => {
     const mode = b.dataset.mode;
     if (!PROJ || !$('ans-pb').value) return outErr('Select a project and playbook first');
-    if (dirty && confirm(CUR + ' has unsaved changes — save before running?')) await save();
+    if (SPLIT) { if (!(await SPLIT.saveAll())) return; }
+    else if (dirty && confirm(CUR + ' has unsaved changes — save before running?')) await save();
     if (mode === 'run' && !$('ans-chk').checked) {
       const onlyDebug = TAGS.filter(t => tagState[t] === 'on');
       const safe = onlyDebug.length && onlyDebug.every(t => /debug/i.test(t));
@@ -10719,13 +11027,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ---------------- CLI ----------------
   function switchTab(t) {
-    document.querySelectorAll('.ans-rtabs div').forEach(x => x.classList.toggle('act', x.dataset.rt === t));
+    document.querySelectorAll('#v18-ansible-section .ans-rtabs div').forEach(x => x.classList.toggle('act', x.dataset.rt === t));
     $('ans-rt-form').style.display = t === 'form' ? '' : 'none';
     $('ans-rt-cli').style.display = t === 'cli' ? '' : 'none';
     LS('hitech.ans.tab', t);
     if (t === 'cli') $('ans-clin').focus();
   }
-  document.querySelectorAll('.ans-rtabs div').forEach(x => x.onclick = () => switchTab(x.dataset.rt));
+  document.querySelectorAll('#v18-ansible-section .ans-rtabs div').forEach(x => x.onclick = () => switchTab(x.dataset.rt));
   $('ans-clin').addEventListener('keydown', async (e) => {
     if (e.key === 'ArrowUp') { if (hi > 0) { hi--; $('ans-clin').value = hist[hi]; } e.preventDefault(); return; }
     if (e.key === 'ArrowDown') { if (hi < hist.length - 1) { hi++; $('ans-clin').value = hist[hi]; } else { hi = hist.length; $('ans-clin').value = ''; } e.preventDefault(); return; }
@@ -10788,8 +11096,21 @@ document.addEventListener('DOMContentLoaded', () => {
     tick();
   }
   $('ans-stop').onclick = async () => { if (JOB) await api('/api/ansible/job/' + JOB + '/cancel', {}); };
+  $('ans-copy').onclick = () => copyOut('ans-out', 'ans-copy');
   $('ans-clear').onclick = () => { $('ans-out').innerHTML = '<span class="ans-dim">output appears here</span>'; $('ans-out').dataset.fresh = '1'; $('ans-recap').style.display = 'none'; $('ans-jobinfo').textContent = ''; };
-  window.addEventListener('beforeunload', (e) => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+  window.addEventListener('beforeunload', (e) => { if (SPLIT ? SPLIT.anyDirty() : dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+  // v1.55.0: 1–4 editor panes + collapsible / resizable project column
+  if (window.HiSplit && ansCm) {
+    SPLIT = HiSplit.editors({ prefix: 'ans', card: $('ans-ed').closest('.ans-card'),
+      ids: ['ed', 'edname', 'edtype', 'dirty', 'save', 'copyfile'],
+      get: () => ({ path: CUR, dirty, proj: PROJ }),
+      set: (st, quiet) => { CUR = st.path; dirty = st.dirty; SELDIR = CUR.includes('/') ? CUR.split('/').slice(0, -1).join('/') : SELDIR; if (PROJ && !quiet) loadTree(); },
+      proj: () => PROJ,
+      save: () => save(), open: (pth) => openFile(pth), clear: () => setEditor(null),
+      attach: ansEdOpts, storeKey: 'hitech.ans.split' });
+  }
+  if (window.HiSplit) HiSplit.sidebar($('ans-tree').closest('.ans-work'), 'hitech.ans.side', 'project');
 
   // ---------------- init ----------------
   renderEnv();
@@ -10797,6 +11118,425 @@ document.addEventListener('DOMContentLoaded', () => {
   function init() { if (inited) return; inited = true; loadStatus(); loadProjects(); switchTab(LS('hitech.ans.tab') || 'form'); }
   document.querySelectorAll('.v18-nav-item[data-target="ansible"]').forEach(n => n.addEventListener('click', () => { init(); loadStatus(); }));
   if ((LS('hitech.nav') || '') === 'ansible') init();
+})();
+
+/* ===================== v1.53.0: Terraform ===================== */
+(function () {
+  const $ = (id) => document.getElementById(id);
+  if (!$('v18-terraform-section')) return;
+  const LS = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } };
+  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const api = async (url, body, method) => {
+    const r = await fetch(url, body === undefined && !method ? {} : { method: method || 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
+    return r.json();
+  };
+  const WANT_TF = '1.13.3', WANT_ACI = '2.17.0';
+  let PROJ = '', TREE = { files: [], dirs: [] }, CUR = '', SELDIR = '', dirty = false;
+  let JOB = null, JOBACT = '', pollT = null, hist = [], hi = 0, envs = [];
+  try { hist = JSON.parse(LS('hitech.tf.hist') || '[]'); } catch (e) { hist = []; }
+  hi = hist.length;
+
+  // ---------------- status ----------------
+  async function loadStatus() {
+    const el = $('tf-status');
+    let s; try { s = await api('/api/terraform/status'); } catch (e) { el.innerHTML = '<span class="ans-dim">status unavailable</span>'; return; }
+    if (!s.ok) { el.innerHTML = '<span style="color:#dc2626">✖ ' + esc(s.error) + '</span>'; return; }
+    $('tf-projdir').textContent = s.projects_dir;
+    const setup = s.remote ? '' : '<button type="button" class="ans-btn' + (s.installed ? ' ans-s' : '') + '" style="margin-left:auto" id="tf-setup">⚙ Install / repair</button>';
+    if (!s.installed) {
+      el.innerHTML = '<b style="color:#d97706">● Terraform not installed</b><span class="ans-dim">' +
+        (s.remote ? esc(s.error || 'the runner has no Terraform') : 'installs Terraform ' + WANT_TF + ' + CiscoDevNet/aci ' + WANT_ACI + ' into ' + esc(s.where) + ' (checksums verified, ~1 min)') +
+        '</span>' + setup;
+    } else {
+      const aci = (s.providers || {})['ciscodevnet/aci'];
+      const tfOk = s.terraform === WANT_TF;
+      let h = '<b style="color:#16a34a">● Terraform ready</b>' +
+        '<span class="ans-pill' + (tfOk ? '' : ' warn') + '" title="exam version ' + WANT_TF + '">terraform ' + esc(s.terraform || '?') + '</span>' +
+        (aci ? '<span class="ans-pill' + (aci === WANT_ACI ? '' : ' warn') + '">ciscodevnet/aci ' + esc(aci) + ' (local mirror)</span>'
+             : '<span class="ans-pill warn" title="terraform init downloads providers from the registry">no local provider mirror</span>');
+      if (s.remote) {
+        h += s.apic ? '<span class="ans-pill" title="var.apic_url is set to this for every run (TF_VAR_apic_url)">APIC ' + esc(s.apic) + '</span>'
+                    : '<span class="ans-dim">no ACI lab running — book one to apply; var.apic_url is set to your APIC when it is up</span>';
+        h += '<span class="ans-dim">· use <code>url = var.apic_url</code> in the provider — a fixed https://192.168.89.95 does not reach your lab APIC here</span>';
+      } else {
+        h += '<span class="ans-dim">' + esc(s.where) + '</span>';
+        if (!tfOk) h += '<span class="ans-dim">— not the exam version; ⚙ Install / repair adds ' + WANT_TF + ' for this app</span>';
+      }
+      el.innerHTML = h + setup;
+    }
+    if ($('tf-setup')) $('tf-setup').onclick = async () => {
+      if (!confirm('Install / repair Terraform now?\n\nDownloads Terraform ' + WANT_TF + ' (releases.hashicorp.com) and the CiscoDevNet/aci ' + WANT_ACI +
+                   ' provider (GitHub), checks both against their SHA256SUMS and sets up a local provider mirror.')) return;
+      const d = await api('/api/terraform/setup', {});
+      if (!d.ok) return outErr(d.error);
+      runJob(d.job, 'install / repair', () => loadStatus(), true);
+    };
+  }
+
+  // ---------------- projects & tree ----------------
+  async function loadProjects(select) {
+    const d = await api('/api/terraform/projects');
+    const sel = $('tf-proj');
+    const ps = (d && d.projects) || [];
+    sel.innerHTML = ps.length ? ps.map(p => '<option>' + esc(p) + '</option>').join('') : '<option value="">(none)</option>';
+    const want = select || LS('hitech.tf.proj');
+    if (want && ps.includes(want)) sel.value = want;
+    if (SPLIT && (sel.value || '') !== PROJ && PROJ) {     // other project: no pane may keep the old one's files
+      if (SPLIT.anyDirty() && !confirm('Discard unsaved changes in the open files?')) { sel.value = PROJ; return; }
+      SPLIT.clearAll();
+    }
+    PROJ = sel.value || '';
+    await loadTree();
+  }
+  $('tf-proj').onchange = async () => {
+    if ((SPLIT ? SPLIT.anyDirty() : dirty) && !confirm('Discard unsaved changes?')) { $('tf-proj').value = PROJ; return; }
+    PROJ = $('tf-proj').value; LS('hitech.tf.proj', PROJ); CUR = ''; SELDIR = ''; if (SPLIT) SPLIT.clearAll(); else setEditor(null); await loadTree();
+  };
+  function kind(f) {
+    if (/\.tfvars(\.json)?$/.test(f)) return 'variable values';
+    if (/terraform\.tfstate/.test(f)) return 'state (written by terraform)';
+    if (/\.terraform\.lock\.hcl$/.test(f)) return 'provider lock (written by init)';
+    if (/\.tf$/.test(f)) return 'HCL';
+    return '';
+  }
+  async function loadTree() {
+    const el = $('tf-tree');
+    ['tf-new-file', 'tf-new-dir', 'tf-upload', 'tf-del'].forEach(b => $(b).disabled = !PROJ);
+    $('tf-ps').textContent = (PROJ || '') + ' $';
+    $('tf-clicwd').textContent = (PROJ || 'project') + '/';
+    if (!PROJ) { el.innerHTML = '<span class="ans-dim">no project yet — click ＋ Project</span>'; fillVarFiles(); return; }
+    const d = await api('/api/terraform/tree/' + encodeURIComponent(PROJ));
+    if (!d.ok) { el.innerHTML = '<span style="color:#dc2626">' + esc(d.error) + '</span>'; return; }
+    TREE = d;
+    const node = { dirs: {}, files: [] };
+    d.dirs.forEach(p => { let n = node; p.split('/').forEach(s => { n = n.dirs[s] = n.dirs[s] || { dirs: {}, files: [] }; }); });
+    d.files.forEach(f => { const parts = f.path.split('/'); let n = node; parts.slice(0, -1).forEach(s => { n = n.dirs[s] = n.dirs[s] || { dirs: {}, files: [] }; }); n.files.push(f); });
+    let h = '<div class="d' + (SELDIR === '' ? ' sel' : '') + '" data-dir="">📁 ' + esc(PROJ) + '/' +
+            (d.state ? ' <span class="ans-dim" style="font-weight:400">· has state</span>' : '') + '</div>';
+    const walk = (n, prefix, depth) => {
+      Object.keys(n.dirs).sort().forEach(name => {
+        const path = prefix + name;
+        h += '<div class="d' + (SELDIR === path ? ' sel' : '') + '" data-dir="' + esc(path) + '" style="padding-left:' + (8 + depth * 16) + 'px">📁 ' + esc(name) + '/</div>';
+        walk(n.dirs[name], path + '/', depth + 1);
+      });
+      n.files.sort((a, b) => a.path.localeCompare(b.path)).forEach(f => {
+        const nm = f.path.split('/').pop();
+        const st = /tfstate|\.lock\.hcl$/.test(nm);
+        const ic = /\.tfvars/.test(nm) ? '🔧' : st ? '🗄' : /\.tf$/.test(nm) ? '🟪' : '📄';
+        h += '<div data-f="' + esc(f.path) + '" class="' + (f.path === CUR ? 'sel' : '') + (st ? ' st' : '') + '" style="padding-left:' + (8 + depth * 16) + 'px">' + ic + ' ' + esc(nm) + '</div>';
+      });
+    };
+    walk(node, '', 1);
+    el.innerHTML = h;
+    fillVarFiles();
+  }
+  $('tf-tree').addEventListener('click', (e) => {
+    const f = e.target.closest('[data-f]'), dd = e.target.closest('[data-dir]');
+    if (f) openFile(f.dataset.f);
+    else if (dd) { SELDIR = dd.dataset.dir; loadTree(); }
+  });
+
+  // ---------------- editor ----------------
+  const tfEdOpts = { lang: 'hcl', height: '380px',
+      onFormat: async () => {
+        if (!CUR || !/\.(tf|tfvars)$/.test(CUR)) return { ok: false, msg: 'terraform fmt formats .tf / .tfvars files' };
+        document.querySelector('#tf-rt-form [data-act="fmt"]').click();
+        return { ok: true, msg: 'running terraform fmt…' };
+      } };
+  const tfCm = window.HiEd ? HiEd.attach($('tf-ed'), tfEdOpts) : null;
+  const curCm = () => (window.HiEd ? HiEd.cmOf($('tf-ed')) : null);     // the active pane's editor
+  let SPLIT = null;
+  // after a save: terraform validate -json, errors on their lines (other files: in the output)
+  let valSeq = 0;
+  async function validateNow() {
+    const vcm = curCm();
+    if (!vcm || !PROJ || !/\.(tf|tfvars)$/.test(CUR || '')) return;
+    const my = ++valSeq, file = CUR, st = vcm._hied.status;
+    if (st) { st.textContent = '⏳ terraform validate…'; st.style.color = '#64748b'; }
+    let d; try { d = await api('/api/terraform/validate', { project: PROJ, env: envObj() }); } catch (e) { return; }
+    if (my !== valSeq || file !== CUR) return;
+    if (!d.ok) { if (st) st.textContent = ''; return; }
+    if (d.skipped) { if (st) { st.textContent = 'validate skipped: ' + d.skipped; } return; }
+    const here = [], elsewhere = [];
+    (d.diagnostics || []).forEach(x => {
+      const msg = 'terraform: ' + x.summary + (x.detail ? ' — ' + x.detail.replace(/\s+/g, ' ').slice(0, 300) : '');
+      if (x.file && x.file === file) {
+        const fl = (x.line || 1) - 1, fc = (x.column || 1) - 1;
+        const el = x.end_line ? x.end_line - 1 : fl, ec = x.end_column ? x.end_column - 1 : fc + 1;
+        here.push({ from: CodeMirror.Pos(fl, fc), to: CodeMirror.Pos(el, el === fl && ec <= fc ? fc + 1 : ec), message: msg, severity: x.severity === 'warning' ? 'warning' : 'error' });
+      }
+      else elsewhere.push((x.file ? x.file + ':' + x.line + ' ' : '') + msg);
+    });
+    HiEd.setExternal(vcm, here);
+    if (elsewhere.length) { outLine('terraform validate — other files:', 'o-hd'); elsewhere.forEach(l => outLine(l, 'o-fa')); }
+  }
+  function setEditor(path, content, binary) {
+    const ed = $('tf-ed');
+    if (curCm()) HiEd.setLang(curCm(), binary ? 'text' : HiEd.langFor(path || '', 'yaml'));
+    CUR = path || ''; dirty = false; $('tf-dirty').style.display = 'none';
+    $('tf-edname').textContent = path || '(no file)';
+    $('tf-edtype').textContent = path ? kind(path) : '';
+    ed.disabled = !path || binary;
+    ed.value = binary ? '(binary file — not editable here)' : (content || '');
+  }
+  async function openFile(path) {
+    if (SPLIT) { const k = SPLIT.paneWith(path); if (k >= 0 && k !== SPLIT.act()) { SPLIT.activate(k); return; } }
+    if (dirty && path !== CUR && !confirm('Discard unsaved changes in ' + CUR + '?')) return;
+    const k0 = SPLIT ? SPLIT.act() : 0, proj0 = PROJ;
+    const d = await api('/api/terraform/file?project=' + encodeURIComponent(PROJ) + '&path=' + encodeURIComponent(path));
+    if (!d.ok) return outErr(d.error);
+    if (PROJ !== proj0) return;                      // project changed meanwhile
+    const put = () => { setEditor(path, d.content, d.binary); SELDIR = path.includes('/') ? path.split('/').slice(0, -1).join('/') : ''; };
+    if (SPLIT) SPLIT.run(k0, put); else put();
+    loadTree();
+  }
+  $('tf-ed').addEventListener('input', () => { if (!dirty) { dirty = true; $('tf-dirty').style.display = ''; } });
+  $('tf-ed').addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const t = e.target, s = t.selectionStart;
+      t.value = t.value.slice(0, s) + '  ' + t.value.slice(t.selectionEnd);
+      t.selectionStart = t.selectionEnd = s + 2;
+      t.dispatchEvent(new Event('input'));
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); save(); }
+  });
+  async function save(noValidate) {
+    if (!CUR || $('tf-ed').disabled) return true;
+    const k0 = SPLIT ? SPLIT.act() : 0, content = $('tf-ed').value;
+    const d = await api('/api/terraform/file/save', { project: PROJ, path: CUR, content });
+    if (!d.ok) { outErr(d.error); return false; }
+    const done = () => { if ($('tf-ed').value === content) { dirty = false; $('tf-dirty').style.display = 'none'; } };
+    if (SPLIT) SPLIT.run(k0, done); else done();
+    if (noValidate !== true && (!SPLIT || SPLIT.act() === k0)) validateNow();
+    return true;
+  }
+  $('tf-save').onclick = () => save();
+  $('tf-copyfile').onclick = () => copyPlain(CUR && !$('tf-ed').disabled ? $('tf-ed').value : '', $('tf-copyfile'));
+
+  // ---------------- create / delete / upload ----------------
+  function modal(title, bodyHtml, onOk) {
+    const m = document.createElement('div');
+    m.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.45);display:grid;place-items:center;z-index:9999';
+    m.innerHTML = '<div style="background:#fff;color:#0f172a;border-radius:8px;padding:18px;width:440px;font-size:13px">' +
+      '<h4 style="margin:0 0 10px">' + esc(title) + '</h4>' + bodyHtml +
+      '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button type="button" class="ans-btn ans-s" data-x>Cancel</button><button type="button" class="ans-btn" data-ok>Create</button></div></div>';
+    document.body.appendChild(m);
+    const close = () => m.remove();
+    m.querySelector('[data-x]').onclick = close;
+    m.querySelector('[data-ok]').onclick = async () => { if (await onOk(m) !== false) close(); };
+    const first = m.querySelector('input,select'); if (first) first.focus();
+    m.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') m.querySelector('[data-ok]').click(); });
+  }
+  const inpStyle = 'style="width:100%;padding:6px 8px;border:1px solid #cbd5e1;border-radius:5px;margin:4px 0 10px;box-sizing:border-box"';
+  $('tf-new-proj').onclick = () => modal('New Terraform project',
+    '<label>Project name <span class="ans-req">*</span></label><input id="m-n" placeholder="e2-terraform" ' + inpStyle + '>' +
+    '<label class="ans-inl"><input type="checkbox" id="m-s" checked> start with the ACI example (main.tf, variables.tf, outputs.tf, terraform.tfvars)</label>',
+    async (m) => {
+      const n = m.querySelector('#m-n').value.trim();
+      const d = await api('/api/terraform/project/create', { project: n, starter: m.querySelector('#m-s').checked });
+      if (!d.ok) { alert(d.error); return false; }
+      LS('hitech.tf.proj', n); await loadProjects(n);
+      if (m.querySelector('#m-s').checked) openFile('main.tf');
+    });
+  $('tf-new-file').onclick = () => modal('New file in ' + PROJ + '/' + (SELDIR ? SELDIR + '/' : ''),
+    '<label>File name <span class="ans-req">*</span></label><input id="m-n" placeholder="tenant.tf" ' + inpStyle + '>' +
+    '<label>Start from</label><select id="m-t" ' + inpStyle + '><option value="tf">empty .tf</option><option value="tenant">aci_tenant resource</option>' +
+    '<option value="variable">variable block</option><option value="output">output block</option><option value="tfvars">empty .tfvars</option><option value="empty">empty</option></select>',
+    async (m) => {
+      const path = (SELDIR ? SELDIR + '/' : '') + m.querySelector('#m-n').value.trim();
+      const d = await api('/api/terraform/file/create', { project: PROJ, path, template: m.querySelector('#m-t').value });
+      if (!d.ok) { alert(d.error); return false; }
+      await loadTree(); openFile(path);
+    });
+  $('tf-new-dir').onclick = () => modal('New folder in ' + PROJ + '/' + (SELDIR ? SELDIR + '/' : ''), '<label>Folder name <span class="ans-req">*</span></label><input id="m-n" placeholder="modules" ' + inpStyle + '>', async (m) => {
+    const path = (SELDIR ? SELDIR + '/' : '') + m.querySelector('#m-n').value.trim();
+    const d = await api('/api/terraform/folder/create', { project: PROJ, path });
+    if (!d.ok) { alert(d.error); return false; }
+    SELDIR = path; await loadTree();
+  });
+  $('tf-del').onclick = async () => {
+    const target = CUR || SELDIR;
+    if (!target) {
+      if (!PROJ || !confirm('Delete the whole project ' + PROJ + ' (all files and its state)?\n\nResources it created on the APIC stay — run destroy first if you want them gone.')) return;
+      const d = await api('/api/terraform/project/delete', { project: PROJ });
+      if (!d.ok) return outErr(d.error);
+      LS('hitech.tf.proj', ''); if (SPLIT) SPLIT.clearAll(); else setEditor(null); return loadProjects();
+    }
+    const stateWarn = /tfstate/.test(target) ? '\n\n⚠ Without the state Terraform forgets what it created — destroy will no longer remove it.' : '';
+    if (!confirm('Delete ' + PROJ + '/' + target + (CUR ? '' : '/  (folder and everything in it)') + ' ?\nThis cannot be undone.' + stateWarn)) return;
+    const d = await api('/api/terraform/path/delete', { project: PROJ, path: target });
+    if (!d.ok) return outErr(d.error);
+    if (SPLIT) SPLIT.forget(target); else if (CUR) setEditor(null); SELDIR = ''; loadTree();
+  };
+  $('tf-upload').onclick = () => $('tf-upload-in').click();
+  $('tf-upload-in').onchange = async () => {
+    const fs = $('tf-upload-in').files; if (!fs.length) return;
+    const fd = new FormData(); fd.append('project', PROJ); fd.append('folder', SELDIR);
+    [...fs].forEach(f => fd.append('files', f));
+    const d = await (await fetch('/api/terraform/file/upload', { method: 'POST', body: fd })).json();
+    $('tf-upload-in').value = '';
+    if (!d.ok) return outErr(d.error);
+    outLine('uploaded: ' + d.saved.join(', '), 'o-ok'); loadTree();
+  };
+
+  // ---------------- actions ----------------
+  function fillVarFiles() {
+    const sel = $('tf-varfile'), prev = sel.value || LS('hitech.tf.vf.' + PROJ) || '';
+    const vfs = TREE.files.map(f => f.path).filter(p => /\.tfvars(\.json)?$/.test(p) && p !== 'terraform.tfvars' && !/\.auto\.tfvars/.test(p));
+    sel.innerHTML = '<option value="">(terraform.tfvars only)</option>' + vfs.map(p => '<option>' + esc(p) + '</option>').join('');
+    if (vfs.includes(prev)) sel.value = prev;
+    cmd();
+  }
+  $('tf-varfile').onchange = () => { LS('hitech.tf.vf.' + PROJ, $('tf-varfile').value); cmd(); };
+  $('tf-targets').addEventListener('input', cmd);
+  const targets = () => $('tf-targets').value.split(',').map(s => s.trim()).filter(Boolean);
+  function argsFor(act) {
+    const base = { init: 'init', fmt: 'fmt', validate: 'validate', plan: 'plan', apply: 'apply -auto-approve', destroy: 'destroy -auto-approve',
+                   output: 'output', show: 'show', state: 'state list', providers: 'providers', version: 'version' }[act];
+    let c = 'terraform ' + base;
+    if (['plan', 'apply', 'destroy'].includes(act)) {
+      targets().forEach(t => c += ' -target=' + t);
+      if ($('tf-varfile').value) c += ' -var-file=' + $('tf-varfile').value;
+    }
+    return c;
+  }
+  function cmd() {
+    const pre = envs.filter(e => e[0]).map(e => e[0] + '=' + (e[2] ? "'******'" : e[1])).join(' ');
+    $('tf-cmd').textContent = (pre ? pre + ' \\\n' : '') + argsFor('plan') + '      # init runs first when needed';
+  }
+
+  function renderEnv() {
+    $('tf-envs').innerHTML = envs.map((e, i) => '<div class="ans-envrow">' +
+      '<input data-i="' + i + '" data-k="0" value="' + esc(e[0]) + '" placeholder="TF_VAR_name" style="font-family:monospace">' +
+      '<input data-i="' + i + '" data-k="1" type="' + (e[2] ? 'password' : 'text') + '" value="' + esc(e[1]) + '" placeholder="value">' +
+      '<label class="ans-inl ans-dim"><input type="checkbox" data-i="' + i + '" data-k="2" ' + (e[2] ? 'checked' : '') + '>secret</label>' +
+      '<button type="button" class="ans-btn ans-r" data-del="' + i + '">✕</button></div>').join('');
+  }
+  $('tf-envs').addEventListener('input', (e) => {
+    const i = +e.target.dataset.i, k = +e.target.dataset.k; if (isNaN(i)) return;
+    envs[i][k] = k === 2 ? e.target.checked : e.target.value;
+    if (k === 2) renderEnv();
+    saveEnvNames(); cmd();
+  });
+  $('tf-envs').addEventListener('click', (e) => { if (e.target.dataset.del !== undefined) { envs.splice(+e.target.dataset.del, 1); renderEnv(); saveEnvNames(); cmd(); } });
+  $('tf-add-env').onclick = () => { envs.push(['', '', false]); renderEnv(); };
+  function saveEnvNames() { LS('hitech.tf.env', JSON.stringify(envs.map(e => [e[0], e[2] ? '' : e[1], e[2]]))); }
+  try { envs = JSON.parse(LS('hitech.tf.env') || '[]'); } catch (e) { envs = []; }
+  const envObj = () => Object.fromEntries(envs.filter(e => e[0]).map(e => [e[0], e[1]]));
+
+  async function beforeRun() {
+    if (!PROJ) { outErr('Create or select a project first'); return false; }
+    if (SPLIT) return await SPLIT.saveAll();
+    if (dirty && confirm(CUR + ' has unsaved changes — save before running?')) return await save(true);
+    return true;
+  }
+  document.querySelectorAll('#tf-rt-form [data-act]').forEach(b => b.onclick = async () => {
+    const act = b.dataset.act;
+    if (!(await beforeRun())) return;
+    if (act === 'apply' && !confirm('terraform apply — this creates / changes objects on the APIC.\n\n' + argsFor(act) + '\n\nTip: run plan first to see what will change. Continue?')) return;
+    if (act === 'destroy' && !confirm('terraform destroy — this DELETES everything this project created on the APIC' +
+        (targets().length ? ' (only the -target resources)' : '') + '.\n\n' + argsFor(act) + '\n\nContinue?')) return;
+    const d = await api('/api/terraform/run', { project: PROJ, action: act, targets: targets(), var_file: $('tf-varfile').value, env: envObj() });
+    if (!d.ok) return outErr(d.error);
+    runJob(d.job, argsFor(act), () => { loadTree(); if (SPLIT) SPLIT.reloadAll(); else if (CUR && !dirty) openFile(CUR); }, false, act);
+  });
+
+  // ---------------- CLI ----------------
+  function switchTab(t) {
+    document.querySelectorAll('#tf-rtabs div').forEach(x => x.classList.toggle('act', x.dataset.rt === t));
+    $('tf-rt-form').style.display = t === 'form' ? '' : 'none';
+    $('tf-rt-cli').style.display = t === 'cli' ? '' : 'none';
+    LS('hitech.tf.tab', t);
+    if (t === 'cli') $('tf-clin').focus();
+  }
+  document.querySelectorAll('#tf-rtabs div').forEach(x => x.onclick = () => switchTab(x.dataset.rt));
+  $('tf-clin').addEventListener('keydown', async (e) => {
+    if (e.key === 'ArrowUp') { if (hi > 0) { hi--; $('tf-clin').value = hist[hi]; } e.preventDefault(); return; }
+    if (e.key === 'ArrowDown') { if (hi < hist.length - 1) { hi++; $('tf-clin').value = hist[hi]; } else { hi = hist.length; $('tf-clin').value = ''; } e.preventDefault(); return; }
+    if (e.key !== 'Enter') return;
+    const line = $('tf-clin').value.trim(); if (!line) return;
+    if (!(await beforeRun())) return;
+    if (hist[hist.length - 1] !== line) { hist.push(line); hist = hist.slice(-100); LS('hitech.tf.hist', JSON.stringify(hist)); }
+    hi = hist.length; $('tf-clin').value = '';
+    const sub = (line.split(/\s+/)[1] || '');
+    if ((sub === 'apply' || sub === 'destroy') && !confirm('terraform ' + sub + ' — this changes the APIC (runs with -auto-approve).\n\n' + line + '\n\nContinue?')) return;
+    const d = await api('/api/terraform/cli', { project: PROJ, command: line, env: envObj() });
+    if (!d.ok) { outLine(PROJ + ' $ ' + line, 'o-ok'); return outErr(d.error); }
+    runJob(d.job, line, () => loadTree(), false, sub);
+  });
+
+  // ---------------- job output ----------------
+  const ANSI = /\x1b\[[0-9;]*[A-Za-z]/g;
+  function outLine(text, c) {
+    text = String(text).replace(ANSI, '');
+    const o = $('tf-out');
+    if (o.dataset.fresh !== '0') { o.innerHTML = ''; o.dataset.fresh = '0'; }
+    o.insertAdjacentHTML('beforeend', (c ? '<span class="' + c + '">' + esc(text) + '</span>' : esc(text)) + '\n');
+    o.scrollTop = o.scrollHeight;
+  }
+  function outErr(msg) { outLine('✖ ' + msg, 'o-fa'); }
+  function cls(l) {
+    if (/^\$ /.test(l)) return 'o-hd';
+    if (/^\s*(Error|╷|│ Error)/.test(l) || /^✖/.test(l)) return 'o-fa';
+    if (/^\s*(Warning|│ Warning)/.test(l) || /^■/.test(l)) return 'o-sk';
+    if (/(Apply complete!|Destroy complete!|has been successfully initialized|Success! The configuration is valid|No changes\.|Creation complete|Destruction complete)/.test(l)) return 'o-ok';
+    if (/^\s*\+ /.test(l)) return 'o-ok';
+    if (/^\s*(-|-\/\+) /.test(l)) return 'o-fa';
+    if (/^\s*~ /.test(l) || /^Plan: /.test(l)) return 'o-ch';
+    return '';
+  }
+  function runJob(id, label, onDone, showArgv, act) {
+    if (pollT) clearTimeout(pollT);
+    JOB = id; JOBACT = act || ''; $('tf-stop').disabled = false;
+    const o = $('tf-out'); o.innerHTML = ''; o.dataset.fresh = '0';
+    outLine((PROJ || '') + ' $ ' + label, 'o-ok');
+    let since = 0;
+    const tick = async () => {
+      let d; try { d = await (await fetch('/api/terraform/job/' + id + '?since=' + since)).json(); } catch (e) { pollT = setTimeout(tick, 1500); return; }
+      if (!d.ok) { outErr(d.error); $('tf-stop').disabled = true; return; }
+      since = d.next;
+      d.lines.forEach(l => {
+        // the argv echo of the action itself repeats the label; keep the init step visible
+        if (/^\$ /.test(l) && !showArgv && !/\binit -input=false -no-color$/.test(l)) return;
+        outLine(l.replace(/^\$ \S*\/terraform /, '$ terraform '), cls(l));
+      });
+      $('tf-jobinfo').textContent = (d.done ? (d.rc === 0 ? '✔ finished' : '✖ exit ' + d.rc) : '⏳ running') + ' · ' + d.elapsed + ' s';
+      if (!d.done) { pollT = setTimeout(tick, 400); return; }
+      $('tf-stop').disabled = true; JOB = null;
+      if (onDone) onDone();
+    };
+    tick();
+  }
+  $('tf-stop').onclick = async () => {
+    if (!JOB) return;
+    if ((JOBACT === 'apply' || JOBACT === 'destroy') &&
+        !confirm('Stop ' + JOBACT + ' now?\n\nObjects already changed on the APIC may not be recorded in the state — check with plan afterwards.')) return;
+    const d = await api('/api/terraform/job/' + JOB + '/cancel', {});
+    if (!d.ok) outErr(d.error);
+  };
+  $('tf-copy').onclick = () => copyOut('tf-out', 'tf-copy');
+  $('tf-clear').onclick = () => { $('tf-out').innerHTML = '<span class="ans-dim">output appears here</span>'; $('tf-out').dataset.fresh = '1'; $('tf-jobinfo').textContent = ''; };
+  window.addEventListener('beforeunload', (e) => { if (SPLIT ? SPLIT.anyDirty() : dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+  // v1.55.0: 1–4 editor panes + collapsible / resizable project column
+  if (window.HiSplit && tfCm) {
+    SPLIT = HiSplit.editors({ prefix: 'tf', card: $('tf-ed').closest('.ans-card'),
+      ids: ['ed', 'edname', 'edtype', 'dirty', 'save', 'copyfile'],
+      get: () => ({ path: CUR, dirty, proj: PROJ }),
+      set: (st, quiet) => { CUR = st.path; dirty = st.dirty; SELDIR = CUR.includes('/') ? CUR.split('/').slice(0, -1).join('/') : SELDIR; if (PROJ && !quiet) loadTree(); },
+      proj: () => PROJ,
+      save: (nv) => save(nv), open: (pth) => openFile(pth), clear: () => setEditor(null),
+      attach: tfEdOpts, storeKey: 'hitech.tf.split' });
+  }
+  if (window.HiSplit) HiSplit.sidebar($('tf-tree').closest('.ans-work'), 'hitech.tf.side', 'project');
+
+  // ---------------- init ----------------
+  renderEnv();
+  let inited = false;
+  function init() { if (inited) return; inited = true; loadStatus(); loadProjects(); switchTab(LS('hitech.tf.tab') || 'form'); }
+  document.querySelectorAll('.v18-nav-item[data-target="terraform"]').forEach(n => n.addEventListener('click', () => { init(); loadStatus(); }));
+  if ((LS('hitech.nav') || '') === 'terraform') init();
 })();
 </script>
 

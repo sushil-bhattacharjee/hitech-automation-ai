@@ -1,0 +1,988 @@
+{
+  "version": 1,
+  "root": {
+    "id": "root",
+    "type": "folder",
+    "name": "RESTCONF",
+    "children": [
+      {
+        "id": "nd1c972d489e0",
+        "type": "folder",
+        "name": "iosxe",
+        "children": [
+          {
+            "id": "na6c449a629ea",
+            "type": "request",
+            "name": "GET router-ospf",
+            "request": {
+              "name": "GET router-ospf",
+              "method": "GET",
+              "uri": "https://{{cat8Kv71}}/restconf/data/Cisco-IOS-XE-native:native/router/router-ospf",
+              "params": {},
+              "headers": {
+                "Accept": "application/yang-data+json"
+              },
+              "auth_type": "basic",
+              "auth_username": "expert",
+              "auth_password": "1234QWer!",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {}
+            }
+          },
+          {
+            "id": "n7a423ccd3303",
+            "type": "request",
+            "name": "bgp-neighbor",
+            "request": {
+              "name": "GET bgp-neighbor",
+              "method": "GET",
+              "uri": "https://{{cat8Kv71}}/restconf/data/Cisco-IOS-XE-native:native/router/bgp=65001/neighbor",
+              "params": {},
+              "headers": {
+                "Accept": "application/yang-data+json"
+              },
+              "auth_type": "basic",
+              "auth_username": "expert",
+              "auth_password": "1234QWer!",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {}
+            }
+          },
+          {
+            "id": "n128dcda5a1b6",
+            "type": "request",
+            "name": "native",
+            "request": {
+              "name": "native",
+              "method": "GET",
+              "uri": "https://{{cat8Kv71}}/restconf/data/Cisco-IOS-XE-native:native",
+              "params": {},
+              "headers": {
+                "Accept": "application/yang-data+json"
+              },
+              "auth_type": "basic",
+              "auth_username": "expert",
+              "auth_password": "1234QWer!",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": "",
+                "jq_raw": false,
+                "jq_engine": "browser"
+              }
+            }
+          },
+          {
+            "id": "n9ca6b51b2b6b",
+            "type": "request",
+            "name": "standard=xxx",
+            "request": {
+              "name": "native copy",
+              "method": "GET",
+              "uri": "https://{{cat8Kv71}}/restconf/data/Cisco-IOS-XE-native:native/ip/access-list/standard=SNMP-ACL",
+              "params": {},
+              "headers": {
+                "Accept": "application/yang-data+json"
+              },
+              "auth_type": "basic",
+              "auth_username": "expert",
+              "auth_password": "1234QWer!",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": "",
+                "jq_raw": false,
+                "jq_engine": "browser"
+              }
+            }
+          },
+          {
+            "id": "n9071a44c848e",
+            "type": "request",
+            "name": "access-list",
+            "request": {
+              "name": "standard=SNMP-ACL",
+              "method": "GET",
+              "uri": "https://{{cat8Kv71}}/restconf/data/Cisco-IOS-XE-native:native/ip/access-list",
+              "params": {},
+              "headers": {
+                "Accept": "application/yang-data+json"
+              },
+              "auth_type": "basic",
+              "auth_username": "expert",
+              "auth_password": "1234QWer!",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": "",
+                "jq_raw": false,
+                "jq_engine": "browser"
+              }
+            }
+          },
+          {
+            "id": "neca8186310a3",
+            "type": "request",
+            "name": "extended",
+            "request": {
+              "name": "access-list",
+              "method": "GET",
+              "uri": "https://{{cat8Kv71}}/restconf/data/Cisco-IOS-XE-native:native/ip/access-list/extended",
+              "params": {},
+              "headers": {
+                "Accept": "application/yang-data+json"
+              },
+              "auth_type": "basic",
+              "auth_username": "expert",
+              "auth_password": "1234QWer!",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": "",
+                "jq_raw": false,
+                "jq_engine": "browser"
+              }
+            }
+          },
+          {
+            "id": "nc7840cb90ccc",
+            "type": "request",
+            "name": "extended=chxx",
+            "request": {
+              "name": "extended",
+              "method": "GET",
+              "uri": "https://{{cat8Kv71}}/restconf/data/Cisco-IOS-XE-native:native/ip/access-list/extended=challenge-207-pod-10",
+              "params": {},
+              "headers": {
+                "Accept": "application/yang-data+json"
+              },
+              "auth_type": "basic",
+              "auth_username": "expert",
+              "auth_password": "1234QWer!",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": "",
+                "jq_raw": false,
+                "jq_engine": "browser"
+              }
+            }
+          },
+          {
+            "id": "n16f0466b6d28",
+            "type": "request",
+            "name": "extended=xxx",
+            "request": {
+              "name": "extended",
+              "method": "PATCH",
+              "uri": "https://{{cat8Kv71}}/restconf/data/Cisco-IOS-XE-native:native/ip/access-list/extended=challenge-207-pod-10",
+              "params": {},
+              "headers": {
+                "Accept": "application/yang-data+json",
+                "Content-Type": "application/yang-data+json"
+              },
+              "auth_type": "basic",
+              "auth_username": "expert",
+              "auth_password": "1234QWer!",
+              "auth_token": "",
+              "device_name": "",
+              "payload": "{\n  \"Cisco-IOS-XE-acl:extended\": {\n    \"name\": \"challenge-207-pod-10\",\n    \"access-list-seq-rule\": [\n      {\n        \"sequence\": \"10\",\n        \"ace-rule\": {\n          \"action\": \"permit\",\n          \"protocol\": \"tcp\",\n          \"any\": [\n            null\n          ],\n          \"src-gt\": 10,\n          \"dest-ipv4-address\": \"203.36.36.32\",\n          \"dest-mask\": \"0.0.0.15\",\n          \"dst-eq\": 636\n        }\n      },\n      {\n        \"sequence\": \"20\",\n        \"ace-rule\": {\n          \"action\": \"deny\",\n          \"protocol\": \"ip\",\n          \"host-address\": \"198.51.100.6\",\n          \"dst-any\": [\n            null\n          ]\n        }\n      }\n    ]\n  }\n}",
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": "",
+                "jq_raw": false,
+                "jq_engine": "browser"
+              }
+            }
+          },
+          {
+            "id": "n62a9cc2c8fb1",
+            "type": "request",
+            "name": "extended=xxx",
+            "request": {
+              "name": "extended=xxx",
+              "method": "PUT",
+              "uri": "https://{{cat8Kv71}}/restconf/data/Cisco-IOS-XE-native:native/ip/access-list/extended=challenge-207-pod-10",
+              "params": {},
+              "headers": {
+                "Accept": "application/yang-data+json",
+                "Content-Type": "application/yang-data+json"
+              },
+              "auth_type": "basic",
+              "auth_username": "expert",
+              "auth_password": "1234QWer!",
+              "auth_token": "",
+              "device_name": "",
+              "payload": "{\n  \"Cisco-IOS-XE-acl:extended\": {\n    \"name\": \"challenge-207-pod-10\",\n    \"access-list-seq-rule\": [\n      {\n        \"sequence\": \"10\",\n        \"ace-rule\": {\n          \"action\": \"permit\",\n          \"protocol\": \"tcp\",\n          \"any\": [\n            null\n          ],\n          \"src-gt\": 10,\n          \"dest-ipv4-address\": \"203.36.36.32\",\n          \"dest-mask\": \"0.0.0.15\",\n          \"dst-eq\": 636\n        }\n      },\n      {\n        \"sequence\": \"20\",\n        \"ace-rule\": {\n          \"action\": \"deny\",\n          \"protocol\": \"ip\",\n          \"host-address\": \"198.51.100.6\",\n          \"dst-any\": [\n            null\n          ]\n        }\n      }\n    ]\n  }\n}",
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": "",
+                "jq_raw": false,
+                "jq_engine": "browser"
+              }
+            }
+          },
+          {
+            "id": "n543fcdca9f8e",
+            "type": "request",
+            "name": "Find allow",
+            "request": {
+              "name": "Find allow",
+              "kind": "curl",
+              "curl": {
+                "command": "curl -sk -X OPTIONS -u expert:'1234QWer!' \\\n  'https://192.168.89.71/restconf/data/Cisco-IOS-XE-native:native/ip/access-list/Cisco-IOS-XE-acl:extended=restconf-crud-test/access-list-seq-rule' \\\n  -D - | grep -i allow"
+              }
+            }
+          },
+          {
+            "id": "n8b5a31f8729d",
+            "type": "request",
+            "name": "access-list-seq-rule=10",
+            "request": {
+              "name": "extended=chxx",
+              "method": "GET",
+              "uri": "https://{{cat8Kv71}}/restconf/data/Cisco-IOS-XE-native:native/ip/access-list/extended=challenge-207-pod-10/access-list-seq-rule=10",
+              "params": {},
+              "headers": {
+                "Accept": "application/yang-data+json",
+                "Content-Type": "application/yang-data+json"
+              },
+              "auth_type": "basic",
+              "auth_username": "expert",
+              "auth_password": "1234QWer!",
+              "auth_token": "",
+              "device_name": "",
+              "payload": "{\n  \"Cisco-IOS-XE-acl:extended\": [\n    {\n      \"name\": \"challenge-207-pod-10\",\n      \"access-list-seq-rule\": [\n        {\n          \"sequence\": \"10\",\n          \"ace-rule\": {\n            \"action\": \"permit\",\n            \"protocol\": \"tcp\",\n            \"any\": [\n              null\n            ],\n            \"src-gt\": 10,\n            \"dest-ipv4-address\": \"203.36.36.32\",\n            \"dest-mask\": \"0.0.0.15\",\n            \"dst-eq\": 636\n          }\n        },\n        {\n          \"sequence\": \"20\",\n          \"ace-rule\": {\n            \"action\": \"deny\",\n            \"protocol\": \"ip\",\n            \"host-address\": \"198.51.100.6\",\n            \"dst-any\": [\n              null\n            ]\n          }\n        }\n      ]\n    },\n    {\n      \"name\": \"exam2-netconf-create-16\",\n      \"access-list-seq-rule\": [\n        {\n          \"sequence\": \"16\",\n          \"ace-rule\": {\n            \"action\": \"permit\",\n            \"protocol\": \"udp\",\n            \"host-address\": \"198.51.100.216\",\n            \"dst-host-address\": \"203.0.113.16\"\n          }\n        }\n      ]\n    }\n  ]\n}",
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": "",
+                "jq_raw": false,
+                "jq_engine": "browser"
+              }
+            }
+          },
+          {
+            "id": "n0d75a9b9a0fe",
+            "type": "request",
+            "name": "access-list-seq-rule=10",
+            "request": {
+              "name": "access-list-seq-rule=10",
+              "method": "PUT",
+              "uri": "https://{{cat8Kv71}}/restconf/data/Cisco-IOS-XE-native:native/ip/access-list/extended=challenge-207-pod-10/access-list-seq-rule=10",
+              "params": {},
+              "headers": {
+                "Accept": "application/yang-data+json",
+                "Content-Type": "application/yang-data+json"
+              },
+              "auth_type": "basic",
+              "auth_username": "expert",
+              "auth_password": "1234QWer!",
+              "auth_token": "",
+              "device_name": "",
+              "payload": "{\n  \"Cisco-IOS-XE-acl:access-list-seq-rule\": {\n    \"sequence\": \"10\",\n    \"ace-rule\": {\n      \"action\": \"permit\",\n      \"protocol\": \"tcp\",\n      \"any\": [\n        null\n      ],\n      \"src-gt\": 10,\n      \"dest-ipv4-address\": \"203.36.36.32\",\n      \"dest-mask\": \"0.0.0.15\",\n      \"dst-eq\": 636\n    }\n  }\n}",
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": "",
+                "jq_raw": false,
+                "jq_engine": "browser"
+              }
+            }
+          },
+          {
+            "id": "ndfab344a7016",
+            "type": "request",
+            "name": "standard=xxx",
+            "request": {
+              "name": "standard=xxx",
+              "kind": "curl",
+              "curl": {
+                "command": "curl -sk -X PUT \"https://192.168.89.71/restconf/data/Cisco-IOS-XE-native:native/ip/access-list/standard=e2-restconf-15\" \\\n  -H 'content-type: application/yang-data+json' \\\n  -u expert:'1234QWer!' \\\n  -d '{\n  \"Cisco-IOS-XE-acl:standard\": [\n    {\n      \"name\": \"e2-restconf-15\",\n      \"access-list-seq-rule\": [\n        {\n          \"sequence\": \"15\",\n          \"permit\": {\n            \"std-ace\": {\n              \"ipv4-address-prefix\": \"10.10.10.15\"\n            }\n          }\n        }\n      ]\n    }\n  ]\n}'"
+              }
+            }
+          },
+          {
+            "id": "ncb9c5f741a88",
+            "type": "request",
+            "name": "standard=xxx",
+            "request": {
+              "name": "standard=xxx",
+              "method": "DELETE",
+              "uri": "https://{{cat8Kv71}}/restconf/data/Cisco-IOS-XE-native:native/ip/access-list/standard=NEW-ACL",
+              "params": {},
+              "headers": {
+                "Accept": "application/yang-data+json"
+              },
+              "auth_type": "basic",
+              "auth_username": "expert",
+              "auth_password": "1234QWer!",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": "",
+                "jq_raw": false,
+                "jq_engine": "browser"
+              }
+            }
+          },
+          {
+            "id": "n3128108edf6b",
+            "type": "request",
+            "name": "PUT /uir=key body_wPREFIX:{}",
+            "request": {
+              "name": "PUT /uir=key body_wPREFIX:{}",
+              "kind": "curl",
+              "curl": {
+                "command": "curl -ski -X PUT \"https://192.168.89.71/restconf/data/Cisco-IOS-XE-native:native/ip/access-list/standard=NEW-ACL\" \\\n  -H 'content-type: application/yang-data+json' \\\n  -u expert:'1234QWer!' \\\n  -d '{\n  \"Cisco-IOS-XE-acl:standard\": {\n    \"name\": \"NEW-ACL\",\n    \"access-list-seq-rule\": [\n      {\n        \"sequence\": \"10\",\n        \"permit\": {\n          \"std-ace\": {\n            \"ipv4-address-prefix\": \"10.0.0.1\"\n          }\n        }\n      }\n    ]\n  }\n}'"
+              }
+            }
+          },
+          {
+            "id": "n0bf3cb53cff1",
+            "type": "request",
+            "name": "PUT /uri=key body:[]",
+            "request": {
+              "name": "PUT /uri=key body:[]",
+              "kind": "curl",
+              "curl": {
+                "command": "curl -ski -X PUT \"https://192.168.89.71/restconf/data/Cisco-IOS-XE-native:native/ip/access-list/standard=NEW-ACL\" \\\n  -H 'content-type: application/yang-data+json' \\\n  -u expert:'1234QWer!' \\\n  -d '{\n  \"standard\": [\n    {\n      \"name\": \"NEW-ACL\",\n      \"access-list-seq-rule\": [\n        {\n          \"sequence\": \"10\",\n          \"permit\": {\n            \"std-ace\": {\n              \"ipv4-address-prefix\": \"10.0.0.1\"\n            }\n          }\n        }\n      ]\n    }\n  ]\n}'"
+              }
+            }
+          },
+          {
+            "id": "n9b825d640d7f",
+            "type": "request",
+            "name": "uri=access-list | prefixed:body:{}",
+            "request": {
+              "name": "access-list",
+              "method": "POST",
+              "uri": "https://{{cat8Kv71}}/restconf/data/Cisco-IOS-XE-native:native/ip/access-list",
+              "params": {},
+              "headers": {
+                "Accept": "application/yang-data+json",
+                "Content-Type": "application/yang-data+json"
+              },
+              "auth_type": "basic",
+              "auth_username": "expert",
+              "auth_password": "1234QWer!",
+              "auth_token": "",
+              "device_name": "",
+              "payload": "{\n  \"Cisco-IOS-XE-acl:standard\": {\n    \"name\": \"WEB-ACL\"\n  }\n}",
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": "",
+                "jq_raw": false,
+                "jq_engine": "browser"
+              }
+            }
+          },
+          {
+            "id": "n84162850d4ba",
+            "type": "request",
+            "name": "extended=xxx",
+            "request": {
+              "name": "standard=xxx",
+              "method": "DELETE",
+              "uri": "https://{{cat8Kv71}}/restconf/data/Cisco-IOS-XE-native:native/ip/access-list/extended=WEB-ACL",
+              "params": {},
+              "headers": {
+                "Accept": "application/yang-data+json"
+              },
+              "auth_type": "basic",
+              "auth_username": "expert",
+              "auth_password": "1234QWer!",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": "",
+                "jq_raw": false,
+                "jq_engine": "browser"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "n8b9e2d8e7673",
+        "type": "folder",
+        "name": "nxos",
+        "children": [
+          {
+            "id": "n7295b8f644f0",
+            "type": "request",
+            "name": "PhysIf-list=eth1/12",
+            "request": {
+              "name": "PhysIf-list=eth1/12",
+              "method": "GET",
+              "uri": "https://{{hostname}}/restconf/data/Cisco-NX-OS-device:System/intf-items/phys-items/PhysIf-list=eth1%2F12/",
+              "params": {},
+              "headers": {
+                "Accept": "application/yang.data+json"
+              },
+              "auth_type": "basic",
+              "auth_username": "expert",
+              "auth_password": "1234QWer!",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {}
+            }
+          },
+          {
+            "id": "n80cb62164537",
+            "type": "request",
+            "name": "bd-items",
+            "request": {
+              "name": "bd-items",
+              "method": "GET",
+              "uri": "https://{{hostname}}/restconf/data/Cisco-NX-OS-device:System/bd-items/bd-items",
+              "params": {},
+              "headers": {
+                "Accept": "application/yang.data+json"
+              },
+              "auth_type": "basic",
+              "auth_username": "expert",
+              "auth_password": "1234QWer!",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {}
+            }
+          },
+          {
+            "id": "n1652cdd4b22a",
+            "type": "request",
+            "name": "vlan-100 mtu=1500 | eth1/11",
+            "request": {
+              "name": "vlan-100 mtu=1500 | eth1/11",
+              "kind": "curl",
+              "curl": {
+                "command": "curl -sk -X PATCH \"https://192.168.89.73/restconf/data/Cisco-NX-OS-device:System/intf-items/phys-items/PhysIf-list=eth1%2F11\" \\\n  -H 'content-type: application/yang.data+json' \\\n  -u expert:'1234QWer!' \\\n  -d '{\n    \"id\": \"eth1/11\",\n    \"accessVlan\": \"vlan-100\",\n    \"mtu\": 1500\n  }'"
+              }
+            }
+          },
+          {
+            "id": "n518533fecdfa",
+            "type": "request",
+            "name": "System",
+            "request": {
+              "name": "PhysIf-list=eth1/12",
+              "method": "GET",
+              "uri": "https://{{hostname}}/restconf/data/Cisco-NX-OS-device:System",
+              "params": {},
+              "headers": {
+                "Accept": "application/yang.data+json"
+              },
+              "auth_type": "basic",
+              "auth_username": "expert",
+              "auth_password": "1234QWer!",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": "",
+                "jq_raw": false,
+                "jq_engine": "browser"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "n3d30cc986ccc",
+        "type": "folder",
+        "name": "APIC",
+        "children": [
+          {
+            "id": "nce0ae306efbc",
+            "type": "request",
+            "name": "POST TOKEN",
+            "request": {
+              "name": "POST TOKEN",
+              "method": "POST",
+              "uri": "https://{{APIC_HOST}}/api/aaaLogin.json",
+              "params": {},
+              "headers": {
+                "Cookie": ""
+              },
+              "auth_type": "basic",
+              "auth_username": "admin",
+              "auth_password": "1234QWer!",
+              "auth_token": "",
+              "device_name": "",
+              "payload": "{\n    \"aaaUser\": {\n        \"attributes\": {\n            \"name\": \"{{APIC_USERNAME}}\",\n            \"pwd\": \"{{APIC_PASSWORD}}\"\n        }\n    }\n}",
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": ".imdata[0].aaaLogin.attributes.token",
+                "jq_raw": true,
+                "jq_engine": "browser"
+              }
+            }
+          },
+          {
+            "id": "nabd7ab199c5c",
+            "type": "request",
+            "name": "Subnet-dn",
+            "request": {
+              "name": "Subnet-dn",
+              "method": "GET",
+              "uri": "https://{{APIC_HOST}}/api/mo/uni/tn-p4-challenge-b6.json",
+              "params": {
+                "query-target": "subtree",
+                "target-subtree-class": "fvSubnet"
+              },
+              "headers": {
+                "Cookie": ""
+              },
+              "auth_type": "basic",
+              "auth_username": "",
+              "auth_password": "",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": ".imdata[].fvSubnet.attributes.dn",
+                "jq_raw": true,
+                "jq_engine": "browser"
+              }
+            }
+          },
+          {
+            "id": "ne1d726250587",
+            "type": "request",
+            "name": "fvBD | subnet",
+            "request": {
+              "name": "Subnet-dn copy",
+              "method": "GET",
+              "uri": "https://{{APIC_HOST}}/api/class/fvBD.json",
+              "params": {
+                "query-target": "subtree",
+                "target-subtree-class": "fvSubnet",
+                "query-target-filter": "eq(fvSubnet.ip,\"10.1.7.1/24\")"
+              },
+              "headers": {
+                "Cookie": ""
+              },
+              "auth_type": "basic",
+              "auth_username": "",
+              "auth_password": "",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": ".imdata[].fvSubnet.attributes.dn",
+                "jq_raw": true,
+                "jq_engine": "browser"
+              }
+            }
+          },
+          {
+            "id": "n44533b74b9d3",
+            "type": "request",
+            "name": "tn | bd_dn",
+            "request": {
+              "name": "Subnet-dn copy",
+              "method": "GET",
+              "uri": "https://{{APIC_HOST}}/api/mo/uni/tn-p4-challenge-b6.json",
+              "params": {
+                "query-target": "children",
+                "target-subtree-class": "fvBD"
+              },
+              "headers": {
+                "Cookie": ""
+              },
+              "auth_type": "basic",
+              "auth_username": "",
+              "auth_password": "",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": ".imdata[].fvSubnet.attributes.dn",
+                "jq_raw": true,
+                "jq_engine": "browser"
+              }
+            }
+          },
+          {
+            "id": "n9f2c89779f4b",
+            "type": "request",
+            "name": "fvBD-subnetDn",
+            "request": {
+              "name": "fvBD-subnetDn",
+              "kind": "curl",
+              "curl": {
+                "command": "APIC=192.168.89.95\nCOOKIE=$(curl -sk \"https://$APIC/api/aaaLogin.json\" \\\n  -d '{\"aaaUser\":{\"attributes\":{\"name\":\"admin\",\"pwd\":\"1234QWer!\"}}}' \\\n  | jq -r '.imdata[0].aaaLogin.attributes.token')\n\ncurl -sk \"https://$APIC/api/class/fvBD.json?query-target=subtree&target-subtree-class=fvSubnet&query-target-filter=eq(fvSubnet.ip,\\\"10.1.7.1/24\\\")\" \\\n  -H \"Cookie: APIC-cookie=$COOKIE\" \\\n  | jq -r '.imdata[].fvSubnet.attributes.dn'"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "nc985aaff9db5",
+        "type": "folder",
+        "name": "python",
+        "children": [
+          {
+            "id": "nb9ea3ab3997a",
+            "type": "request",
+            "name": "fvBD-subnetDn",
+            "request": {
+              "name": "py-fvBD-subnetDn",
+              "kind": "python",
+              "python": {
+                "code": "import requests, urllib3, os\nurllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)\n\nAPIC_COOKIE = os.environ[\"APIC_COOKIE\"]      # \u2190 read it from the env box\n\nurl = \"https://192.168.89.95/api/class/fvBD.json?query-target=subtree&target-subtree-class=fvSubnet&query-target-filter=eq%28fvSubnet.ip%2C%2210.1.7.1%2F24%22%29\"\nheaders = {\n    \"Cookie\": f\"APIC-cookie={APIC_COOKIE}\",\n    \"Accept\": \"application/json\",\n}\n\nresp = requests.get(url, headers=headers, verify=False)\nprint(resp.status_code)\nprint(resp.text)",
+                "env_text": "APIC_COOKIE={{token}}"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "nd327974d7f53",
+        "type": "folder",
+        "name": "CML",
+        "children": [
+          {
+            "id": "n1f1f569de5a4",
+            "type": "request",
+            "name": "Token",
+            "request": {
+              "name": "Request 2",
+              "method": "POST",
+              "uri": "https://192.168.89.100/api/v0/authenticate",
+              "params": {},
+              "headers": {
+                "Content-Type": "application/json"
+              },
+              "auth_type": "basic",
+              "auth_username": "",
+              "auth_password": "",
+              "auth_token": "",
+              "device_name": "",
+              "payload": "{\n  \"username\": \"admin\",\n  \"password\": \"97249_NEC\"\n}",
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": "",
+                "jq_raw": false,
+                "jq_engine": "browser"
+              }
+            }
+          },
+          {
+            "id": "n9fc5002b82cd",
+            "type": "request",
+            "name": "labs",
+            "request": {
+              "name": "Request 2",
+              "method": "GET",
+              "uri": "https://{{host}}/api/v0/labs",
+              "params": {},
+              "headers": {
+                "Authorization": ""
+              },
+              "auth_type": "basic",
+              "auth_username": "",
+              "auth_password": "",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": "",
+                "jq_raw": true,
+                "jq_engine": "server"
+              }
+            }
+          },
+          {
+            "id": "n8534af59f7ba",
+            "type": "request",
+            "name": "lab-id",
+            "request": {
+              "name": "labs copy",
+              "method": "GET",
+              "uri": "https://{{host}}/api/v0/labs/39e77d83-b22e-4c67-9910-a57b877ce447/download",
+              "params": {},
+              "headers": {
+                "Authorization": ""
+              },
+              "auth_type": "basic",
+              "auth_username": "",
+              "auth_password": "",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": "",
+                "jq_raw": true,
+                "jq_engine": "server"
+              }
+            }
+          },
+          {
+            "id": "nf8bd1d66090e",
+            "type": "request",
+            "name": "download",
+            "request": {
+              "name": "download",
+              "kind": "curl",
+              "curl": {
+                "command": "curl -sk 'https://{{host}}/api/v0/labs/39e77d83-b22e-4c67-9910-a57b877ce447/download' \\\n  -H \"Authorization: Bearer {{token}}\" -o /home/sushil/devexpert.yaml"
+              }
+            }
+          },
+          {
+            "id": "n35ddfa373adb",
+            "type": "request",
+            "name": "CML-Token",
+            "request": {
+              "name": "CML-Token",
+              "kind": "curl",
+              "curl": {
+                "command": "curl -k -X POST 'https://192.168.89.100/api/v0/authenticate' \\\n  -H 'Content-Type: application/json' \\\n  --data '{\"username\":\"admin\",\"password\":\"97249_NEC\"}'"
+              }
+            }
+          },
+          {
+            "id": "n7453a8fba983",
+            "type": "request",
+            "name": "import",
+            "request": {
+              "name": "import",
+              "kind": "curl",
+              "curl": {
+                "command": "curl -sk -X POST 'https://{{host}}/api/v0/import?title=DEVEXPERT-copy' \\\n  -H \"Authorization: Bearer {{token}}\" \\\n  -H 'Content-Type: text/plain' \\\n  --data-binary @/home/sushil/devexpert.yaml"
+              }
+            }
+          },
+          {
+            "id": "n85abfab741fa",
+            "type": "request",
+            "name": "nodes",
+            "request": {
+              "name": "labs copy copy",
+              "method": "GET",
+              "uri": "https://{{host}}/api/v0/labs/39e77d83-b22e-4c67-9910-a57b877ce447/nodes",
+              "params": {},
+              "headers": {
+                "Authorization": ""
+              },
+              "auth_type": "basic",
+              "auth_username": "",
+              "auth_password": "",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": "",
+                "jq_raw": true,
+                "jq_engine": "server"
+              }
+            }
+          },
+          {
+            "id": "ncb8d14a4c4f8",
+            "type": "request",
+            "name": "nodes-id",
+            "request": {
+              "name": "nodes",
+              "method": "GET",
+              "uri": "https://{{host}}/api/v0/labs/39e77d83-b22e-4c67-9910-a57b877ce447/nodes/f7b597f7-7e5d-40ec-89ef-57bd9a1b4c93",
+              "params": {},
+              "headers": {
+                "Authorization": ""
+              },
+              "auth_type": "basic",
+              "auth_username": "",
+              "auth_password": "",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": "",
+                "jq_raw": true,
+                "jq_engine": "server"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "n9205484588c5",
+        "type": "folder",
+        "name": "Wiki",
+        "children": [
+          {
+            "id": "n1747605a0e5f",
+            "type": "request",
+            "name": "sear-page",
+            "request": {
+              "name": "sear-page",
+              "kind": "curl",
+              "curl": {
+                "command": "curl -s -H \"User-Agent: hiTech-lab/1.0 (sushil; contact: github.com/sushil-bhattacharjee)\" \\\n  \"https://api.wikimedia.org/core/v1/wikipedia/en/search/page?q=RESTCONF&limit=5\""
+              }
+            }
+          },
+          {
+            "id": "nf88c95f46fd9",
+            "type": "request",
+            "name": "search-page",
+            "request": {
+              "name": "Request 5",
+              "method": "GET",
+              "uri": "https://api.wikimedia.org/core/v1/wikipedia/en/search/page?q=RESTCONF&limit=5",
+              "params": {},
+              "headers": {
+                "User-Agent": "hiTech-lab/1.0 (sushil)"
+              },
+              "auth_type": "basic",
+              "auth_username": "",
+              "auth_password": "",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": "",
+                "jq_raw": false,
+                "jq_engine": "browser"
+              }
+            }
+          },
+          {
+            "id": "n30837f1f63f8",
+            "type": "request",
+            "name": "netconf-bare",
+            "request": {
+              "name": "search-page",
+              "method": "GET",
+              "uri": "https://api.wikimedia.org/core/v1/wikipedia/en/page/NETCONF/bare",
+              "params": {},
+              "headers": {
+                "User-Agent": "hiTech-lab/1.0 (sushil)"
+              },
+              "auth_type": "basic",
+              "auth_username": "",
+              "auth_password": "",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": "",
+                "jq_raw": false,
+                "jq_engine": "browser"
+              }
+            }
+          },
+          {
+            "id": "n317af5aec706",
+            "type": "request",
+            "name": "bgp",
+            "request": {
+              "name": "netconf-bare",
+              "method": "GET",
+              "uri": "https://en.wikipedia.org/api/rest_v1/page/summary/Border_Gateway_Protocol",
+              "params": {},
+              "headers": {
+                "User-Agent": "hiTech-lab/1.0 (sushil)"
+              },
+              "auth_type": "basic",
+              "auth_username": "",
+              "auth_password": "",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": "",
+                "jq_raw": false,
+                "jq_engine": "browser"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

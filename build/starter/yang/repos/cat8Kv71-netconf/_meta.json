@@ -1,0 +1,2891 @@
+{
+  "name": "cat8Kv71-netconf",
+  "modules": [
+    {
+      "file": "ATM-FORUM-TC-MIB.yang",
+      "module": "ATM-FORUM-TC-MIB",
+      "revision": ""
+    },
+    {
+      "file": "ATM-MIB@1998-10-19.yang",
+      "module": "ATM-MIB",
+      "revision": "1998-10-19"
+    },
+    {
+      "file": "ATM-TC-MIB@1998-10-19.yang",
+      "module": "ATM-TC-MIB",
+      "revision": "1998-10-19"
+    },
+    {
+      "file": "BGP4-MIB@1994-05-05.yang",
+      "module": "BGP4-MIB",
+      "revision": "1994-05-05"
+    },
+    {
+      "file": "BRIDGE-MIB@2005-09-19.yang",
+      "module": "BRIDGE-MIB",
+      "revision": "2005-09-19"
+    },
+    {
+      "file": "CISCO-AAA-SERVER-MIB@2003-11-17.yang",
+      "module": "CISCO-AAA-SERVER-MIB",
+      "revision": "2003-11-17"
+    },
+    {
+      "file": "CISCO-AAA-SESSION-MIB@2006-03-21.yang",
+      "module": "CISCO-AAA-SESSION-MIB",
+      "revision": "2006-03-21"
+    },
+    {
+      "file": "CISCO-AAL5-MIB@2003-09-22.yang",
+      "module": "CISCO-AAL5-MIB",
+      "revision": "2003-09-22"
+    },
+    {
+      "file": "CISCO-ATM-EXT-MIB@2003-01-06.yang",
+      "module": "CISCO-ATM-EXT-MIB",
+      "revision": "2003-01-06"
+    },
+    {
+      "file": "CISCO-ATM-PVCTRAP-EXTN-MIB@2003-01-20.yang",
+      "module": "CISCO-ATM-PVCTRAP-EXTN-MIB",
+      "revision": "2003-01-20"
+    },
+    {
+      "file": "CISCO-ATM-QOS-MIB@2002-06-10.yang",
+      "module": "CISCO-ATM-QOS-MIB",
+      "revision": "2002-06-10"
+    },
+    {
+      "file": "CISCO-BGP-POLICY-ACCOUNTING-MIB@2002-07-26.yang",
+      "module": "CISCO-BGP-POLICY-ACCOUNTING-MIB",
+      "revision": "2002-07-26"
+    },
+    {
+      "file": "CISCO-BGP4-MIB@2010-09-30.yang",
+      "module": "CISCO-BGP4-MIB",
+      "revision": "2010-09-30"
+    },
+    {
+      "file": "CISCO-BULK-FILE-MIB@2002-06-10.yang",
+      "module": "CISCO-BULK-FILE-MIB",
+      "revision": "2002-06-10"
+    },
+    {
+      "file": "CISCO-CBP-TARGET-MIB@2006-05-24.yang",
+      "module": "CISCO-CBP-TARGET-MIB",
+      "revision": "2006-05-24"
+    },
+    {
+      "file": "CISCO-CBP-TARGET-TC-MIB@2006-03-24.yang",
+      "module": "CISCO-CBP-TARGET-TC-MIB",
+      "revision": "2006-03-24"
+    },
+    {
+      "file": "CISCO-CBP-TC-MIB@2008-06-24.yang",
+      "module": "CISCO-CBP-TC-MIB",
+      "revision": "2008-06-24"
+    },
+    {
+      "file": "CISCO-CDP-MIB@2005-03-21.yang",
+      "module": "CISCO-CDP-MIB",
+      "revision": "2005-03-21"
+    },
+    {
+      "file": "CISCO-CEF-MIB@2006-01-30.yang",
+      "module": "CISCO-CEF-MIB",
+      "revision": "2006-01-30"
+    },
+    {
+      "file": "CISCO-CEF-TC@2005-09-30.yang",
+      "module": "CISCO-CEF-TC",
+      "revision": "2005-09-30"
+    },
+    {
+      "file": "CISCO-CONFIG-COPY-MIB@2005-04-06.yang",
+      "module": "CISCO-CONFIG-COPY-MIB",
+      "revision": "2005-04-06"
+    },
+    {
+      "file": "CISCO-CONFIG-MAN-MIB@2007-04-27.yang",
+      "module": "CISCO-CONFIG-MAN-MIB",
+      "revision": "2007-04-27"
+    },
+    {
+      "file": "CISCO-CONTEXT-MAPPING-MIB@2008-11-22.yang",
+      "module": "CISCO-CONTEXT-MAPPING-MIB",
+      "revision": "2008-11-22"
+    },
+    {
+      "file": "CISCO-DATA-COLLECTION-MIB@2002-10-30.yang",
+      "module": "CISCO-DATA-COLLECTION-MIB",
+      "revision": "2002-10-30"
+    },
+    {
+      "file": "CISCO-DIAL-CONTROL-MIB@2005-05-26.yang",
+      "module": "CISCO-DIAL-CONTROL-MIB",
+      "revision": "2005-05-26"
+    },
+    {
+      "file": "CISCO-DOT3-OAM-MIB@2006-05-31.yang",
+      "module": "CISCO-DOT3-OAM-MIB",
+      "revision": "2006-05-31"
+    },
+    {
+      "file": "CISCO-DYNAMIC-TEMPLATE-MIB@2007-09-06.yang",
+      "module": "CISCO-DYNAMIC-TEMPLATE-MIB",
+      "revision": "2007-09-06"
+    },
+    {
+      "file": "CISCO-DYNAMIC-TEMPLATE-TC-MIB@2012-01-27.yang",
+      "module": "CISCO-DYNAMIC-TEMPLATE-TC-MIB",
+      "revision": "2012-01-27"
+    },
+    {
+      "file": "CISCO-EIGRP-MIB@2004-11-16.yang",
+      "module": "CISCO-EIGRP-MIB",
+      "revision": "2004-11-16"
+    },
+    {
+      "file": "CISCO-EMBEDDED-EVENT-MGR-MIB@2006-11-07.yang",
+      "module": "CISCO-EMBEDDED-EVENT-MGR-MIB",
+      "revision": "2006-11-07"
+    },
+    {
+      "file": "CISCO-ENHANCED-MEMPOOL-MIB@2008-12-05.yang",
+      "module": "CISCO-ENHANCED-MEMPOOL-MIB",
+      "revision": "2008-12-05"
+    },
+    {
+      "file": "CISCO-ENTITY-ALARM-MIB@1999-07-06.yang",
+      "module": "CISCO-ENTITY-ALARM-MIB",
+      "revision": "1999-07-06"
+    },
+    {
+      "file": "CISCO-ENTITY-EXT-MIB@2008-11-24.yang",
+      "module": "CISCO-ENTITY-EXT-MIB",
+      "revision": "2008-11-24"
+    },
+    {
+      "file": "CISCO-ENTITY-FRU-CONTROL-MIB@2013-08-19.yang",
+      "module": "CISCO-ENTITY-FRU-CONTROL-MIB",
+      "revision": "2013-08-19"
+    },
+    {
+      "file": "CISCO-ENTITY-QFP-MIB@2014-06-18.yang",
+      "module": "CISCO-ENTITY-QFP-MIB",
+      "revision": "2014-06-18"
+    },
+    {
+      "file": "CISCO-ENTITY-SENSOR-MIB@2015-01-15.yang",
+      "module": "CISCO-ENTITY-SENSOR-MIB",
+      "revision": "2015-01-15"
+    },
+    {
+      "file": "CISCO-ENTITY-VENDORTYPE-OID-MIB@2014-12-09.yang",
+      "module": "CISCO-ENTITY-VENDORTYPE-OID-MIB",
+      "revision": "2014-12-09"
+    },
+    {
+      "file": "CISCO-ETHER-CFM-MIB@2004-12-28.yang",
+      "module": "CISCO-ETHER-CFM-MIB",
+      "revision": "2004-12-28"
+    },
+    {
+      "file": "CISCO-ETHERLIKE-EXT-MIB@2010-06-04.yang",
+      "module": "CISCO-ETHERLIKE-EXT-MIB",
+      "revision": "2010-06-04"
+    },
+    {
+      "file": "CISCO-FIREWALL-TC@2006-03-03.yang",
+      "module": "CISCO-FIREWALL-TC",
+      "revision": "2006-03-03"
+    },
+    {
+      "file": "CISCO-FLASH-MIB@2013-08-06.yang",
+      "module": "CISCO-FLASH-MIB",
+      "revision": "2013-08-06"
+    },
+    {
+      "file": "CISCO-FTP-CLIENT-MIB@2006-03-31.yang",
+      "module": "CISCO-FTP-CLIENT-MIB",
+      "revision": "2006-03-31"
+    },
+    {
+      "file": "CISCO-HSRP-EXT-MIB@2010-09-02.yang",
+      "module": "CISCO-HSRP-EXT-MIB",
+      "revision": "2010-09-02"
+    },
+    {
+      "file": "CISCO-HSRP-MIB@2010-09-06.yang",
+      "module": "CISCO-HSRP-MIB",
+      "revision": "2010-09-06"
+    },
+    {
+      "file": "CISCO-IETF-ATM2-PVCTRAP-MIB-EXTN@2000-07-11.yang",
+      "module": "CISCO-IETF-ATM2-PVCTRAP-MIB-EXTN",
+      "revision": "2000-07-11"
+    },
+    {
+      "file": "CISCO-IETF-ATM2-PVCTRAP-MIB@1998-02-03.yang",
+      "module": "CISCO-IETF-ATM2-PVCTRAP-MIB",
+      "revision": "1998-02-03"
+    },
+    {
+      "file": "CISCO-IETF-BFD-MIB@2011-04-16.yang",
+      "module": "CISCO-IETF-BFD-MIB",
+      "revision": "2011-04-16"
+    },
+    {
+      "file": "CISCO-IETF-FRR-MIB@2008-04-29.yang",
+      "module": "CISCO-IETF-FRR-MIB",
+      "revision": "2008-04-29"
+    },
+    {
+      "file": "CISCO-IETF-ISIS-MIB@2005-08-16.yang",
+      "module": "CISCO-IETF-ISIS-MIB",
+      "revision": "2005-08-16"
+    },
+    {
+      "file": "CISCO-IETF-MPLS-ID-STD-03-MIB@2012-06-07.yang",
+      "module": "CISCO-IETF-MPLS-ID-STD-03-MIB",
+      "revision": "2012-06-07"
+    },
+    {
+      "file": "CISCO-IETF-MPLS-TE-EXT-STD-03-MIB@2012-06-06.yang",
+      "module": "CISCO-IETF-MPLS-TE-EXT-STD-03-MIB",
+      "revision": "2012-06-06"
+    },
+    {
+      "file": "CISCO-IETF-PW-ATM-MIB@2005-04-19.yang",
+      "module": "CISCO-IETF-PW-ATM-MIB",
+      "revision": "2005-04-19"
+    },
+    {
+      "file": "CISCO-IETF-PW-ENET-MIB@2002-09-22.yang",
+      "module": "CISCO-IETF-PW-ENET-MIB",
+      "revision": "2002-09-22"
+    },
+    {
+      "file": "CISCO-IETF-PW-MIB@2004-03-17.yang",
+      "module": "CISCO-IETF-PW-MIB",
+      "revision": "2004-03-17"
+    },
+    {
+      "file": "CISCO-IETF-PW-MPLS-MIB@2003-02-26.yang",
+      "module": "CISCO-IETF-PW-MPLS-MIB",
+      "revision": "2003-02-26"
+    },
+    {
+      "file": "CISCO-IETF-PW-TC-MIB@2006-07-21.yang",
+      "module": "CISCO-IETF-PW-TC-MIB",
+      "revision": "2006-07-21"
+    },
+    {
+      "file": "CISCO-IETF-PW-TDM-MIB@2006-07-21.yang",
+      "module": "CISCO-IETF-PW-TDM-MIB",
+      "revision": "2006-07-21"
+    },
+    {
+      "file": "CISCO-IF-EXTENSION-MIB@2013-03-13.yang",
+      "module": "CISCO-IF-EXTENSION-MIB",
+      "revision": "2013-03-13"
+    },
+    {
+      "file": "CISCO-IGMP-FILTER-MIB@2005-11-29.yang",
+      "module": "CISCO-IGMP-FILTER-MIB",
+      "revision": "2005-11-29"
+    },
+    {
+      "file": "CISCO-IMAGE-LICENSE-MGMT-MIB@2007-10-16.yang",
+      "module": "CISCO-IMAGE-LICENSE-MGMT-MIB",
+      "revision": "2007-10-16"
+    },
+    {
+      "file": "CISCO-IMAGE-MIB@1995-08-15.yang",
+      "module": "CISCO-IMAGE-MIB",
+      "revision": "1995-08-15"
+    },
+    {
+      "file": "CISCO-IP-LOCAL-POOL-MIB@2007-11-12.yang",
+      "module": "CISCO-IP-LOCAL-POOL-MIB",
+      "revision": "2007-11-12"
+    },
+    {
+      "file": "CISCO-IP-TAP-MIB@2004-03-11.yang",
+      "module": "CISCO-IP-TAP-MIB",
+      "revision": "2004-03-11"
+    },
+    {
+      "file": "CISCO-IP-URPF-MIB@2011-12-29.yang",
+      "module": "CISCO-IP-URPF-MIB",
+      "revision": "2011-12-29"
+    },
+    {
+      "file": "CISCO-IPMROUTE-MIB@2005-03-07.yang",
+      "module": "CISCO-IPMROUTE-MIB",
+      "revision": "2005-03-07"
+    },
+    {
+      "file": "CISCO-IPSEC-FLOW-MONITOR-MIB@2007-10-24.yang",
+      "module": "CISCO-IPSEC-FLOW-MONITOR-MIB",
+      "revision": "2007-10-24"
+    },
+    {
+      "file": "CISCO-IPSEC-MIB@2000-08-07.yang",
+      "module": "CISCO-IPSEC-MIB",
+      "revision": "2000-08-07"
+    },
+    {
+      "file": "CISCO-IPSEC-POLICY-MAP-MIB@2000-08-17.yang",
+      "module": "CISCO-IPSEC-POLICY-MAP-MIB",
+      "revision": "2000-08-17"
+    },
+    {
+      "file": "CISCO-IPSLA-AUTOMEASURE-MIB@2007-06-13.yang",
+      "module": "CISCO-IPSLA-AUTOMEASURE-MIB",
+      "revision": "2007-06-13"
+    },
+    {
+      "file": "CISCO-IPSLA-ECHO-MIB@2007-08-16.yang",
+      "module": "CISCO-IPSLA-ECHO-MIB",
+      "revision": "2007-08-16"
+    },
+    {
+      "file": "CISCO-IPSLA-JITTER-MIB@2007-07-24.yang",
+      "module": "CISCO-IPSLA-JITTER-MIB",
+      "revision": "2007-07-24"
+    },
+    {
+      "file": "CISCO-IPSLA-TC-MIB@2007-03-23.yang",
+      "module": "CISCO-IPSLA-TC-MIB",
+      "revision": "2007-03-23"
+    },
+    {
+      "file": "CISCO-LICENSE-MGMT-MIB@2012-04-19.yang",
+      "module": "CISCO-LICENSE-MGMT-MIB",
+      "revision": "2012-04-19"
+    },
+    {
+      "file": "CISCO-MEDIA-GATEWAY-MIB@2009-02-25.yang",
+      "module": "CISCO-MEDIA-GATEWAY-MIB",
+      "revision": "2009-02-25"
+    },
+    {
+      "file": "CISCO-MPLS-LSR-EXT-STD-MIB@2012-04-30.yang",
+      "module": "CISCO-MPLS-LSR-EXT-STD-MIB",
+      "revision": "2012-04-30"
+    },
+    {
+      "file": "CISCO-MPLS-TC-EXT-STD-MIB@2012-02-22.yang",
+      "module": "CISCO-MPLS-TC-EXT-STD-MIB",
+      "revision": "2012-02-22"
+    },
+    {
+      "file": "CISCO-NBAR-PROTOCOL-DISCOVERY-MIB@2002-08-16.yang",
+      "module": "CISCO-NBAR-PROTOCOL-DISCOVERY-MIB",
+      "revision": "2002-08-16"
+    },
+    {
+      "file": "CISCO-NETSYNC-MIB@2010-10-15.yang",
+      "module": "CISCO-NETSYNC-MIB",
+      "revision": "2010-10-15"
+    },
+    {
+      "file": "CISCO-NTP-MIB@2006-07-31.yang",
+      "module": "CISCO-NTP-MIB",
+      "revision": "2006-07-31"
+    },
+    {
+      "file": "CISCO-OSPF-MIB@2003-07-18.yang",
+      "module": "CISCO-OSPF-MIB",
+      "revision": "2003-07-18"
+    },
+    {
+      "file": "CISCO-OSPF-TRAP-MIB@2003-07-18.yang",
+      "module": "CISCO-OSPF-TRAP-MIB",
+      "revision": "2003-07-18"
+    },
+    {
+      "file": "CISCO-PIM-MIB@2000-11-02.yang",
+      "module": "CISCO-PIM-MIB",
+      "revision": "2000-11-02"
+    },
+    {
+      "file": "CISCO-PING-MIB@2001-08-28.yang",
+      "module": "CISCO-PING-MIB",
+      "revision": "2001-08-28"
+    },
+    {
+      "file": "CISCO-PROCESS-MIB@2011-06-23.yang",
+      "module": "CISCO-PROCESS-MIB",
+      "revision": "2011-06-23"
+    },
+    {
+      "file": "CISCO-PRODUCTS-MIB@2014-11-06.yang",
+      "module": "CISCO-PRODUCTS-MIB",
+      "revision": "2014-11-06"
+    },
+    {
+      "file": "CISCO-PTP-MIB@2011-01-28.yang",
+      "module": "CISCO-PTP-MIB",
+      "revision": "2011-01-28"
+    },
+    {
+      "file": "CISCO-QOS-PIB-MIB@2007-08-29.yang",
+      "module": "CISCO-QOS-PIB-MIB",
+      "revision": "2007-08-29"
+    },
+    {
+      "file": "CISCO-RADIUS-EXT-MIB@2010-05-25.yang",
+      "module": "CISCO-RADIUS-EXT-MIB",
+      "revision": "2010-05-25"
+    },
+    {
+      "file": "CISCO-RF-MIB@2005-09-01.yang",
+      "module": "CISCO-RF-MIB",
+      "revision": "2005-09-01"
+    },
+    {
+      "file": "CISCO-RTTMON-MIB@2012-08-16.yang",
+      "module": "CISCO-RTTMON-MIB",
+      "revision": "2012-08-16"
+    },
+    {
+      "file": "CISCO-RTTMON-TC-MIB@2012-05-25.yang",
+      "module": "CISCO-RTTMON-TC-MIB",
+      "revision": "2012-05-25"
+    },
+    {
+      "file": "CISCO-SESS-BORDER-CTRLR-CALL-STATS-MIB@2010-09-03.yang",
+      "module": "CISCO-SESS-BORDER-CTRLR-CALL-STATS-MIB",
+      "revision": "2010-09-03"
+    },
+    {
+      "file": "CISCO-SESS-BORDER-CTRLR-STATS-MIB@2010-09-15.yang",
+      "module": "CISCO-SESS-BORDER-CTRLR-STATS-MIB",
+      "revision": "2010-09-15"
+    },
+    {
+      "file": "CISCO-SIP-UA-MIB@2004-02-19.yang",
+      "module": "CISCO-SIP-UA-MIB",
+      "revision": "2004-02-19"
+    },
+    {
+      "file": "CISCO-SMI@2012-08-29.yang",
+      "module": "CISCO-SMI",
+      "revision": "2012-08-29"
+    },
+    {
+      "file": "CISCO-SONET-MIB@2003-03-07.yang",
+      "module": "CISCO-SONET-MIB",
+      "revision": "2003-03-07"
+    },
+    {
+      "file": "CISCO-ST-TC@2012-08-08.yang",
+      "module": "CISCO-ST-TC",
+      "revision": "2012-08-08"
+    },
+    {
+      "file": "CISCO-STP-EXTENSIONS-MIB@2013-03-07.yang",
+      "module": "CISCO-STP-EXTENSIONS-MIB",
+      "revision": "2013-03-07"
+    },
+    {
+      "file": "CISCO-SUBSCRIBER-IDENTITY-TC-MIB@2011-12-23.yang",
+      "module": "CISCO-SUBSCRIBER-IDENTITY-TC-MIB",
+      "revision": "2011-12-23"
+    },
+    {
+      "file": "CISCO-SUBSCRIBER-SESSION-MIB@2012-08-08.yang",
+      "module": "CISCO-SUBSCRIBER-SESSION-MIB",
+      "revision": "2012-08-08"
+    },
+    {
+      "file": "CISCO-SUBSCRIBER-SESSION-TC-MIB@2012-01-27.yang",
+      "module": "CISCO-SUBSCRIBER-SESSION-TC-MIB",
+      "revision": "2012-01-27"
+    },
+    {
+      "file": "CISCO-SYSLOG-MIB@2005-12-03.yang",
+      "module": "CISCO-SYSLOG-MIB",
+      "revision": "2005-12-03"
+    },
+    {
+      "file": "CISCO-TAP2-MIB@2009-11-06.yang",
+      "module": "CISCO-TAP2-MIB",
+      "revision": "2009-11-06"
+    },
+    {
+      "file": "CISCO-TC@2011-11-11.yang",
+      "module": "CISCO-TC",
+      "revision": "2011-11-11"
+    },
+    {
+      "file": "CISCO-UBE-MIB@2010-11-29.yang",
+      "module": "CISCO-UBE-MIB",
+      "revision": "2010-11-29"
+    },
+    {
+      "file": "CISCO-UNIFIED-FIREWALL-MIB@2005-09-22.yang",
+      "module": "CISCO-UNIFIED-FIREWALL-MIB",
+      "revision": "2005-09-22"
+    },
+    {
+      "file": "CISCO-VLAN-IFTABLE-RELATIONSHIP-MIB@2013-07-15.yang",
+      "module": "CISCO-VLAN-IFTABLE-RELATIONSHIP-MIB",
+      "revision": "2013-07-15"
+    },
+    {
+      "file": "CISCO-VLAN-MEMBERSHIP-MIB@2007-12-14.yang",
+      "module": "CISCO-VLAN-MEMBERSHIP-MIB",
+      "revision": "2007-12-14"
+    },
+    {
+      "file": "CISCO-VOICE-COMMON-DIAL-CONTROL-MIB@2010-06-30.yang",
+      "module": "CISCO-VOICE-COMMON-DIAL-CONTROL-MIB",
+      "revision": "2010-06-30"
+    },
+    {
+      "file": "CISCO-VOICE-DIAL-CONTROL-MIB@2012-05-15.yang",
+      "module": "CISCO-VOICE-DIAL-CONTROL-MIB",
+      "revision": "2012-05-15"
+    },
+    {
+      "file": "CISCO-VOICE-DNIS-MIB@2002-05-01.yang",
+      "module": "CISCO-VOICE-DNIS-MIB",
+      "revision": "2002-05-01"
+    },
+    {
+      "file": "CISCO-VPDN-MGMT-MIB@2009-06-16.yang",
+      "module": "CISCO-VPDN-MGMT-MIB",
+      "revision": "2009-06-16"
+    },
+    {
+      "file": "CISCO-VTP-MIB@2013-10-14.yang",
+      "module": "CISCO-VTP-MIB",
+      "revision": "2013-10-14"
+    },
+    {
+      "file": "Cisco-IOS-XE-aaa-actions-rpc@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-aaa-actions-rpc",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-aaa-events@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-aaa-events",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-aaa-oper@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-aaa-oper",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-aaa-rpc@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-aaa-rpc",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-aaa@2021-07-20.yang",
+      "module": "Cisco-IOS-XE-aaa",
+      "revision": "2021-07-20"
+    },
+    {
+      "file": "Cisco-IOS-XE-acl-oper@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-acl-oper",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-acl@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-acl",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-app-hosting-cfg@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-app-hosting-cfg",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-app-hosting-oper@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-app-hosting-oper",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-arp-oper@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-arp-oper",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-arp-rpc@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-arp-rpc",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-arp@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-arp",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-atm@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-atm",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-bba-group@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-bba-group",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-bfd-oper@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-bfd-oper",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-bfd@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-bfd",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-bgp-common-oper@2019-05-01.yang",
+      "module": "Cisco-IOS-XE-bgp-common-oper",
+      "revision": "2019-05-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-bgp-oper@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-bgp-oper",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-bgp-route-oper@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-bgp-route-oper",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-bgp-rpc@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-bgp-rpc",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-bgp@2021-08-10.yang",
+      "module": "Cisco-IOS-XE-bgp",
+      "revision": "2021-08-10"
+    },
+    {
+      "file": "Cisco-IOS-XE-bridge-domain@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-bridge-domain",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-bridge@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-bridge",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-call-home@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-call-home",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-card@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-card",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-cdp-deviation@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-cdp-deviation",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-cdp-oper@2019-05-01.yang",
+      "module": "Cisco-IOS-XE-cdp-oper",
+      "revision": "2019-05-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-cdp@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-cdp",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-cef@2019-11-01.yang",
+      "module": "Cisco-IOS-XE-cef",
+      "revision": "2019-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-cellular-rpc@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-cellular-rpc",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-cellular@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-cellular",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-cellwan-oper@2019-05-01.yang",
+      "module": "Cisco-IOS-XE-cellwan-oper",
+      "revision": "2019-05-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-cfm-oper@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-cfm-oper",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-checkpoint-archive-oper@2019-05-01.yang",
+      "module": "Cisco-IOS-XE-checkpoint-archive-oper",
+      "revision": "2019-05-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-common-types@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-common-types",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-controller-shdsl-common@2020-03-01.yang",
+      "module": "Cisco-IOS-XE-controller-shdsl-common",
+      "revision": "2020-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-controller-shdsl-events@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-controller-shdsl-events",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-controller-shdsl-oper@2020-03-01.yang",
+      "module": "Cisco-IOS-XE-controller-shdsl-oper",
+      "revision": "2020-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-controller-vdsl-oper@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-controller-vdsl-oper",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-controller@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-controller",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-crypto-actions-rpc@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-crypto-actions-rpc",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-crypto-oper@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-crypto-oper",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-crypto-pki-events@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-crypto-pki-events",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-crypto-pki-oper@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-crypto-pki-oper",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-crypto-rpc@2020-03-01.yang",
+      "module": "Cisco-IOS-XE-crypto-rpc",
+      "revision": "2020-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-crypto@2021-07-10.yang",
+      "module": "Cisco-IOS-XE-crypto",
+      "revision": "2021-07-10"
+    },
+    {
+      "file": "Cisco-IOS-XE-cts-routing-deviation@2020-08-26.yang",
+      "module": "Cisco-IOS-XE-cts-routing-deviation",
+      "revision": "2020-08-26"
+    },
+    {
+      "file": "Cisco-IOS-XE-cts-rpc@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-cts-rpc",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-cts@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-cts",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-dapr@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-dapr",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-device-hardware-oper@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-device-hardware-oper",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-device-tracking@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-device-tracking",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-dhcp-oper@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-dhcp-oper",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-dhcp-rpc@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-dhcp-rpc",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-dhcp@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-dhcp",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-diagnostics@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-diagnostics",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-dialer-deviation@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-dialer-deviation",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-dialer@2021-07-10.yang",
+      "module": "Cisco-IOS-XE-dialer",
+      "revision": "2021-07-10"
+    },
+    {
+      "file": "Cisco-IOS-XE-dmi-common-types@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-dmi-common-types",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-dot1x@2020-03-01.yang",
+      "module": "Cisco-IOS-XE-dot1x",
+      "revision": "2020-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-eem@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-eem",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-efp-oper@2019-05-01.yang",
+      "module": "Cisco-IOS-XE-efp-oper",
+      "revision": "2019-05-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-eigrp-obsolete@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-eigrp-obsolete",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-eigrp-oper@2019-05-01.yang",
+      "module": "Cisco-IOS-XE-eigrp-oper",
+      "revision": "2019-05-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-eigrp@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-eigrp",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-environment-oper@2019-05-01.yang",
+      "module": "Cisco-IOS-XE-environment-oper",
+      "revision": "2019-05-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-eta@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-eta",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-ethernet-cfm-efp@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-ethernet-cfm-efp",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-ethernet-oam@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-ethernet-oam",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-ethernet-rpc@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-ethernet-rpc",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-ethernet@2021-07-10.yang",
+      "module": "Cisco-IOS-XE-ethernet",
+      "revision": "2021-07-10"
+    },
+    {
+      "file": "Cisco-IOS-XE-event-history-types@2019-05-01.yang",
+      "module": "Cisco-IOS-XE-event-history-types",
+      "revision": "2019-05-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-ezpm@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-ezpm",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-features@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-features",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-fib-oper@2020-03-01.yang",
+      "module": "Cisco-IOS-XE-fib-oper",
+      "revision": "2020-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-flow-monitor-oper@2019-05-01.yang",
+      "module": "Cisco-IOS-XE-flow-monitor-oper",
+      "revision": "2019-05-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-flow-rpc@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-flow-rpc",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-flow@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-flow",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-fqdn@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-fqdn",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-frame-relay@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-frame-relay",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-fw-oper@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-fw-oper",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-geo-events@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-geo-events",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-geo-oper@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-geo-oper",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-geo-rpc@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-geo-rpc",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-geo@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-geo",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-gir-oper@2019-11-01.yang",
+      "module": "Cisco-IOS-XE-gir-oper",
+      "revision": "2019-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-gnss-oper@2020-03-01.yang",
+      "module": "Cisco-IOS-XE-gnss-oper",
+      "revision": "2020-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-hsrp-events@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-hsrp-events",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-hsrp-oper@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-hsrp-oper",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-http@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-http",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-icmp@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-icmp",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-igmp@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-igmp",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-im-events-oper@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-im-events-oper",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-install-events@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-install-events",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-install-oper@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-install-oper",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-install-rpc@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-install-rpc",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-interface-common@2021-07-10.yang",
+      "module": "Cisco-IOS-XE-interface-common",
+      "revision": "2021-07-10"
+    },
+    {
+      "file": "Cisco-IOS-XE-interfaces-oper@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-interfaces-oper",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-interfaces@2021-07-10.yang",
+      "module": "Cisco-IOS-XE-interfaces",
+      "revision": "2021-07-10"
+    },
+    {
+      "file": "Cisco-IOS-XE-ios-common-oper@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-ios-common-oper",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-ios-events-oper@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-ios-events-oper",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-ip-sla-events@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-ip-sla-events",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-ip-sla-oper@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-ip-sla-oper",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-ip@2021-07-10.yang",
+      "module": "Cisco-IOS-XE-ip",
+      "revision": "2021-07-10"
+    },
+    {
+      "file": "Cisco-IOS-XE-ipmux@2019-10-01.yang",
+      "module": "Cisco-IOS-XE-ipmux",
+      "revision": "2019-10-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-ipv6-oper@2019-05-01.yang",
+      "module": "Cisco-IOS-XE-ipv6-oper",
+      "revision": "2019-05-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-ipv6@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-ipv6",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-isg@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-isg",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-isis-oper@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-isis-oper",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-isis@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-isis",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-iwanfabric@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-iwanfabric",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-l2tp-oper@2020-03-01.yang",
+      "module": "Cisco-IOS-XE-l2tp-oper",
+      "revision": "2020-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-l2vpn@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-l2vpn",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-l3vpn@2019-11-01.yang",
+      "module": "Cisco-IOS-XE-l3vpn",
+      "revision": "2019-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-license@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-license",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-line-deviation@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-line-deviation",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-line@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-line",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-lisp-deviation@2021-07-10.yang",
+      "module": "Cisco-IOS-XE-lisp-deviation",
+      "revision": "2021-07-10"
+    },
+    {
+      "file": "Cisco-IOS-XE-lisp-oper@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-lisp-oper",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-lisp@2021-08-01.yang",
+      "module": "Cisco-IOS-XE-lisp",
+      "revision": "2021-08-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-lldp-oper@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-lldp-oper",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-lldp@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-lldp",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-logging@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-logging",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-mdns-gateway@2021-07-10.yang",
+      "module": "Cisco-IOS-XE-mdns-gateway",
+      "revision": "2021-07-10"
+    },
+    {
+      "file": "Cisco-IOS-XE-mdt-capabilities-oper@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-mdt-capabilities-oper",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-mdt-cfg@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-mdt-cfg",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-mdt-common-defs@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-mdt-common-defs",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-mdt-oper-v2@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-mdt-oper-v2",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-mdt-oper@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-mdt-oper",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-memory-oper@2019-05-01.yang",
+      "module": "Cisco-IOS-XE-memory-oper",
+      "revision": "2019-05-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-mld@2020-03-01.yang",
+      "module": "Cisco-IOS-XE-mld",
+      "revision": "2020-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-mlppp-oper@2019-05-01.yang",
+      "module": "Cisco-IOS-XE-mlppp-oper",
+      "revision": "2019-05-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-mobileip@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-mobileip",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-mpls-forwarding-oper@2020-03-01.yang",
+      "module": "Cisco-IOS-XE-mpls-forwarding-oper",
+      "revision": "2020-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-mpls-ldp-oper@2019-11-01.yang",
+      "module": "Cisco-IOS-XE-mpls-ldp-oper",
+      "revision": "2019-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-mpls-te-oper@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-mpls-te-oper",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-mpls@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-mpls",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-mroute-oper@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-mroute-oper",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-multicast-rpc@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-multicast-rpc",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-multicast@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-multicast",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-nam@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-nam",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-nat-oper@2019-05-01.yang",
+      "module": "Cisco-IOS-XE-nat-oper",
+      "revision": "2019-05-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-nat@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-nat",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-native@2021-08-10.yang",
+      "module": "Cisco-IOS-XE-native",
+      "revision": "2021-08-10"
+    },
+    {
+      "file": "Cisco-IOS-XE-nbar@2021-04-28.yang",
+      "module": "Cisco-IOS-XE-nbar",
+      "revision": "2021-04-28"
+    },
+    {
+      "file": "Cisco-IOS-XE-ncch-cfg@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-ncch-cfg",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-ncch-oper@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-ncch-oper",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-nd-deviation@2020-06-09.yang",
+      "module": "Cisco-IOS-XE-nd-deviation",
+      "revision": "2020-06-09"
+    },
+    {
+      "file": "Cisco-IOS-XE-nd@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-nd",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-netconf-diag-oper@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-netconf-diag-oper",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-netconf-diag-rpc@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-netconf-diag-rpc",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-nhrp@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-nhrp",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-ntp-oper@2019-05-01.yang",
+      "module": "Cisco-IOS-XE-ntp-oper",
+      "revision": "2019-05-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-ntp@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-ntp",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-object-group@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-object-group",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-ospf-common@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-ospf-common",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-ospf-events@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-ospf-events",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-ospf-obsolete@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-ospf-obsolete",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-ospf-oper@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-ospf-oper",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-ospf-rpc@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-ospf-rpc",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-ospf@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-ospf",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-ospfv3-deviation@2021-01-08.yang",
+      "module": "Cisco-IOS-XE-ospfv3-deviation",
+      "revision": "2021-01-08"
+    },
+    {
+      "file": "Cisco-IOS-XE-ospfv3@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-ospfv3",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-otv@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-otv",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-parser@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-parser",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-pathmgr@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-pathmgr",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-perf-measure-events@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-perf-measure-events",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-perf-measure-oper@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-perf-measure-oper",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-perf-measure@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-perf-measure",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-pfr@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-pfr",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-pim-oper@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-pim-oper",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-platform-oper@2021-07-02.yang",
+      "module": "Cisco-IOS-XE-platform-oper",
+      "revision": "2021-07-02"
+    },
+    {
+      "file": "Cisco-IOS-XE-platform-rpc@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-platform-rpc",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-platform-software-events@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-platform-software-events",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-platform-software-oper@2021-07-04.yang",
+      "module": "Cisco-IOS-XE-platform-software-oper",
+      "revision": "2021-07-04"
+    },
+    {
+      "file": "Cisco-IOS-XE-platform@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-platform",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-pnp@2019-11-01.yang",
+      "module": "Cisco-IOS-XE-pnp",
+      "revision": "2019-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-policy-deviation@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-policy-deviation",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-policy@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-policy",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-port-channel-deviation@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-port-channel-deviation",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-ppp-oper@2019-05-01.yang",
+      "module": "Cisco-IOS-XE-ppp-oper",
+      "revision": "2019-05-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-ppp@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-ppp",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-pppoe@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-pppoe",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-process-cpu-oper@2019-05-01.yang",
+      "module": "Cisco-IOS-XE-process-cpu-oper",
+      "revision": "2019-05-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-process-memory-oper@2019-05-01.yang",
+      "module": "Cisco-IOS-XE-process-memory-oper",
+      "revision": "2019-05-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-qfp-classification-oper@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-qfp-classification-oper",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-qfp-resource-utilization-oper@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-qfp-resource-utilization-oper",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-qfp-stats-oper@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-qfp-stats-oper",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-qfp-stats@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-qfp-stats",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-qos@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-qos",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-rip@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-rip",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-rmi-dad@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-rmi-dad",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-route-map@2021-07-10.yang",
+      "module": "Cisco-IOS-XE-route-map",
+      "revision": "2021-07-10"
+    },
+    {
+      "file": "Cisco-IOS-XE-rpc@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-rpc",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-rsvp@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-rsvp",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-sanet-deviation@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-sanet-deviation",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-sanet@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-sanet",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-sd-vxlan-oper@2020-03-01.yang",
+      "module": "Cisco-IOS-XE-sd-vxlan-oper",
+      "revision": "2020-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-segment-routing@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-segment-routing",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-service-discovery@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-service-discovery",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-service-insertion@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-service-insertion",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-service-routing@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-service-routing",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-sisf@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-sisf",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-site-manager@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-site-manager",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-sla@2021-08-01.yang",
+      "module": "Cisco-IOS-XE-sla",
+      "revision": "2021-08-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-sm-enum-types@2019-11-01.yang",
+      "module": "Cisco-IOS-XE-sm-enum-types",
+      "revision": "2019-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-sm-events-oper@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-sm-events-oper",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-snmp@2021-08-10.yang",
+      "module": "Cisco-IOS-XE-snmp",
+      "revision": "2021-08-10"
+    },
+    {
+      "file": "Cisco-IOS-XE-spanning-tree@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-spanning-tree",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-switch@2021-08-01.yang",
+      "module": "Cisco-IOS-XE-switch",
+      "revision": "2021-08-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-template@2021-08-10.yang",
+      "module": "Cisco-IOS-XE-template",
+      "revision": "2021-08-10"
+    },
+    {
+      "file": "Cisco-IOS-XE-trace-events@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-trace-events",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-trace-rpc@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-trace-rpc",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-track@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-track",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-trustsec-oper@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-trustsec-oper",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-tunnel-oper@2020-07-01.yang",
+      "module": "Cisco-IOS-XE-tunnel-oper",
+      "revision": "2020-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-tunnel-types@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-tunnel-types",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-tunnel@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-tunnel",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-types@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-types",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-umbrella-oper-dp@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-umbrella-oper-dp",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-umbrella-oper@2019-05-01.yang",
+      "module": "Cisco-IOS-XE-umbrella-oper",
+      "revision": "2019-05-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-umbrella-rpc@2019-11-01.yang",
+      "module": "Cisco-IOS-XE-umbrella-rpc",
+      "revision": "2019-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-umbrella@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-umbrella",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-utd-common-oper@2019-05-01.yang",
+      "module": "Cisco-IOS-XE-utd-common-oper",
+      "revision": "2019-05-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-utd-oper@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-utd-oper",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-utd-rpc@2019-11-01.yang",
+      "module": "Cisco-IOS-XE-utd-rpc",
+      "revision": "2019-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-utd@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-utd",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-vlan@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-vlan",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-vpdn@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-vpdn",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-vrf-oper@2019-05-01.yang",
+      "module": "Cisco-IOS-XE-vrf-oper",
+      "revision": "2019-05-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-vrrp-oper@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-vrrp-oper",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-vrrp-types@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-vrrp-types",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-vrrp@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-vrrp",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-vservice@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-vservice",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-vtp@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-vtp",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-vxlan@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-vxlan",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-wccp@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-wccp",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-wsma@2019-07-01.yang",
+      "module": "Cisco-IOS-XE-wsma",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-xcopy-events@2021-03-01.yang",
+      "module": "Cisco-IOS-XE-xcopy-events",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-xcopy-rpc@2021-07-02.yang",
+      "module": "Cisco-IOS-XE-xcopy-rpc",
+      "revision": "2021-07-02"
+    },
+    {
+      "file": "Cisco-IOS-XE-yang-interfaces-cfg@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-yang-interfaces-cfg",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-yang-interfaces-oper@2021-07-01.yang",
+      "module": "Cisco-IOS-XE-yang-interfaces-oper",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-zone-rpc@2019-11-01.yang",
+      "module": "Cisco-IOS-XE-zone-rpc",
+      "revision": "2019-11-01"
+    },
+    {
+      "file": "Cisco-IOS-XE-zone@2020-11-01.yang",
+      "module": "Cisco-IOS-XE-zone",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "DIAL-CONTROL-MIB@1996-09-23.yang",
+      "module": "DIAL-CONTROL-MIB",
+      "revision": "1996-09-23"
+    },
+    {
+      "file": "DIFFSERV-DSCP-TC@2002-05-09.yang",
+      "module": "DIFFSERV-DSCP-TC",
+      "revision": "2002-05-09"
+    },
+    {
+      "file": "DIFFSERV-MIB@2002-02-07.yang",
+      "module": "DIFFSERV-MIB",
+      "revision": "2002-02-07"
+    },
+    {
+      "file": "DISMAN-EVENT-MIB@2000-10-16.yang",
+      "module": "DISMAN-EVENT-MIB",
+      "revision": "2000-10-16"
+    },
+    {
+      "file": "DISMAN-EXPRESSION-MIB@2000-10-16.yang",
+      "module": "DISMAN-EXPRESSION-MIB",
+      "revision": "2000-10-16"
+    },
+    {
+      "file": "DRAFT-MSDP-MIB@1999-12-16.yang",
+      "module": "DRAFT-MSDP-MIB",
+      "revision": "1999-12-16"
+    },
+    {
+      "file": "DS1-MIB@1998-08-01.yang",
+      "module": "DS1-MIB",
+      "revision": "1998-08-01"
+    },
+    {
+      "file": "DS3-MIB@1998-08-01.yang",
+      "module": "DS3-MIB",
+      "revision": "1998-08-01"
+    },
+    {
+      "file": "ENTITY-MIB@2005-08-10.yang",
+      "module": "ENTITY-MIB",
+      "revision": "2005-08-10"
+    },
+    {
+      "file": "ENTITY-SENSOR-MIB@2002-12-16.yang",
+      "module": "ENTITY-SENSOR-MIB",
+      "revision": "2002-12-16"
+    },
+    {
+      "file": "ENTITY-STATE-MIB@2005-11-22.yang",
+      "module": "ENTITY-STATE-MIB",
+      "revision": "2005-11-22"
+    },
+    {
+      "file": "ENTITY-STATE-TC-MIB@2005-11-22.yang",
+      "module": "ENTITY-STATE-TC-MIB",
+      "revision": "2005-11-22"
+    },
+    {
+      "file": "ETHER-WIS@2003-09-19.yang",
+      "module": "ETHER-WIS",
+      "revision": "2003-09-19"
+    },
+    {
+      "file": "EXPRESSION-MIB@2005-11-24.yang",
+      "module": "EXPRESSION-MIB",
+      "revision": "2005-11-24"
+    },
+    {
+      "file": "EtherLike-MIB@2003-09-19.yang",
+      "module": "EtherLike-MIB",
+      "revision": "2003-09-19"
+    },
+    {
+      "file": "FRAME-RELAY-DTE-MIB@1997-05-01.yang",
+      "module": "FRAME-RELAY-DTE-MIB",
+      "revision": "1997-05-01"
+    },
+    {
+      "file": "HCNUM-TC@2000-06-08.yang",
+      "module": "HCNUM-TC",
+      "revision": "2000-06-08"
+    },
+    {
+      "file": "IANA-ADDRESS-FAMILY-NUMBERS-MIB@2000-09-08.yang",
+      "module": "IANA-ADDRESS-FAMILY-NUMBERS-MIB",
+      "revision": "2000-09-08"
+    },
+    {
+      "file": "IANA-RTPROTO-MIB@2000-09-26.yang",
+      "module": "IANA-RTPROTO-MIB",
+      "revision": "2000-09-26"
+    },
+    {
+      "file": "IANAifType-MIB@2006-03-31.yang",
+      "module": "IANAifType-MIB",
+      "revision": "2006-03-31"
+    },
+    {
+      "file": "IEEE8021-TC-MIB@2008-10-15.yang",
+      "module": "IEEE8021-TC-MIB",
+      "revision": "2008-10-15"
+    },
+    {
+      "file": "IF-MIB@2000-06-14.yang",
+      "module": "IF-MIB",
+      "revision": "2000-06-14"
+    },
+    {
+      "file": "IGMP-STD-MIB@2000-09-28.yang",
+      "module": "IGMP-STD-MIB",
+      "revision": "2000-09-28"
+    },
+    {
+      "file": "INET-ADDRESS-MIB@2005-02-04.yang",
+      "module": "INET-ADDRESS-MIB",
+      "revision": "2005-02-04"
+    },
+    {
+      "file": "INT-SERV-MIB@1997-10-03.yang",
+      "module": "INT-SERV-MIB",
+      "revision": "1997-10-03"
+    },
+    {
+      "file": "INTEGRATED-SERVICES-MIB@1995-11-03.yang",
+      "module": "INTEGRATED-SERVICES-MIB",
+      "revision": "1995-11-03"
+    },
+    {
+      "file": "IP-FORWARD-MIB@1996-09-19.yang",
+      "module": "IP-FORWARD-MIB",
+      "revision": "1996-09-19"
+    },
+    {
+      "file": "IP-MIB@2006-02-02.yang",
+      "module": "IP-MIB",
+      "revision": "2006-02-02"
+    },
+    {
+      "file": "IPMROUTE-STD-MIB@2000-09-22.yang",
+      "module": "IPMROUTE-STD-MIB",
+      "revision": "2000-09-22"
+    },
+    {
+      "file": "IPV6-FLOW-LABEL-MIB@2003-08-28.yang",
+      "module": "IPV6-FLOW-LABEL-MIB",
+      "revision": "2003-08-28"
+    },
+    {
+      "file": "LLDP-MIB@2005-05-06.yang",
+      "module": "LLDP-MIB",
+      "revision": "2005-05-06"
+    },
+    {
+      "file": "MPLS-L3VPN-STD-MIB@2006-01-23.yang",
+      "module": "MPLS-L3VPN-STD-MIB",
+      "revision": "2006-01-23"
+    },
+    {
+      "file": "MPLS-LDP-GENERIC-STD-MIB@2004-06-03.yang",
+      "module": "MPLS-LDP-GENERIC-STD-MIB",
+      "revision": "2004-06-03"
+    },
+    {
+      "file": "MPLS-LDP-STD-MIB@2004-06-03.yang",
+      "module": "MPLS-LDP-STD-MIB",
+      "revision": "2004-06-03"
+    },
+    {
+      "file": "MPLS-LSR-STD-MIB@2004-06-03.yang",
+      "module": "MPLS-LSR-STD-MIB",
+      "revision": "2004-06-03"
+    },
+    {
+      "file": "MPLS-TC-MIB@2001-01-04.yang",
+      "module": "MPLS-TC-MIB",
+      "revision": "2001-01-04"
+    },
+    {
+      "file": "MPLS-TC-STD-MIB@2004-06-03.yang",
+      "module": "MPLS-TC-STD-MIB",
+      "revision": "2004-06-03"
+    },
+    {
+      "file": "MPLS-TE-STD-MIB@2004-06-03.yang",
+      "module": "MPLS-TE-STD-MIB",
+      "revision": "2004-06-03"
+    },
+    {
+      "file": "MPLS-VPN-MIB@2001-10-15.yang",
+      "module": "MPLS-VPN-MIB",
+      "revision": "2001-10-15"
+    },
+    {
+      "file": "NHRP-MIB@1999-08-26.yang",
+      "module": "NHRP-MIB",
+      "revision": "1999-08-26"
+    },
+    {
+      "file": "NOTIFICATION-LOG-MIB@2000-11-27.yang",
+      "module": "NOTIFICATION-LOG-MIB",
+      "revision": "2000-11-27"
+    },
+    {
+      "file": "OSPF-MIB@2006-11-10.yang",
+      "module": "OSPF-MIB",
+      "revision": "2006-11-10"
+    },
+    {
+      "file": "OSPF-TRAP-MIB@2006-11-10.yang",
+      "module": "OSPF-TRAP-MIB",
+      "revision": "2006-11-10"
+    },
+    {
+      "file": "P-BRIDGE-MIB@2006-01-09.yang",
+      "module": "P-BRIDGE-MIB",
+      "revision": "2006-01-09"
+    },
+    {
+      "file": "PIM-MIB@2000-09-28.yang",
+      "module": "PIM-MIB",
+      "revision": "2000-09-28"
+    },
+    {
+      "file": "PerfHist-TC-MIB@1998-11-07.yang",
+      "module": "PerfHist-TC-MIB",
+      "revision": "1998-11-07"
+    },
+    {
+      "file": "Q-BRIDGE-MIB@2006-01-09.yang",
+      "module": "Q-BRIDGE-MIB",
+      "revision": "2006-01-09"
+    },
+    {
+      "file": "RFC-1212.yang",
+      "module": "RFC-1212",
+      "revision": ""
+    },
+    {
+      "file": "RFC-1215.yang",
+      "module": "RFC-1215",
+      "revision": ""
+    },
+    {
+      "file": "RFC1155-SMI.yang",
+      "module": "RFC1155-SMI",
+      "revision": ""
+    },
+    {
+      "file": "RFC1213-MIB.yang",
+      "module": "RFC1213-MIB",
+      "revision": ""
+    },
+    {
+      "file": "RFC1315-MIB.yang",
+      "module": "RFC1315-MIB",
+      "revision": ""
+    },
+    {
+      "file": "RMON-MIB@2000-05-11.yang",
+      "module": "RMON-MIB",
+      "revision": "2000-05-11"
+    },
+    {
+      "file": "RMON2-MIB@1996-05-27.yang",
+      "module": "RMON2-MIB",
+      "revision": "1996-05-27"
+    },
+    {
+      "file": "RSVP-MIB@1998-08-25.yang",
+      "module": "RSVP-MIB",
+      "revision": "1998-08-25"
+    },
+    {
+      "file": "SNMP-FRAMEWORK-MIB@2002-10-14.yang",
+      "module": "SNMP-FRAMEWORK-MIB",
+      "revision": "2002-10-14"
+    },
+    {
+      "file": "SNMP-PROXY-MIB@2002-10-14.yang",
+      "module": "SNMP-PROXY-MIB",
+      "revision": "2002-10-14"
+    },
+    {
+      "file": "SNMP-TARGET-MIB@1998-08-04.yang",
+      "module": "SNMP-TARGET-MIB",
+      "revision": "1998-08-04"
+    },
+    {
+      "file": "SNMPv2-MIB@2002-10-16.yang",
+      "module": "SNMPv2-MIB",
+      "revision": "2002-10-16"
+    },
+    {
+      "file": "SNMPv2-TC.yang",
+      "module": "SNMPv2-TC",
+      "revision": ""
+    },
+    {
+      "file": "SONET-MIB@2003-08-11.yang",
+      "module": "SONET-MIB",
+      "revision": "2003-08-11"
+    },
+    {
+      "file": "TCP-MIB@2005-02-18.yang",
+      "module": "TCP-MIB",
+      "revision": "2005-02-18"
+    },
+    {
+      "file": "TOKEN-RING-RMON-MIB.yang",
+      "module": "TOKEN-RING-RMON-MIB",
+      "revision": ""
+    },
+    {
+      "file": "TOKENRING-MIB@1994-10-23.yang",
+      "module": "TOKENRING-MIB",
+      "revision": "1994-10-23"
+    },
+    {
+      "file": "TUNNEL-MIB@2005-05-16.yang",
+      "module": "TUNNEL-MIB",
+      "revision": "2005-05-16"
+    },
+    {
+      "file": "UDP-MIB@2005-05-20.yang",
+      "module": "UDP-MIB",
+      "revision": "2005-05-20"
+    },
+    {
+      "file": "VPN-TC-STD-MIB@2005-11-15.yang",
+      "module": "VPN-TC-STD-MIB",
+      "revision": "2005-11-15"
+    },
+    {
+      "file": "cisco-bridge-common@2019-07-01.yang",
+      "module": "cisco-bridge-common",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "cisco-bridge-domain@2019-07-01.yang",
+      "module": "cisco-bridge-domain",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "cisco-ethernet@2016-05-10.yang",
+      "module": "cisco-ethernet",
+      "revision": "2016-05-10"
+    },
+    {
+      "file": "cisco-ia@2021-07-01.yang",
+      "module": "cisco-ia",
+      "revision": "2021-07-01"
+    },
+    {
+      "file": "cisco-ospf@2019-07-01.yang",
+      "module": "cisco-ospf",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "cisco-policy-filters@2019-07-01.yang",
+      "module": "cisco-policy-filters",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "cisco-policy-target@2019-07-01.yang",
+      "module": "cisco-policy-target",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "cisco-policy@2019-07-01.yang",
+      "module": "cisco-policy",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "cisco-pw@2019-07-01.yang",
+      "module": "cisco-pw",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "cisco-routing-ext@2019-11-01.yang",
+      "module": "cisco-routing-ext",
+      "revision": "2019-11-01"
+    },
+    {
+      "file": "cisco-self-mgmt@2019-07-01.yang",
+      "module": "cisco-self-mgmt",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "cisco-semver@2019-03-20.yang",
+      "module": "cisco-semver",
+      "revision": "2019-03-20"
+    },
+    {
+      "file": "cisco-smart-license-errors@2020-11-01.yang",
+      "module": "cisco-smart-license-errors",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "cisco-smart-license@2021-03-01.yang",
+      "module": "cisco-smart-license",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "cisco-storm-control@2019-07-01.yang",
+      "module": "cisco-storm-control",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "cisco-xe-ietf-event-notifications-deviation@2018-12-03.yang",
+      "module": "cisco-xe-ietf-event-notifications-deviation",
+      "revision": "2018-12-03"
+    },
+    {
+      "file": "cisco-xe-ietf-ip-deviation@2016-08-10.yang",
+      "module": "cisco-xe-ietf-ip-deviation",
+      "revision": "2016-08-10"
+    },
+    {
+      "file": "cisco-xe-ietf-ipv4-unicast-routing-deviation@2015-09-11.yang",
+      "module": "cisco-xe-ietf-ipv4-unicast-routing-deviation",
+      "revision": "2015-09-11"
+    },
+    {
+      "file": "cisco-xe-ietf-ipv6-unicast-routing-deviation@2015-09-11.yang",
+      "module": "cisco-xe-ietf-ipv6-unicast-routing-deviation",
+      "revision": "2015-09-11"
+    },
+    {
+      "file": "cisco-xe-ietf-ospf-deviation@2018-02-09.yang",
+      "module": "cisco-xe-ietf-ospf-deviation",
+      "revision": "2018-02-09"
+    },
+    {
+      "file": "cisco-xe-ietf-routing-deviation@2016-07-09.yang",
+      "module": "cisco-xe-ietf-routing-deviation",
+      "revision": "2016-07-09"
+    },
+    {
+      "file": "cisco-xe-ietf-yang-push-deviation@2018-12-03.yang",
+      "module": "cisco-xe-ietf-yang-push-deviation",
+      "revision": "2018-12-03"
+    },
+    {
+      "file": "cisco-xe-ietf-yang-push-ext@2020-04-27.yang",
+      "module": "cisco-xe-ietf-yang-push-ext",
+      "revision": "2020-04-27"
+    },
+    {
+      "file": "cisco-xe-openconfig-acl-deviation@2017-08-25.yang",
+      "module": "cisco-xe-openconfig-acl-deviation",
+      "revision": "2017-08-25"
+    },
+    {
+      "file": "cisco-xe-openconfig-acl-ext@2017-03-30.yang",
+      "module": "cisco-xe-openconfig-acl-ext",
+      "revision": "2017-03-30"
+    },
+    {
+      "file": "cisco-xe-openconfig-aft-deviation@2018-12-05.yang",
+      "module": "cisco-xe-openconfig-aft-deviation",
+      "revision": "2018-12-05"
+    },
+    {
+      "file": "cisco-xe-openconfig-bgp-deviation@2018-05-21.yang",
+      "module": "cisco-xe-openconfig-bgp-deviation",
+      "revision": "2018-05-21"
+    },
+    {
+      "file": "cisco-xe-openconfig-bgp-policy-deviation@2017-07-24.yang",
+      "module": "cisco-xe-openconfig-bgp-policy-deviation",
+      "revision": "2017-07-24"
+    },
+    {
+      "file": "cisco-xe-openconfig-if-ethernet-ext@2017-10-30.yang",
+      "module": "cisco-xe-openconfig-if-ethernet-ext",
+      "revision": "2017-10-30"
+    },
+    {
+      "file": "cisco-xe-openconfig-if-ip-deviation@2017-03-04.yang",
+      "module": "cisco-xe-openconfig-if-ip-deviation",
+      "revision": "2017-03-04"
+    },
+    {
+      "file": "cisco-xe-openconfig-interfaces-deviation@2018-08-21.yang",
+      "module": "cisco-xe-openconfig-interfaces-deviation",
+      "revision": "2018-08-21"
+    },
+    {
+      "file": "cisco-xe-openconfig-interfaces-ext@2018-07-14.yang",
+      "module": "cisco-xe-openconfig-interfaces-ext",
+      "revision": "2018-07-14"
+    },
+    {
+      "file": "cisco-xe-openconfig-isis-deviation@2018-12-05.yang",
+      "module": "cisco-xe-openconfig-isis-deviation",
+      "revision": "2018-12-05"
+    },
+    {
+      "file": "cisco-xe-openconfig-isis-policy-deviation@2020-07-30.yang",
+      "module": "cisco-xe-openconfig-isis-policy-deviation",
+      "revision": "2020-07-30"
+    },
+    {
+      "file": "cisco-xe-openconfig-lldp-deviation@2018-07-25.yang",
+      "module": "cisco-xe-openconfig-lldp-deviation",
+      "revision": "2018-07-25"
+    },
+    {
+      "file": "cisco-xe-openconfig-local-routing-deviation@2020-09-20.yang",
+      "module": "cisco-xe-openconfig-local-routing-deviation",
+      "revision": "2020-09-20"
+    },
+    {
+      "file": "cisco-xe-openconfig-mpls-deviation@2019-06-27.yang",
+      "module": "cisco-xe-openconfig-mpls-deviation",
+      "revision": "2019-06-27"
+    },
+    {
+      "file": "cisco-xe-openconfig-network-instance-deviation@2017-02-14.yang",
+      "module": "cisco-xe-openconfig-network-instance-deviation",
+      "revision": "2017-02-14"
+    },
+    {
+      "file": "cisco-xe-openconfig-rib-bgp-ext@2016-11-30.yang",
+      "module": "cisco-xe-openconfig-rib-bgp-ext",
+      "revision": "2016-11-30"
+    },
+    {
+      "file": "cisco-xe-openconfig-routing-policy-deviation@2017-03-30.yang",
+      "module": "cisco-xe-openconfig-routing-policy-deviation",
+      "revision": "2017-03-30"
+    },
+    {
+      "file": "cisco-xe-openconfig-segment-routing-deviation@2018-12-05.yang",
+      "module": "cisco-xe-openconfig-segment-routing-deviation",
+      "revision": "2018-12-05"
+    },
+    {
+      "file": "cisco-xe-routing-csr-openconfig-platform-deviation@2010-10-09.yang",
+      "module": "cisco-xe-routing-csr-openconfig-platform-deviation",
+      "revision": "2010-10-09"
+    },
+    {
+      "file": "cisco-xe-routing-openconfig-system-deviation@2017-11-27.yang",
+      "module": "cisco-xe-routing-openconfig-system-deviation",
+      "revision": "2017-11-27"
+    },
+    {
+      "file": "cisco-xe-routing-openconfig-system-ext@2020-11-01.yang",
+      "module": "cisco-xe-routing-openconfig-system-ext",
+      "revision": "2020-11-01"
+    },
+    {
+      "file": "cisco-xe-routing-openconfig-system-management-deviation@2019-07-01.yang",
+      "module": "cisco-xe-routing-openconfig-system-management-deviation",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "cisco-xe-routing-openconfig-vlan-deviation@2018-12-12.yang",
+      "module": "cisco-xe-routing-openconfig-vlan-deviation",
+      "revision": "2018-12-12"
+    },
+    {
+      "file": "common-mpls-static-devs@2015-09-11.yang",
+      "module": "common-mpls-static-devs",
+      "revision": "2015-09-11"
+    },
+    {
+      "file": "common-mpls-static@2019-07-01.yang",
+      "module": "common-mpls-static",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "common-mpls-types@2019-07-01.yang",
+      "module": "common-mpls-types",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "iana-crypt-hash@2014-08-06.yang",
+      "module": "iana-crypt-hash",
+      "revision": "2014-08-06"
+    },
+    {
+      "file": "iana-if-type@2014-05-08.yang",
+      "module": "iana-if-type",
+      "revision": "2014-05-08"
+    },
+    {
+      "file": "ietf-diffserv-action@2015-04-07.yang",
+      "module": "ietf-diffserv-action",
+      "revision": "2015-04-07"
+    },
+    {
+      "file": "ietf-diffserv-classifier@2015-04-07.yang",
+      "module": "ietf-diffserv-classifier",
+      "revision": "2015-04-07"
+    },
+    {
+      "file": "ietf-diffserv-policy@2015-04-07.yang",
+      "module": "ietf-diffserv-policy",
+      "revision": "2015-04-07"
+    },
+    {
+      "file": "ietf-diffserv-target@2015-04-07.yang",
+      "module": "ietf-diffserv-target",
+      "revision": "2015-04-07"
+    },
+    {
+      "file": "ietf-event-notifications@2016-10-27.yang",
+      "module": "ietf-event-notifications",
+      "revision": "2016-10-27"
+    },
+    {
+      "file": "ietf-inet-types@2013-07-15.yang",
+      "module": "ietf-inet-types",
+      "revision": "2013-07-15"
+    },
+    {
+      "file": "ietf-interfaces-ext.yang",
+      "module": "ietf-interfaces-ext",
+      "revision": ""
+    },
+    {
+      "file": "ietf-interfaces@2014-05-08.yang",
+      "module": "ietf-interfaces",
+      "revision": "2014-05-08"
+    },
+    {
+      "file": "ietf-ip@2014-06-16.yang",
+      "module": "ietf-ip",
+      "revision": "2014-06-16"
+    },
+    {
+      "file": "ietf-ipv4-unicast-routing@2015-05-25.yang",
+      "module": "ietf-ipv4-unicast-routing",
+      "revision": "2015-05-25"
+    },
+    {
+      "file": "ietf-ipv6-unicast-routing@2015-05-25.yang",
+      "module": "ietf-ipv6-unicast-routing",
+      "revision": "2015-05-25"
+    },
+    {
+      "file": "ietf-key-chain@2015-02-24.yang",
+      "module": "ietf-key-chain",
+      "revision": "2015-02-24"
+    },
+    {
+      "file": "ietf-netconf-acm@2012-02-22.yang",
+      "module": "ietf-netconf-acm",
+      "revision": "2012-02-22"
+    },
+    {
+      "file": "ietf-netconf-monitoring@2010-10-04.yang",
+      "module": "ietf-netconf-monitoring",
+      "revision": "2010-10-04"
+    },
+    {
+      "file": "ietf-netconf-notifications@2012-02-06.yang",
+      "module": "ietf-netconf-notifications",
+      "revision": "2012-02-06"
+    },
+    {
+      "file": "ietf-netconf-with-defaults@2011-06-01.yang",
+      "module": "ietf-netconf-with-defaults",
+      "revision": "2011-06-01"
+    },
+    {
+      "file": "ietf-netconf@2011-06-01.yang",
+      "module": "ietf-netconf",
+      "revision": "2011-06-01"
+    },
+    {
+      "file": "ietf-ospf@2015-03-09.yang",
+      "module": "ietf-ospf",
+      "revision": "2015-03-09"
+    },
+    {
+      "file": "ietf-restconf-monitoring@2017-01-26.yang",
+      "module": "ietf-restconf-monitoring",
+      "revision": "2017-01-26"
+    },
+    {
+      "file": "ietf-routing@2015-05-25.yang",
+      "module": "ietf-routing",
+      "revision": "2015-05-25"
+    },
+    {
+      "file": "ietf-yang-library@2016-06-21.yang",
+      "module": "ietf-yang-library",
+      "revision": "2016-06-21"
+    },
+    {
+      "file": "ietf-yang-push@2021-03-01.yang",
+      "module": "ietf-yang-push",
+      "revision": "2021-03-01"
+    },
+    {
+      "file": "ietf-yang-smiv2@2012-06-22.yang",
+      "module": "ietf-yang-smiv2",
+      "revision": "2012-06-22"
+    },
+    {
+      "file": "ietf-yang-types@2013-07-15.yang",
+      "module": "ietf-yang-types",
+      "revision": "2013-07-15"
+    },
+    {
+      "file": "nvo-devs@2015-09-11.yang",
+      "module": "nvo-devs",
+      "revision": "2015-09-11"
+    },
+    {
+      "file": "nvo@2019-07-01.yang",
+      "module": "nvo",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "openconfig-aaa-radius@2017-09-18.yang",
+      "module": "openconfig-aaa-radius",
+      "revision": "2017-09-18"
+    },
+    {
+      "file": "openconfig-aaa-tacacs@2017-09-18.yang",
+      "module": "openconfig-aaa-tacacs",
+      "revision": "2017-09-18"
+    },
+    {
+      "file": "openconfig-aaa-types@2017-09-18.yang",
+      "module": "openconfig-aaa-types",
+      "revision": "2017-09-18"
+    },
+    {
+      "file": "openconfig-aaa@2017-09-18.yang",
+      "module": "openconfig-aaa",
+      "revision": "2017-09-18"
+    },
+    {
+      "file": "openconfig-acl@2017-05-26.yang",
+      "module": "openconfig-acl",
+      "revision": "2017-05-26"
+    },
+    {
+      "file": "openconfig-aft-types@2017-01-13.yang",
+      "module": "openconfig-aft-types",
+      "revision": "2017-01-13"
+    },
+    {
+      "file": "openconfig-aft@2017-01-13.yang",
+      "module": "openconfig-aft",
+      "revision": "2017-01-13"
+    },
+    {
+      "file": "openconfig-alarm-types@2018-11-21.yang",
+      "module": "openconfig-alarm-types",
+      "revision": "2018-11-21"
+    },
+    {
+      "file": "openconfig-alarms@2017-08-24.yang",
+      "module": "openconfig-alarms",
+      "revision": "2017-08-24"
+    },
+    {
+      "file": "openconfig-bgp-common-multiprotocol@2016-06-21.yang",
+      "module": "openconfig-bgp-common-multiprotocol",
+      "revision": "2016-06-21"
+    },
+    {
+      "file": "openconfig-bgp-common-structure@2016-06-21.yang",
+      "module": "openconfig-bgp-common-structure",
+      "revision": "2016-06-21"
+    },
+    {
+      "file": "openconfig-bgp-common@2016-06-21.yang",
+      "module": "openconfig-bgp-common",
+      "revision": "2016-06-21"
+    },
+    {
+      "file": "openconfig-bgp-global@2016-06-21.yang",
+      "module": "openconfig-bgp-global",
+      "revision": "2016-06-21"
+    },
+    {
+      "file": "openconfig-bgp-neighbor@2016-06-21.yang",
+      "module": "openconfig-bgp-neighbor",
+      "revision": "2016-06-21"
+    },
+    {
+      "file": "openconfig-bgp-peer-group@2016-06-21.yang",
+      "module": "openconfig-bgp-peer-group",
+      "revision": "2016-06-21"
+    },
+    {
+      "file": "openconfig-bgp-policy@2016-06-21.yang",
+      "module": "openconfig-bgp-policy",
+      "revision": "2016-06-21"
+    },
+    {
+      "file": "openconfig-bgp-types@2016-06-21.yang",
+      "module": "openconfig-bgp-types",
+      "revision": "2016-06-21"
+    },
+    {
+      "file": "openconfig-bgp@2016-06-21.yang",
+      "module": "openconfig-bgp",
+      "revision": "2016-06-21"
+    },
+    {
+      "file": "openconfig-extensions@2018-10-17.yang",
+      "module": "openconfig-extensions",
+      "revision": "2018-10-17"
+    },
+    {
+      "file": "openconfig-if-aggregate@2018-01-05.yang",
+      "module": "openconfig-if-aggregate",
+      "revision": "2018-01-05"
+    },
+    {
+      "file": "openconfig-if-ethernet@2020-05-06.yang",
+      "module": "openconfig-if-ethernet",
+      "revision": "2020-05-06"
+    },
+    {
+      "file": "openconfig-if-ip-ext@2018-01-05.yang",
+      "module": "openconfig-if-ip-ext",
+      "revision": "2018-01-05"
+    },
+    {
+      "file": "openconfig-if-ip@2018-01-05.yang",
+      "module": "openconfig-if-ip",
+      "revision": "2018-01-05"
+    },
+    {
+      "file": "openconfig-inet-types@2017-08-24.yang",
+      "module": "openconfig-inet-types",
+      "revision": "2017-08-24"
+    },
+    {
+      "file": "openconfig-interfaces@2018-01-05.yang",
+      "module": "openconfig-interfaces",
+      "revision": "2018-01-05"
+    },
+    {
+      "file": "openconfig-isis-lsdb-types@2017-01-13.yang",
+      "module": "openconfig-isis-lsdb-types",
+      "revision": "2017-01-13"
+    },
+    {
+      "file": "openconfig-isis-lsp@2017-01-13.yang",
+      "module": "openconfig-isis-lsp",
+      "revision": "2017-01-13"
+    },
+    {
+      "file": "openconfig-isis-policy@2017-01-13.yang",
+      "module": "openconfig-isis-policy",
+      "revision": "2017-01-13"
+    },
+    {
+      "file": "openconfig-isis-routing@2017-01-13.yang",
+      "module": "openconfig-isis-routing",
+      "revision": "2017-01-13"
+    },
+    {
+      "file": "openconfig-isis-types@2017-01-13.yang",
+      "module": "openconfig-isis-types",
+      "revision": "2017-01-13"
+    },
+    {
+      "file": "openconfig-isis@2017-01-13.yang",
+      "module": "openconfig-isis",
+      "revision": "2017-01-13"
+    },
+    {
+      "file": "openconfig-lldp-types@2016-05-16.yang",
+      "module": "openconfig-lldp-types",
+      "revision": "2016-05-16"
+    },
+    {
+      "file": "openconfig-lldp@2018-11-21.yang",
+      "module": "openconfig-lldp",
+      "revision": "2018-11-21"
+    },
+    {
+      "file": "openconfig-local-routing@2016-05-11.yang",
+      "module": "openconfig-local-routing",
+      "revision": "2016-05-11"
+    },
+    {
+      "file": "openconfig-mpls-igp@2016-12-15.yang",
+      "module": "openconfig-mpls-igp",
+      "revision": "2016-12-15"
+    },
+    {
+      "file": "openconfig-mpls-ldp@2016-12-15.yang",
+      "module": "openconfig-mpls-ldp",
+      "revision": "2016-12-15"
+    },
+    {
+      "file": "openconfig-mpls-rsvp@2016-12-15.yang",
+      "module": "openconfig-mpls-rsvp",
+      "revision": "2016-12-15"
+    },
+    {
+      "file": "openconfig-mpls-sr@2016-12-15.yang",
+      "module": "openconfig-mpls-sr",
+      "revision": "2016-12-15"
+    },
+    {
+      "file": "openconfig-mpls-static@2016-12-15.yang",
+      "module": "openconfig-mpls-static",
+      "revision": "2016-12-15"
+    },
+    {
+      "file": "openconfig-mpls-te@2016-12-15.yang",
+      "module": "openconfig-mpls-te",
+      "revision": "2016-12-15"
+    },
+    {
+      "file": "openconfig-mpls-types@2016-12-15.yang",
+      "module": "openconfig-mpls-types",
+      "revision": "2016-12-15"
+    },
+    {
+      "file": "openconfig-mpls@2016-12-15.yang",
+      "module": "openconfig-mpls",
+      "revision": "2016-12-15"
+    },
+    {
+      "file": "openconfig-network-instance-l2@2017-01-13.yang",
+      "module": "openconfig-network-instance-l2",
+      "revision": "2017-01-13"
+    },
+    {
+      "file": "openconfig-network-instance-l3@2017-01-13.yang",
+      "module": "openconfig-network-instance-l3",
+      "revision": "2017-01-13"
+    },
+    {
+      "file": "openconfig-network-instance-types@2016-12-15.yang",
+      "module": "openconfig-network-instance-types",
+      "revision": "2016-12-15"
+    },
+    {
+      "file": "openconfig-network-instance@2017-01-13.yang",
+      "module": "openconfig-network-instance",
+      "revision": "2017-01-13"
+    },
+    {
+      "file": "openconfig-packet-match-types@2017-05-26.yang",
+      "module": "openconfig-packet-match-types",
+      "revision": "2017-05-26"
+    },
+    {
+      "file": "openconfig-packet-match@2017-05-26.yang",
+      "module": "openconfig-packet-match",
+      "revision": "2017-05-26"
+    },
+    {
+      "file": "openconfig-platform-types@2018-11-21.yang",
+      "module": "openconfig-platform-types",
+      "revision": "2018-11-21"
+    },
+    {
+      "file": "openconfig-platform@2018-11-21.yang",
+      "module": "openconfig-platform",
+      "revision": "2018-11-21"
+    },
+    {
+      "file": "openconfig-policy-types@2016-05-12.yang",
+      "module": "openconfig-policy-types",
+      "revision": "2016-05-12"
+    },
+    {
+      "file": "openconfig-procmon@2017-09-18.yang",
+      "module": "openconfig-procmon",
+      "revision": "2017-09-18"
+    },
+    {
+      "file": "openconfig-rib-bgp-ext@2016-04-11.yang",
+      "module": "openconfig-rib-bgp-ext",
+      "revision": "2016-04-11"
+    },
+    {
+      "file": "openconfig-rib-bgp-types@2016-04-11.yang",
+      "module": "openconfig-rib-bgp-types",
+      "revision": "2016-04-11"
+    },
+    {
+      "file": "openconfig-rib-bgp@2017-03-07.yang",
+      "module": "openconfig-rib-bgp",
+      "revision": "2017-03-07"
+    },
+    {
+      "file": "openconfig-routing-policy@2016-05-12.yang",
+      "module": "openconfig-routing-policy",
+      "revision": "2016-05-12"
+    },
+    {
+      "file": "openconfig-segment-routing@2017-01-12.yang",
+      "module": "openconfig-segment-routing",
+      "revision": "2017-01-12"
+    },
+    {
+      "file": "openconfig-system-logging@2017-09-18.yang",
+      "module": "openconfig-system-logging",
+      "revision": "2017-09-18"
+    },
+    {
+      "file": "openconfig-system-management@2018-11-21.yang",
+      "module": "openconfig-system-management",
+      "revision": "2018-11-21"
+    },
+    {
+      "file": "openconfig-system-terminal@2017-09-18.yang",
+      "module": "openconfig-system-terminal",
+      "revision": "2017-09-18"
+    },
+    {
+      "file": "openconfig-system@2018-07-17.yang",
+      "module": "openconfig-system",
+      "revision": "2018-07-17"
+    },
+    {
+      "file": "openconfig-types@2019-04-16.yang",
+      "module": "openconfig-types",
+      "revision": "2019-04-16"
+    },
+    {
+      "file": "openconfig-vlan-types@2016-05-26.yang",
+      "module": "openconfig-vlan-types",
+      "revision": "2016-05-26"
+    },
+    {
+      "file": "openconfig-vlan@2016-05-26.yang",
+      "module": "openconfig-vlan",
+      "revision": "2016-05-26"
+    },
+    {
+      "file": "openconfig-yang-types@2018-11-21.yang",
+      "module": "openconfig-yang-types",
+      "revision": "2018-11-21"
+    },
+    {
+      "file": "pim@2019-07-01.yang",
+      "module": "pim",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "policy-attr@2019-07-01.yang",
+      "module": "policy-attr",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "policy-types@2019-07-01.yang",
+      "module": "policy-types",
+      "revision": "2019-07-01"
+    },
+    {
+      "file": "tailf-cli-extensions@2021-12-03.yang",
+      "module": "tailf-cli-extensions",
+      "revision": "2021-12-03"
+    },
+    {
+      "file": "tailf-common-monitoring@2019-04-09.yang",
+      "module": "tailf-common-monitoring",
+      "revision": "2019-04-09"
+    },
+    {
+      "file": "tailf-common-query@2017-12-15.yang",
+      "module": "tailf-common-query",
+      "revision": "2017-12-15"
+    },
+    {
+      "file": "tailf-common@2021-12-03.yang",
+      "module": "tailf-common",
+      "revision": "2021-12-03"
+    },
+    {
+      "file": "tailf-confd-monitoring@2019-10-30.yang",
+      "module": "tailf-confd-monitoring",
+      "revision": "2019-10-30"
+    },
+    {
+      "file": "tailf-meta-extensions@2017-03-08.yang",
+      "module": "tailf-meta-extensions",
+      "revision": "2017-03-08"
+    },
+    {
+      "file": "tailf-netconf-extensions@2019-04-09.yang",
+      "module": "tailf-netconf-extensions",
+      "revision": "2019-04-09"
+    },
+    {
+      "file": "tailf-netconf-monitoring@2019-03-28.yang",
+      "module": "tailf-netconf-monitoring",
+      "revision": "2019-03-28"
+    }
+  ],
+  "created": "2026-07-07 17:11:24"
+}

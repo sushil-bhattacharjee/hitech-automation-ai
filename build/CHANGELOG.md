@@ -1,5 +1,82 @@
 # CHANGELOG
 
+## hitech_automation_ai.1.56.0 — 2026-10-16
+
+### Added — starter set (saved work every install starts with)
+- `build/starter/`: RESTCONF / NETCONF / XPath / Python collections and environments, YANG repos,
+  Terraform and Ansible projects, made on the maintainer's machine by `tools/export-starter.sh`
+  (secrets blanked — the lab login stays; never: devices.yaml, secrets.yaml, pki, audit.log,
+  terraform.tfstate, .terraform, private keys, vault password files).
+- At start-up the installed app (GitHub download, Docker image, lab workstation) copies into
+  `~/.hitech_automation_ai/` every starter file it does not have yet — once per starter VERSION;
+  your own files are never overwritten (`tools/starter.py`).
+- Public site: `tools/publish-template.sh` now sends this same set to the site's bucket
+  (Terraform and Ansible projects included); users get it on their next start.
+
+## hitech_automation_ai.1.55.0 — 2026-10-16
+
+### Added
+- **Split editors (1–4 panes)** on the Ansible, Terraform and Python pages — "View: ▭1 ◫2 ▥3 ⊞4" above the
+  editor (4 = 2 x 2). Ansible / Terraform: click a pane, then a file in the tree to open it there; each pane
+  has its own Save / Copy / unsaved mark, Ctrl+S saves the pane you are in, a file already open in another
+  pane is brought forward instead of opened twice, runs ask to save every pane with changes, `terraform fmt`
+  reloads every pane. Python: the extra panes show other files of the project (one pane per file; the main
+  editor's file can also be shown and stays in step). The choice is remembered per page.
+  (`static/hitech-split.js`)
+- **Project panel − / +** (Ansible, Terraform): hide it to give the editors the full width; drag the gap
+  between the panel and the editors to resize it (remembered).
+- Editors and the run output can be resized in **both directions** (drag the bottom-right corner).
+- **XPath — ✎ Paste my own XML**: paste XML from anywhere (a device reply, a file, `show … | format xml`)
+  into Result (XML), then use Extract fields and XPath filter on it. It starts from the last result and
+  warns when the XML is not well formed.
+
+## hitech_automation_ai.1.54.0 — 2026-10-16
+
+### Added — code checks in every editor
+- One editor (CodeMirror 5.65.18, vendored with js-yaml 4.1.0 under `static/`, works offline) for
+  Terraform, Ansible, the RESTCONF payload (JSON or XML) and variables, the NETCONF XML payload,
+  the Jinja2 templates and variables, both Python panes and the YANG NETCONF RPC editor
+  (`static/hitech-editor.js`). Line numbers, bracket matching, auto-close, trailing spaces and
+  tab characters highlighted.
+- **Errors on the line as you type** (gutter marker + underline, message on hover, "✖ n errors" under
+  the editor): JSON and XML in the browser ({{ var }} / {% %} are not errors); YAML via js-yaml
+  (indentation, tabs, duplicate keys; Ansible: a value starting with {{ must be quoted; !vault
+  accepted); Jinja2 tag balance and if/for/macro/block … end* pairs; Python via ruff
+  (`/api/python-lint`, import-order notes left out); Terraform: brackets, quotes, heredocs and
+  empty `name =` as you type, plus `terraform validate -json` on save (`/api/terraform/validate`)
+  with each error on its line (other files: in the output).
+- **✨ Format** (auto-correction): JSON pretty-print keeping {{ vars }}, XML indent, Python
+  `ruff format` (`/api/python-format`), Terraform `terraform fmt`, YAML / Jinja: tabs → spaces and
+  trailing spaces removed. RESTCONF's ⧉ Pretty-print now also handles XML.
+- Suggestions: Ctrl-Space or after 3 letters — language keywords, Ansible module names and words
+  already in the file.
+- **Terraform: ACI 2.17.0 suggestions from the provider's own schema** (`static/terraform/aci-2.17.0.json`,
+  320 resources + 330 data sources, trimmed by `tools/trim_tf_schema.py`): `resource "aci_…` lists the
+  resource types; inside a resource (also nested objects such as `relation_to_bridge_domain = {`,
+  blocks, `dynamic` / `content`, `provider "aci"`) the attributes it accepts, required ones marked *,
+  common ones (`parent_dn`, `name` …) first, each with its description.
+
+## hitech_automation_ai.1.53.0 — 2026-10-13
+
+### Added — Terraform (CCIE Automation v1.1 versions)
+- **⧉ Copy** on the Terraform and Ansible output and in both file editors (copies unsaved text too) (plain text; also on http:// where the browser clipboard API is off).
+  CLI commands get `-no-color`, so no colour codes in the output.
+- **🟪 Terraform page** (`tools/terraform_mgr.py`, `/api/terraform/*`): projects, files, editor;
+  init / fmt / validate / plan / apply / destroy / output / show / state list / providers / version
+  buttons with `-target` and `-var-file`; a `terraform <subcommand>` CLI. New projects can start with
+  an ACI tenant + VRF example. Commands that need providers run `terraform init` first; one run per
+  project; ■ Stop = Ctrl-C with 30 s for Terraform to save its state.
+- **Versions:** Terraform **1.13.3**, provider **CiscoDevNet/aci 2.17.0**, providers only from a local
+  mirror. `tools/terraform_install.py` (⚙ Install / repair) downloads both, verifies SHA256SUMS,
+  installs into `<software_ai>/.vterraform`.
+- **Public site:** Terraform runs on the runner (image adds `/opt/terraform` + `tf-run` wrapper);
+  `TF_VAR_apic_url` = the user's running APIC; apply/destroy cannot be stopped there; state > 5 MB refused.
+
+### Changed
+- Runner jobs (Python, Ansible, Terraform) write back only files the run itself changed — an edit saved
+  during a run is no longer overwritten. A run that hits the time limit gets Ctrl-C and 30 s before it
+  is killed, and its files still come back.
+
 ## hitech_automation_ai.1.52.0 — 2026-10-10
 
 ### Added — Cisco Modeling Labs in the AI agent on the public site

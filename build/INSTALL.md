@@ -550,6 +550,17 @@ This was a deliberate change from v1.7 behavior, where "Use RAG" + Agentic just 
 | RAG-in-agentic doesn't seem to fire | Check the server log for "agent: RAG pre-fetch added N chunks". If you see "RAG pre-fetch failed", the corpus may not be loaded — check the RAG status in the AI Chat status bar. |
 
 
+## Terraform (v1.53.0) — optional, in its own folder
+
+The Terraform page uses `<software_ai>/.vterraform` (Terraform 1.13.3 + CiscoDevNet/aci 2.17.0,
+the CCIE Automation v1.1 versions). Easiest: **🟪 Terraform → ⚙ Install / repair**. Manual
+equivalent (standard library only, checksums verified):
+
+```bash
+cd ~/DevnetExpert/mock3/software_ai
+python3 build/tools/terraform_install.py .vterraform
+```
+
 ## Ansible (v1.50.0) — optional, separate venv
 
 The Ansible page runs from its own venv `<software_ai>/.vansible`, never the app's

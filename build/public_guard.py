@@ -166,6 +166,7 @@ DENIED_PATHS = frozenset({
 DENIED_PREFIXES = (
     "/api/ansible/",            # v1.50.0 Ansible: playbooks run any module (shell, local
                                 # connection) in a subprocess the socket guard cannot see
+    "/api/terraform/",          # v1.53.0 Terraform: provisioners run commands too
 )
 DENIED_MESSAGE = ("This feature runs code on the server, so it is switched off on "
                   "the public site. Install the software to use it.")
@@ -175,8 +176,8 @@ DENIED_MESSAGE = ("This feature runs code on the server, so it is switched off o
 # permissions) these run there instead of here, so they can be switched on.
 RUNNER = bool(os.environ.get("RUNNER_UDS") and os.environ.get("RUNNER_TOKEN"))
 RUNNER_PATHS = frozenset({"/api/python-execute", "/api/python-run"})
-RUNNER_PREFIXES = ("/api/ansible/",)
-STILL_DENIED = frozenset({"/api/ansible/setup"})     # nothing to install: the runner has it
+RUNNER_PREFIXES = ("/api/ansible/", "/api/terraform/")
+STILL_DENIED = frozenset({"/api/ansible/setup", "/api/terraform/setup"})   # nothing to install: the runner has it
 
 
 def runner_allows(path: str) -> bool:

@@ -1,0 +1,11 @@
+{
+  "name": "ios-xe",
+  "queries": [
+    {
+      "name": "Gi | in/out-octates>0",
+      "device": "cat8Kv71",
+      "source": "state",
+      "xpath": "/interfaces/interface[starts-with(name, \"GigabitEthernet\")]\n[state/admin-status=\"UP\"][state/oper-status=\"UP\"]\n[state/counters/out-octets > 0 or state/counters/in-octets > 0]"
+    }
+  ]
+}

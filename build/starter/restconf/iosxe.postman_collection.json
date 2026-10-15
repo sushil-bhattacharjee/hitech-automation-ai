@@ -1,0 +1,126 @@
+{
+  "info": {
+    "name": "iosxe",
+    "_postman_id": "b048bf8c-4aea-4e74-b879-2abb9a68d411",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET router-ospf",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/yang-data+json"
+          }
+        ],
+        "url": {
+          "raw": "https://{{cat8Kv71}}/restconf/data/Cisco-IOS-XE-native:native/router/router-ospf",
+          "protocol": "https",
+          "host": [
+            "{{cat8Kv71}}"
+          ],
+          "path": [
+            "restconf",
+            "data",
+            "Cisco-IOS-XE-native:native",
+            "router",
+            "router-ospf"
+          ]
+        },
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "expert",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "1234QWer!",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "_netconfsw": {
+        "name": "GET router-ospf",
+        "method": "GET",
+        "uri": "https://{{cat8Kv71}}/restconf/data/Cisco-IOS-XE-native:native/router/router-ospf",
+        "params": {},
+        "headers": {
+          "Accept": "application/yang-data+json"
+        },
+        "auth_type": "basic",
+        "auth_username": "expert",
+        "auth_password": "1234QWer!",
+        "auth_token": "",
+        "device_name": "",
+        "payload": null,
+        "verify_tls": false,
+        "variables": {}
+      }
+    },
+    {
+      "name": "GET bgp-neighbor",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/yang-data+json"
+          }
+        ],
+        "url": {
+          "raw": "https://{{cat8Kv71}}/restconf/data/Cisco-IOS-XE-native:native/router/bgp=65001/neighbor",
+          "protocol": "https",
+          "host": [
+            "{{cat8Kv71}}"
+          ],
+          "path": [
+            "restconf",
+            "data",
+            "Cisco-IOS-XE-native:native",
+            "router",
+            "bgp=65001",
+            "neighbor"
+          ]
+        },
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "expert",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "1234QWer!",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "_netconfsw": {
+        "name": "GET bgp-neighbor",
+        "method": "GET",
+        "uri": "https://{{cat8Kv71}}/restconf/data/Cisco-IOS-XE-native:native/router/bgp=65001/neighbor",
+        "params": {},
+        "headers": {
+          "Accept": "application/yang-data+json"
+        },
+        "auth_type": "basic",
+        "auth_username": "expert",
+        "auth_password": "1234QWer!",
+        "auth_token": "",
+        "device_name": "",
+        "payload": null,
+        "verify_tls": false,
+        "variables": {}
+      }
+    }
+  ]
+}

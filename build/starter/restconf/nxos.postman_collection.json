@@ -1,0 +1,126 @@
+{
+  "info": {
+    "name": "nxos",
+    "_postman_id": "e1a684fa-b311-44b0-8309-99478460d287",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "PhysIf-list=eth1/12",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/yang.data+json"
+          }
+        ],
+        "url": {
+          "raw": "https://{{hostname}}/restconf/data/Cisco-NX-OS-device:System/intf-items/phys-items/PhysIf-list=eth1%2F12/",
+          "protocol": "https",
+          "host": [
+            "{{hostname}}"
+          ],
+          "path": [
+            "restconf",
+            "data",
+            "Cisco-NX-OS-device:System",
+            "intf-items",
+            "phys-items",
+            "PhysIf-list=eth1%2F12"
+          ]
+        },
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "expert",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "1234QWer!",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "_netconfsw": {
+        "name": "PhysIf-list=eth1/12",
+        "method": "GET",
+        "uri": "https://{{hostname}}/restconf/data/Cisco-NX-OS-device:System/intf-items/phys-items/PhysIf-list=eth1%2F12/",
+        "params": {},
+        "headers": {
+          "Accept": "application/yang.data+json"
+        },
+        "auth_type": "basic",
+        "auth_username": "expert",
+        "auth_password": "1234QWer!",
+        "auth_token": "",
+        "device_name": "",
+        "payload": null,
+        "verify_tls": false,
+        "variables": {}
+      }
+    },
+    {
+      "name": "bd-items",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/yang.data+json"
+          }
+        ],
+        "url": {
+          "raw": "https://{{hostname}}/restconf/data/Cisco-NX-OS-device:System/bd-items/bd-items",
+          "protocol": "https",
+          "host": [
+            "{{hostname}}"
+          ],
+          "path": [
+            "restconf",
+            "data",
+            "Cisco-NX-OS-device:System",
+            "bd-items",
+            "bd-items"
+          ]
+        },
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "expert",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "1234QWer!",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "_netconfsw": {
+        "name": "bd-items",
+        "method": "GET",
+        "uri": "https://{{hostname}}/restconf/data/Cisco-NX-OS-device:System/bd-items/bd-items",
+        "params": {},
+        "headers": {
+          "Accept": "application/yang.data+json"
+        },
+        "auth_type": "basic",
+        "auth_username": "expert",
+        "auth_password": "1234QWer!",
+        "auth_token": "",
+        "device_name": "",
+        "payload": null,
+        "verify_tls": false,
+        "variables": {}
+      }
+    }
+  ]
+}

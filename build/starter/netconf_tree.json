@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "scope": "netconf",
+  "root": {
+    "id": "root",
+    "type": "folder",
+    "name": "NETCONF",
+    "children": []
+  }
+}

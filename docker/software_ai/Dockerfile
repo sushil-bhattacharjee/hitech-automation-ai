@@ -46,6 +46,14 @@ RUN if [ "$WITH_ANSIBLE" = "1" ]; then \
     fi && rm -rf /tmp/ansible
 ENV HITECH_VANSIBLE=/opt/vansible
 
+# v1.53.0 Terraform 1.13.3 + CiscoDevNet/aci 2.17.0 (exam versions), checksums verified,
+# providers only from the local mirror. WITH_TERRAFORM=0 leaves it out.
+ARG WITH_TERRAFORM=1
+COPY build/tools/terraform_install.py /tmp/terraform_install.py
+RUN if [ "$WITH_TERRAFORM" = "1" ]; then python /tmp/terraform_install.py /opt/vterraform; fi \
+ && rm /tmp/terraform_install.py
+ENV HITECH_VTERRAFORM=/opt/vterraform
+
 COPY build/ /app/
 
 # State (devices.yaml, YANG repos, collections, audit log) is bind-mounted from

@@ -1,6 +1,6 @@
 """
 Public site (software-automation.hitech007.ai): run Python and Ansible on the
-separate runner service instead of on this server.
+separate runner service instead of on this server (Terraform too, v1.53.0).
 
 A worker has RUNNER_UDS (a unix socket to the gateway) and RUNNER_TOKEN (its own
 per-worker token) in its environment only on the public site; the gateway checks
@@ -20,6 +20,7 @@ environment, which holds the worker's keys.
 from __future__ import annotations
 
 import base64
+import hashlib
 import io
 import json
 import os
@@ -33,14 +34,15 @@ ENABLED = bool(UDS and TOKEN)
 
 MAX_FILE = 5 * 1024 * 1024        # a single file larger than this is left out
 MAX_TREE = 20 * 1024 * 1024       # whole job, compressed
-_SKIP_DIRS = {".git", "__pycache__", ".venv", ".vansible", "node_modules"}
+_SKIP_DIRS = {".git", "__pycache__", ".venv", ".vansible", ".vterraform", ".terraform", "node_modules"}
 
 
 class RemoteError(RuntimeError):
     pass
 
 
-def _tar_dir(d: Optional[Path]) -> str:
+def _tar_dir(d: Optional[Path], sent: Optional[dict] = None) -> str:
+    """sent (optional) is filled with {relative path: sha256} of what went to the runner."""
     if not d:
         return ""
     d = Path(d)
@@ -52,7 +54,12 @@ def _tar_dir(d: Optional[Path]) -> str:
                 p = Path(root) / name
                 if p.is_symlink() or not p.is_file() or p.stat().st_size > MAX_FILE:
                     continue
-                tf.add(p, arcname=str(p.relative_to(d)), recursive=False)
+                data = p.read_bytes()
+                ti = tf.gettarinfo(str(p), arcname=str(p.relative_to(d)))
+                ti.size = len(data)
+                tf.addfile(ti, io.BytesIO(data))
+                if sent is not None:
+                    sent[ti.name] = hashlib.sha256(data).hexdigest()
     raw = buf.getvalue()
     if len(raw) > MAX_TREE:
         raise RemoteError("these files are too large to run on the public site (20 MB)")
@@ -88,8 +95,8 @@ def _rewrite(args, tree_dir: Optional[Path], mapping: dict) -> list[str]:
     return out
 
 
-def _payload(tool, args, env, tree_dir, extra, stdin, timeout, stream, return_tree, cwd):
-    tree = _tar_dir(tree_dir)
+def _payload(tool, args, env, tree_dir, extra, stdin, timeout, stream, return_tree, cwd, sent=None):
+    tree = _tar_dir(tree_dir, sent)
     xtar, mapping = _tar_files(extra or [])
     rel = ""
     if cwd and tree_dir:
@@ -133,8 +140,8 @@ async def acall(tool: str, args, env=None, tree_dir=None, extra=None, stdin=None
 
 
 def stream(tool: str, args, env=None, tree_dir=None, extra=None, stdin=None, timeout: int = 1800,
-           return_tree: bool = False, cwd=None) -> Iterator[dict]:
-    body = _payload(tool, args, env, tree_dir, extra, stdin, timeout, True, return_tree, cwd)
+           return_tree: bool = False, cwd=None, sent: Optional[dict] = None) -> Iterator[dict]:
+    body = _payload(tool, args, env, tree_dir, extra, stdin, timeout, True, return_tree, cwd, sent)
     with _client(timeout + 60) as c:
         with c.stream("POST", "http://runner/exec", json=body) as r:
             if r.status_code != 200:
@@ -153,8 +160,10 @@ def status() -> dict:
     return r.json()
 
 
-def extract_tree(b64: str, dest: Path) -> int:
-    """Write back regular files the job created or changed under dest. Never deletes."""
+def extract_tree(b64: str, dest: Path, sent: Optional[dict] = None) -> int:
+    """Write back regular files the job created or changed under dest. Never deletes.
+    With sent (from stream), a file the job did not change is left alone — so an edit
+    saved here while the job ran is not overwritten by the copy that was sent."""
     if not b64:
         return 0
     dest = Path(dest)
@@ -169,6 +178,8 @@ def extract_tree(b64: str, dest: Path) -> int:
                 continue
             data = tf.extractfile(m).read()
             if target.is_symlink():
+                continue
+            if sent is not None and sent.get(m.name) == hashlib.sha256(data).hexdigest():
                 continue
             if target.is_file() and target.read_bytes() == data:
                 continue

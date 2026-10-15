@@ -436,15 +436,16 @@ def _stream_remote(job: Job, argv: list[str], cwd: Path, env: dict) -> int:
     """One command on the runner, output line by line into the job. Files the run
     made or changed in the project (backups, vault edits, new roles) come back."""
     rc = 1
+    sent: dict = {}
     try:
         for d in _remote.stream(os.path.basename(argv[0]), argv[1:], _user_env(env), tree_dir=cwd,
-                                extra=job.cleanup, timeout=JOB_TIMEOUT, return_tree=True):
+                                extra=job.cleanup, timeout=JOB_TIMEOUT, return_tree=True, sent=sent):
             if "o" in d:
                 job.add(d["o"])
             if "rc" in d:
                 rc = 1 if d["rc"] is None else d["rc"]
                 if d.get("tree"):
-                    _remote.extract_tree(d["tree"], cwd)
+                    _remote.extract_tree(d["tree"], cwd, sent)
             if job.cancelled:          # closing the connection stops it on the runner
                 break
     except Exception as e:
