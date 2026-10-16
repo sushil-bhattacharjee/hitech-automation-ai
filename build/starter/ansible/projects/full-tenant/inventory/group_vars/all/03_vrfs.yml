@@ -1,0 +1,6 @@
+---
+# FIX: Web/App/DB share one VRF, so their contracts work with the default
+#      "context" scope (no inter-VRF leaking needed). Monitoring is isolated.
+vrfs:
+  - vrf_name: Prod-VRF
+  - vrf_name: Mgmt-VRF

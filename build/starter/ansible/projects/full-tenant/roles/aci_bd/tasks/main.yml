@@ -1,0 +1,87 @@
+---
+# Destroy deletes the BD only - APIC removes its subnet and L3Out link with it.
+- name: Set APIC authentication facts
+  set_fact:
+    apic_auth: &apic_auth
+      hostname: "{{ apic_hostname }}"
+      username: "{{ apic_username }}"
+      private_key: "{{ private_key if aci_use_cert | bool else omit }}"
+      certificate_name: "{{ certificate_name if aci_use_cert | bool else omit }}"
+      password: "{{ omit if aci_use_cert | bool else apic_password }}"
+      validate_certs: "{{ validate_certs }}"
+  tags: always
+
+# ---------- Bridge Domains ----------
+- name: DEBUG Bridge Domains
+  debug:
+    msg: "BD: {{ bd_data.bd_name }} | VRF: {{ bd_data.vrf }}"
+  loop: "{{ bridge_domains }}"
+  loop_control:
+    loop_var: bd_data
+    label: "{{ bd_data.bd_name }}"
+  tags: debug
+
+- name: Bridge Domains
+  cisco.aci.aci_bd:
+    <<: *apic_auth
+    tenant: "{{ tenant_name }}"
+    bd: "{{ bd_data.bd_name }}"
+    vrf: "{{ bd_data.vrf }}"
+    state: "{{ aci_state }}"
+  delegate_to: localhost
+  loop: "{{ bridge_domains }}"
+  loop_control:
+    loop_var: bd_data
+    label: "{{ bd_data.bd_name }}"
+
+# ---------- BD Subnets (gateway) ----------
+- name: DEBUG BD Subnets
+  debug:
+    msg: "BD: {{ bd_data.bd_name }} | Gateway: {{ bd_data.subnet.split('/')[0] }} | Mask: {{ bd_data.subnet.split('/')[1] }} | Scope: {{ bd_data.scope }}"
+  loop: "{{ bridge_domains }}"
+  loop_control:
+    loop_var: bd_data
+    label: "{{ bd_data.bd_name }}"
+  when: bd_data.subnet != ""
+  tags: debug
+
+- name: BD Subnets
+  cisco.aci.aci_bd_subnet:
+    <<: *apic_auth
+    tenant: "{{ tenant_name }}"
+    bd: "{{ bd_data.bd_name }}"
+    gateway: "{{ bd_data.subnet.split('/')[0] }}"
+    mask: "{{ bd_data.subnet.split('/')[1] }}"
+    scope: ["{{ bd_data.scope }}"]
+    state: present
+  delegate_to: localhost
+  loop: "{{ bridge_domains }}"
+  loop_control:
+    loop_var: bd_data
+    label: "{{ bd_data.bd_name }} {{ bd_data.subnet }}"
+  when: aci_state == 'present' and bd_data.subnet != ""
+
+# ---------- BD -> L3Out (advertise public subnets) ----------
+- name: DEBUG BD to L3Out
+  debug:
+    msg: "BD: {{ bd_data.bd_name }} -> L3Out: {{ bd_data.l3out }}"
+  loop: "{{ bridge_domains }}"
+  loop_control:
+    loop_var: bd_data
+    label: "{{ bd_data.bd_name }}"
+  when: bd_data.l3out != ""
+  tags: debug
+
+- name: BD to L3Out
+  cisco.aci.aci_bd_to_l3out:
+    <<: *apic_auth
+    tenant: "{{ tenant_name }}"
+    bd: "{{ bd_data.bd_name }}"
+    l3out: "{{ bd_data.l3out }}"
+    state: present
+  delegate_to: localhost
+  loop: "{{ bridge_domains }}"
+  loop_control:
+    loop_var: bd_data
+    label: "{{ bd_data.bd_name }} -> {{ bd_data.l3out }}"
+  when: aci_state == 'present' and bd_data.l3out != ""

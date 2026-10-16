@@ -1,0 +1,25 @@
+---
+# EPG side of each contract. External EPG side is in 09_l3outs.yml.
+# FIX: every contract now has BOTH a provider and a consumer.
+contract_bindings:
+  # Web -> App -> DB
+  - { app: 3-Tier-App, epg: Web-EPG, contract: Web-to-App, type: consumer }
+  - { app: 3-Tier-App, epg: App-EPG, contract: Web-to-App, type: provider }
+  - { app: 3-Tier-App, epg: App-EPG, contract: App-to-DB,  type: consumer }
+  - { app: 3-Tier-App, epg: DB-EPG,  contract: App-to-DB,  type: provider }
+
+  # SSH / ICMP into all tiers (consumed by DC-Interconnect external EPG)
+  - { app: 3-Tier-App, epg: Web-EPG, contract: Allow-SSH,  type: provider }
+  - { app: 3-Tier-App, epg: App-EPG, contract: Allow-SSH,  type: provider }
+  - { app: 3-Tier-App, epg: DB-EPG,  contract: Allow-SSH,  type: provider }
+  - { app: 3-Tier-App, epg: Web-EPG, contract: Allow-ICMP, type: provider }
+  - { app: 3-Tier-App, epg: App-EPG, contract: Allow-ICMP, type: provider }
+  - { app: 3-Tier-App, epg: DB-EPG,  contract: Allow-ICMP, type: provider }
+
+  # Internet: inbound to Web, outbound from Web (other side = Internet external EPG)
+  - { app: 3-Tier-App, epg: Web-EPG, contract: Internet-In,  type: provider }
+  - { app: 3-Tier-App, epg: Web-EPG, contract: Internet-Out, type: consumer }
+
+  # Monitoring
+  - { app: Monitoring, epg: Grafana,    contract: Grafana-to-Prometheus, type: consumer }
+  - { app: Monitoring, epg: Prometheus, contract: Grafana-to-Prometheus, type: provider }

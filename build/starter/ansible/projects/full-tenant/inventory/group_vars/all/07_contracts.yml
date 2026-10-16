@@ -1,0 +1,30 @@
+---
+# scope "context" = within one VRF (all EPG pairs here are same-VRF)
+contracts:
+  - contract_name: Web-to-App
+    scope: context
+    filters: [HTTP, HTTPS]
+
+  - contract_name: App-to-DB
+    scope: context
+    filters: [MySQL]
+
+  - contract_name: Allow-SSH
+    scope: context
+    filters: [SSH]
+
+  - contract_name: Allow-ICMP
+    scope: context
+    filters: [ICMP]
+
+  - contract_name: Internet-In
+    scope: context
+    filters: [HTTP, HTTPS]
+
+  - contract_name: Internet-Out
+    scope: context
+    filters: [Any]
+
+  - contract_name: Grafana-to-Prometheus
+    scope: context
+    filters: [Prometheus-API]

@@ -1,0 +1,42 @@
+---
+# PREREQUISITE: this L3 (routed) domain must already exist under
+# Fabric > Access Policies > Physical and External Domains > L3 Domains.
+# FIX: Terraform version had no domain, so interfaces would never deploy.
+l3_domain: L3-Dom
+
+# FIX: OSPF area must be "backbone" or dotted format (0.0.0.10), not "0"/"10".
+# FIX: external subnets use import-security only (classification). BD subnets
+#      are advertised via the BD -> L3Out link, not export-rtctrl on 0.0.0.0/0.
+# FIX: Internet transit moved to 203.0.113.0/30 so it no longer overlaps
+#      the DC-Interconnect external subnet 192.168.0.0/16.
+l3outs:
+  - l3out_name: Internet-L3Out
+    vrf: Prod-VRF
+    node_id: "101"
+    router_id: 1.1.1.1
+    interface: eth1/1
+    interface_type: ext-svi        # ext-svi (VLAN) or l3-port (routed)
+    interface_ip: 203.0.113.1/30
+    encap: vlan-100                # "unknown" for l3-port
+    ospf_area: backbone
+    external_subnets:
+      - 0.0.0.0/0
+    contracts:
+      - { contract: Internet-In,  type: consumer }
+      - { contract: Internet-Out, type: provider }
+
+  - l3out_name: DC-Interconnect
+    vrf: Prod-VRF
+    node_id: "102"
+    router_id: 2.2.2.2
+    interface: eth1/2
+    interface_type: l3-port
+    interface_ip: 172.16.0.1/30
+    encap: unknown
+    ospf_area: 0.0.0.10
+    external_subnets:
+      - 172.16.0.0/16              # Remote DC networks
+      - 192.168.0.0/16             # Branch offices
+    contracts:
+      - { contract: Allow-SSH,  type: consumer }
+      - { contract: Allow-ICMP, type: consumer }

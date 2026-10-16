@@ -1,0 +1,3 @@
+---
+tenant_name: Production
+tenant_description: Full tenant config by Ansible

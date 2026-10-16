@@ -1,0 +1,35 @@
+---
+- name: Set APIC authentication facts
+  set_fact:
+    apic_auth: &apic_auth
+      hostname: "{{ apic_hostname }}"
+      username: "{{ apic_username }}"
+      private_key: "{{ private_key if aci_use_cert | bool else omit }}"
+      certificate_name: "{{ certificate_name if aci_use_cert | bool else omit }}"
+      password: "{{ omit if aci_use_cert | bool else apic_password }}"
+      validate_certs: "{{ validate_certs }}"
+  tags: always
+
+- name: DEBUG EPG to Contract
+  debug:
+    msg: "{{ bind_data.app }} / {{ bind_data.epg }} --{{ bind_data.type }}--> {{ bind_data.contract }}"
+  loop: "{{ contract_bindings }}"
+  loop_control:
+    loop_var: bind_data
+    label: "{{ bind_data.epg }} {{ bind_data.type }} {{ bind_data.contract }}"
+  tags: debug
+
+- name: EPG to Contract
+  cisco.aci.aci_epg_to_contract:
+    <<: *apic_auth
+    tenant: "{{ tenant_name }}"
+    ap: "{{ bind_data.app }}"
+    epg: "{{ bind_data.epg }}"
+    contract: "{{ bind_data.contract }}"
+    contract_type: "{{ bind_data.type }}"
+    state: "{{ aci_state }}"
+  delegate_to: localhost
+  loop: "{{ contract_bindings }}"
+  loop_control:
+    loop_var: bind_data
+    label: "{{ bind_data.epg }} {{ bind_data.type }} {{ bind_data.contract }}"

@@ -1,0 +1,11 @@
+---
+# FIX: ACI ether type is "ip" (not "ipv4"); ICMP / Any have no ports.
+# ether_type is optional (default "ip"); dest_port "" = no port.
+filters:
+  - { filter_name: HTTP,           entry_name: http-entry,  protocol: tcp,  dest_port: "80" }
+  - { filter_name: HTTPS,          entry_name: https-entry, protocol: tcp,  dest_port: "443" }
+  - { filter_name: MySQL,          entry_name: mysql-entry, protocol: tcp,  dest_port: "3306" }
+  - { filter_name: SSH,            entry_name: ssh-entry,   protocol: tcp,  dest_port: "22" }
+  - { filter_name: ICMP,           entry_name: icmp-entry,  protocol: icmp, dest_port: "" }
+  - { filter_name: Prometheus-API, entry_name: prom-entry,  protocol: tcp,  dest_port: "9090" }
+  - { filter_name: Any,            entry_name: any-entry,   protocol: unspecified, dest_port: "", ether_type: unspecified }

@@ -1,0 +1,94 @@
+---
+- name: Set APIC authentication facts
+  set_fact:
+    apic_auth: &apic_auth
+      hostname: "{{ apic_hostname }}"
+      username: "{{ apic_username }}"
+      private_key: "{{ private_key if aci_use_cert | bool else omit }}"
+      certificate_name: "{{ certificate_name if aci_use_cert | bool else omit }}"
+      password: "{{ omit if aci_use_cert | bool else apic_password }}"
+      validate_certs: "{{ validate_certs }}"
+  tags: always
+
+# ---------- Interface Profile (l3extLIfP) ----------
+- name: DEBUG Interface Profile
+  debug:
+    msg: "L3Out: {{ l3out_data.l3out_name }} | Interface profile: {{ l3out_data.l3out_name }}-intProf"
+  loop: "{{ l3outs }}"
+  loop_control:
+    loop_var: l3out_data
+    label: "{{ l3out_data.l3out_name }}"
+  tags: debug
+
+- name: Interface Profile
+  cisco.aci.aci_rest:
+    <<: *apic_auth
+    path: "/api/mo/uni/tn-{{ tenant_name }}/out-{{ l3out_data.l3out_name }}/lnodep-{{ l3out_data.l3out_name }}-nodeProf.json"
+    method: post
+    content:
+      l3extLIfP:
+        attributes:
+          name: "{{ l3out_data.l3out_name }}-intProf"
+  delegate_to: localhost
+  loop: "{{ l3outs }}"
+  loop_control:
+    loop_var: l3out_data
+    label: "{{ l3out_data.l3out_name }}-intProf"
+
+# ---------- Routed Interface: SVI or routed port (l3extRsPathL3OutAtt) ----------
+- name: DEBUG Routed Interface
+  debug:
+    msg: >-
+      Path: topology/pod-1/paths-{{ l3out_data.node_id }}/pathep-[{{ l3out_data.interface }}] |
+      Type: {{ l3out_data.interface_type }} | IP: {{ l3out_data.interface_ip }} |
+      Encap: {{ l3out_data.encap }}
+  loop: "{{ l3outs }}"
+  loop_control:
+    loop_var: l3out_data
+    label: "{{ l3out_data.l3out_name }}"
+  tags: debug
+
+- name: Routed Interface
+  cisco.aci.aci_rest:
+    <<: *apic_auth
+    path: "/api/mo/uni/tn-{{ tenant_name }}/out-{{ l3out_data.l3out_name }}/lnodep-{{ l3out_data.l3out_name }}-nodeProf/lifp-{{ l3out_data.l3out_name }}-intProf.json"
+    method: post
+    content:
+      l3extRsPathL3OutAtt:
+        attributes:
+          tDn: "topology/pod-1/paths-{{ l3out_data.node_id }}/pathep-[{{ l3out_data.interface }}]"
+          ifInstT: "{{ l3out_data.interface_type }}"
+          addr: "{{ l3out_data.interface_ip }}"
+          encap: "{{ l3out_data.encap }}"
+          mode: regular
+  delegate_to: localhost
+  loop: "{{ l3outs }}"
+  loop_control:
+    loop_var: l3out_data
+    label: "{{ l3out_data.l3out_name }} {{ l3out_data.interface }}"
+
+# ---------- OSPF Interface Profile (ospfIfP, default OSPF policy) ----------
+- name: DEBUG OSPF Interface Profile
+  debug:
+    msg: "Interface profile: {{ l3out_data.l3out_name }}-intProf | OSPF auth: none"
+  loop: "{{ l3outs }}"
+  loop_control:
+    loop_var: l3out_data
+    label: "{{ l3out_data.l3out_name }}"
+  tags: debug
+
+- name: OSPF Interface Profile
+  cisco.aci.aci_rest:
+    <<: *apic_auth
+    path: "/api/mo/uni/tn-{{ tenant_name }}/out-{{ l3out_data.l3out_name }}/lnodep-{{ l3out_data.l3out_name }}-nodeProf/lifp-{{ l3out_data.l3out_name }}-intProf.json"
+    method: post
+    content:
+      ospfIfP:
+        attributes:
+          authType: none
+          authKeyId: "1"
+  delegate_to: localhost
+  loop: "{{ l3outs }}"
+  loop_control:
+    loop_var: l3out_data
+    label: "{{ l3out_data.l3out_name }}"

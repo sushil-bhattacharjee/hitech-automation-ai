@@ -1,0 +1,28 @@
+---
+# scope: public  = advertised out of the L3Out listed in "l3out"
+# scope: private = stays inside the fabric
+# FIX: BD must be linked to an L3Out, otherwise "public" is never advertised.
+bridge_domains:
+  - bd_name: BD-Web
+    vrf: Prod-VRF
+    subnet: 10.1.1.1/24
+    scope: public
+    l3out: Internet-L3Out
+
+  - bd_name: BD-App
+    vrf: Prod-VRF
+    subnet: 10.2.1.1/24
+    scope: public
+    l3out: DC-Interconnect
+
+  - bd_name: BD-Database
+    vrf: Prod-VRF
+    subnet: 10.3.1.1/24
+    scope: public
+    l3out: DC-Interconnect
+
+  - bd_name: BD-Mgmt
+    vrf: Mgmt-VRF
+    subnet: 10.100.1.1/24
+    scope: private
+    l3out: ""

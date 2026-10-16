@@ -1,0 +1,4 @@
+---
+# Default action is DEPLOY.
+# Destroy from the CLI:  -e aci_state=absent -e confirm_destroy=yes
+aci_state: present

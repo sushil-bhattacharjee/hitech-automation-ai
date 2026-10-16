@@ -1,0 +1,21 @@
+---
+# Runs ONE role inside block/rescue so a failure does not stop the play.
+# Only the include_role task is tagged "always". include_role is dynamic, so
+# that tag does NOT pass down: role tasks keep their own tags (debug / none).
+- name: "Role aci_{{ role_item }}"
+  block:
+    - name: "Run role aci_{{ role_item }}"
+      include_role:
+        name: "aci_{{ role_item }}"
+      tags: always
+
+    - name: "Record result: {{ role_item }}"
+      set_fact:
+        role_results: "{{ role_results | combine({role_item: 'OK'}) }}"
+      tags: always
+
+  rescue:
+    - name: "Record failure: {{ role_item }}"
+      set_fact:
+        role_results: "{{ role_results | combine({role_item: 'FAILED - ' ~ (ansible_failed_result.msg | default('see output above'))}) }}"
+      tags: always

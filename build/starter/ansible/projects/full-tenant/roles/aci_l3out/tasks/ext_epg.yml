@@ -1,0 +1,111 @@
+---
+- name: Set APIC authentication facts
+  set_fact:
+    apic_auth: &apic_auth
+      hostname: "{{ apic_hostname }}"
+      username: "{{ apic_username }}"
+      private_key: "{{ private_key if aci_use_cert | bool else omit }}"
+      certificate_name: "{{ certificate_name if aci_use_cert | bool else omit }}"
+      password: "{{ omit if aci_use_cert | bool else apic_password }}"
+      validate_certs: "{{ validate_certs }}"
+  tags: always
+
+# ---------- External EPG ----------
+- name: DEBUG External EPG
+  debug:
+    msg: "L3Out: {{ l3out_data.l3out_name }} | Ext EPG: {{ l3out_data.l3out_name }}-ExtEPG"
+  loop: "{{ l3outs }}"
+  loop_control:
+    loop_var: l3out_data
+    label: "{{ l3out_data.l3out_name }}"
+  tags: debug
+
+- name: External EPG
+  cisco.aci.aci_l3out_extepg:
+    <<: *apic_auth
+    tenant: "{{ tenant_name }}"
+    l3out: "{{ l3out_data.l3out_name }}"
+    extepg: "{{ l3out_data.l3out_name }}-ExtEPG"
+    state: present
+  delegate_to: localhost
+  loop: "{{ l3outs }}"
+  loop_control:
+    loop_var: l3out_data
+    label: "{{ l3out_data.l3out_name }}-ExtEPG"
+
+# ---------- External Subnets (subnet_data.0 = l3out, subnet_data.1 = prefix) ----------
+- name: DEBUG External Subnets
+  debug:
+    msg: "Ext EPG: {{ subnet_data.0.l3out_name }}-ExtEPG | Subnet: {{ subnet_data.1 }} | Scope: import-security"
+  with_subelements:
+    - "{{ l3outs }}"
+    - external_subnets
+  loop_control:
+    loop_var: subnet_data
+    label: "{{ subnet_data.0.l3out_name }} / {{ subnet_data.1 }}"
+  tags: debug
+
+- name: External Subnets
+  cisco.aci.aci_l3out_extsubnet:
+    <<: *apic_auth
+    tenant: "{{ tenant_name }}"
+    l3out: "{{ subnet_data.0.l3out_name }}"
+    extepg: "{{ subnet_data.0.l3out_name }}-ExtEPG"
+    network: "{{ subnet_data.1 }}"
+    scope: [import-security]
+    state: present
+  delegate_to: localhost
+  with_subelements:
+    - "{{ l3outs }}"
+    - external_subnets
+  loop_control:
+    loop_var: subnet_data
+    label: "{{ subnet_data.0.l3out_name }} / {{ subnet_data.1 }}"
+
+# ---------- External EPG Contracts (ext_c.0 = l3out, ext_c.1 = contract) ----------
+- name: DEBUG External EPG Contracts
+  debug:
+    msg: "{{ ext_c.0.l3out_name }}-ExtEPG --{{ ext_c.1.type }}--> {{ ext_c.1.contract }}"
+  with_subelements:
+    - "{{ l3outs }}"
+    - contracts
+  loop_control:
+    loop_var: ext_c
+    label: "{{ ext_c.0.l3out_name }} {{ ext_c.1.type }} {{ ext_c.1.contract }}"
+  tags: debug
+
+- name: External EPG Contracts - provider (fvRsProv)
+  cisco.aci.aci_rest:
+    <<: *apic_auth
+    path: "/api/mo/uni/tn-{{ tenant_name }}/out-{{ ext_c.0.l3out_name }}/instP-{{ ext_c.0.l3out_name }}-ExtEPG.json"
+    method: post
+    content:
+      fvRsProv:
+        attributes:
+          tnVzBrCPName: "{{ ext_c.1.contract }}"
+  delegate_to: localhost
+  with_subelements:
+    - "{{ l3outs }}"
+    - contracts
+  loop_control:
+    loop_var: ext_c
+    label: "{{ ext_c.0.l3out_name }} provider {{ ext_c.1.contract }}"
+  when: ext_c.1.type == 'provider'
+
+- name: External EPG Contracts - consumer (fvRsCons)
+  cisco.aci.aci_rest:
+    <<: *apic_auth
+    path: "/api/mo/uni/tn-{{ tenant_name }}/out-{{ ext_c.0.l3out_name }}/instP-{{ ext_c.0.l3out_name }}-ExtEPG.json"
+    method: post
+    content:
+      fvRsCons:
+        attributes:
+          tnVzBrCPName: "{{ ext_c.1.contract }}"
+  delegate_to: localhost
+  with_subelements:
+    - "{{ l3outs }}"
+    - contracts
+  loop_control:
+    loop_var: ext_c
+    label: "{{ ext_c.0.l3out_name }} consumer {{ ext_c.1.contract }}"
+  when: ext_c.1.type == 'consumer'

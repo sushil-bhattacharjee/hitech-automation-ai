@@ -1,0 +1,88 @@
+---
+# Destroy deletes the contract only - APIC removes subject + filter links with it.
+- name: Set APIC authentication facts
+  set_fact:
+    apic_auth: &apic_auth
+      hostname: "{{ apic_hostname }}"
+      username: "{{ apic_username }}"
+      private_key: "{{ private_key if aci_use_cert | bool else omit }}"
+      certificate_name: "{{ certificate_name if aci_use_cert | bool else omit }}"
+      password: "{{ omit if aci_use_cert | bool else apic_password }}"
+      validate_certs: "{{ validate_certs }}"
+  tags: always
+
+# ---------- Contracts ----------
+- name: DEBUG Contracts
+  debug:
+    msg: "Contract: {{ contract_data.contract_name }} | Scope: {{ contract_data.scope }}"
+  loop: "{{ contracts }}"
+  loop_control:
+    loop_var: contract_data
+    label: "{{ contract_data.contract_name }}"
+  tags: debug
+
+- name: Contracts
+  cisco.aci.aci_contract:
+    <<: *apic_auth
+    tenant: "{{ tenant_name }}"
+    contract: "{{ contract_data.contract_name }}"
+    scope: "{{ contract_data.scope }}"
+    state: "{{ aci_state }}"
+  delegate_to: localhost
+  loop: "{{ contracts }}"
+  loop_control:
+    loop_var: contract_data
+    label: "{{ contract_data.contract_name }}"
+
+# ---------- Subjects (one per contract) ----------
+- name: DEBUG Contract Subjects
+  debug:
+    msg: "Contract: {{ contract_data.contract_name }} | Subject: {{ contract_data.contract_name }}-subject"
+  loop: "{{ contracts }}"
+  loop_control:
+    loop_var: contract_data
+    label: "{{ contract_data.contract_name }}"
+  tags: debug
+
+- name: Contract Subjects
+  cisco.aci.aci_contract_subject:
+    <<: *apic_auth
+    tenant: "{{ tenant_name }}"
+    contract: "{{ contract_data.contract_name }}"
+    subject: "{{ contract_data.contract_name }}-subject"
+    state: present
+  delegate_to: localhost
+  loop: "{{ contracts }}"
+  loop_control:
+    loop_var: contract_data
+    label: "{{ contract_data.contract_name }}-subject"
+  when: aci_state == 'present'
+
+# ---------- Subject -> Filter (subj_data.0 = contract, subj_data.1 = filter name) ----------
+- name: DEBUG Subject to Filter
+  debug:
+    msg: "Subject: {{ subj_data.0.contract_name }}-subject | Filter: {{ subj_data.1 }}"
+  with_subelements:
+    - "{{ contracts }}"
+    - filters
+  loop_control:
+    loop_var: subj_data
+    label: "{{ subj_data.0.contract_name }} / {{ subj_data.1 }}"
+  tags: debug
+
+- name: Subject to Filter
+  cisco.aci.aci_contract_subject_to_filter:
+    <<: *apic_auth
+    tenant: "{{ tenant_name }}"
+    contract: "{{ subj_data.0.contract_name }}"
+    subject: "{{ subj_data.0.contract_name }}-subject"
+    filter: "{{ subj_data.1 }}"
+    state: present
+  delegate_to: localhost
+  with_subelements:
+    - "{{ contracts }}"
+    - filters
+  loop_control:
+    loop_var: subj_data
+    label: "{{ subj_data.0.contract_name }} / {{ subj_data.1 }}"
+  when: aci_state == 'present'

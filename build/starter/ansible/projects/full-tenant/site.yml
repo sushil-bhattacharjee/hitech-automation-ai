@@ -1,0 +1,79 @@
+---
+# Run everything:        ansible-playbook site.yml
+# Pick roles:            ansible-playbook site.yml -e run_roles=vrf,bd
+# Debug only (no APIC):  ansible-playbook site.yml --tags debug
+# Deploy, no debug:      ansible-playbook site.yml --skip-tags debug
+# Destroy:               ansible-playbook site.yml -e aci_state=absent -e confirm_destroy=yes
+#
+# Role keys: tenant, vrf, bd, app_epg, filter, contract, binding, l3out
+
+- name: Full ACI Tenant
+  hosts: apic1
+  gather_facts: false
+
+  vars:
+    all_roles: [tenant, vrf, bd, app_epg, filter, contract, binding, l3out]
+    run_roles: "{{ all_roles }}"
+    role_results: {}
+
+  tasks:
+    # ---------- Auth: certificate first, password fallback ----------
+    - name: Check the private key file exists
+      stat:
+        path: "{{ private_key }}"
+      register: key_file
+      delegate_to: localhost
+      tags: always
+
+    - name: Pick auth method
+      set_fact:
+        aci_use_cert: "{{ aci_auth_mode == 'cert' and key_file.stat.exists }}"
+      tags: always
+
+    - name: DEBUG Auth method
+      debug:
+        msg:
+          - "Mode requested : {{ aci_auth_mode }}"
+          - "Key file       : {{ private_key }} (exists: {{ key_file.stat.exists }})"
+          - "Using          : {{ 'certificate (' ~ certificate_name ~ ')' if aci_use_cert | bool else 'username/password' }}"
+          - "Username       : {{ apic_username }}"
+      tags: debug
+
+    - name: Build the list of roles to run (keeps the correct order)
+      set_fact:
+        selected_roles: "{{ all_roles | select('in', run_roles.split(',') if run_roles is string else run_roles) | list }}"
+      tags: always
+
+    - name: Reverse the order for destroy (children before parents)
+      set_fact:
+        selected_roles: "{{ selected_roles | reverse | list }}"
+      when: aci_state == 'absent'
+      tags: always
+
+    - name: Safety check before destroy
+      assert:
+        that: confirm_destroy | default('no') | bool
+        fail_msg: "Destroy needs: -e aci_state=absent -e confirm_destroy=yes"
+      when: aci_state == 'absent'
+      tags: always
+
+    - name: DEBUG Run plan
+      debug:
+        msg:
+          - "APIC user : {{ apic_username }}"
+          - "State     : {{ aci_state }}"
+          - "Roles     : {{ selected_roles | join(' -> ') }}"
+      tags: debug
+
+    - name: Run each role (a failed role is recorded, the rest still run)
+      include_tasks: tasks/run_role.yml
+      loop: "{{ selected_roles }}"
+      loop_control:
+        loop_var: role_item
+        label: "{{ role_item }}"
+      tags: always
+
+    - name: Summary
+      debug:
+        msg: "{{ role_results }}"
+      tags: always

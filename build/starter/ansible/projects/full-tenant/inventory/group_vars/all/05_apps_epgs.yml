@@ -1,0 +1,17 @@
+---
+applications:
+  - app_name: 3-Tier-App
+    epgs:
+      - epg_name: Web-EPG
+        bd: BD-Web
+      - epg_name: App-EPG
+        bd: BD-App
+      - epg_name: DB-EPG
+        bd: BD-Database
+
+  - app_name: Monitoring
+    epgs:
+      - epg_name: Prometheus
+        bd: BD-Mgmt
+      - epg_name: Grafana
+        bd: BD-Mgmt

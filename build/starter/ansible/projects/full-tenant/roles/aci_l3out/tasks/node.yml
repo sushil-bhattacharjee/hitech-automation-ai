@@ -1,0 +1,63 @@
+---
+- name: Set APIC authentication facts
+  set_fact:
+    apic_auth: &apic_auth
+      hostname: "{{ apic_hostname }}"
+      username: "{{ apic_username }}"
+      private_key: "{{ private_key if aci_use_cert | bool else omit }}"
+      certificate_name: "{{ certificate_name if aci_use_cert | bool else omit }}"
+      password: "{{ omit if aci_use_cert | bool else apic_password }}"
+      validate_certs: "{{ validate_certs }}"
+  tags: always
+
+# ---------- Node Profile (l3extLNodeP) ----------
+- name: DEBUG Node Profile
+  debug:
+    msg: "L3Out: {{ l3out_data.l3out_name }} | Node profile: {{ l3out_data.l3out_name }}-nodeProf"
+  loop: "{{ l3outs }}"
+  loop_control:
+    loop_var: l3out_data
+    label: "{{ l3out_data.l3out_name }}"
+  tags: debug
+
+- name: Node Profile
+  cisco.aci.aci_rest:
+    <<: *apic_auth
+    path: "/api/mo/uni/tn-{{ tenant_name }}/out-{{ l3out_data.l3out_name }}.json"
+    method: post
+    content:
+      l3extLNodeP:
+        attributes:
+          name: "{{ l3out_data.l3out_name }}-nodeProf"
+  delegate_to: localhost
+  loop: "{{ l3outs }}"
+  loop_control:
+    loop_var: l3out_data
+    label: "{{ l3out_data.l3out_name }}-nodeProf"
+
+# ---------- Leaf Node + Router ID (l3extRsNodeL3OutAtt) ----------
+- name: DEBUG Leaf Node
+  debug:
+    msg: "Node: topology/pod-1/node-{{ l3out_data.node_id }} | Router ID: {{ l3out_data.router_id }}"
+  loop: "{{ l3outs }}"
+  loop_control:
+    loop_var: l3out_data
+    label: "{{ l3out_data.l3out_name }}"
+  tags: debug
+
+- name: Leaf Node
+  cisco.aci.aci_rest:
+    <<: *apic_auth
+    path: "/api/mo/uni/tn-{{ tenant_name }}/out-{{ l3out_data.l3out_name }}/lnodep-{{ l3out_data.l3out_name }}-nodeProf.json"
+    method: post
+    content:
+      l3extRsNodeL3OutAtt:
+        attributes:
+          tDn: "topology/pod-1/node-{{ l3out_data.node_id }}"
+          rtrId: "{{ l3out_data.router_id }}"
+          rtrIdLoopBack: "yes"
+  delegate_to: localhost
+  loop: "{{ l3outs }}"
+  loop_control:
+    loop_var: l3out_data
+    label: "{{ l3out_data.l3out_name }} node-{{ l3out_data.node_id }}"

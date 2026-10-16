@@ -1,0 +1,62 @@
+---
+- name: Set APIC authentication facts
+  set_fact:
+    apic_auth: &apic_auth
+      hostname: "{{ apic_hostname }}"
+      username: "{{ apic_username }}"
+      private_key: "{{ private_key if aci_use_cert | bool else omit }}"
+      certificate_name: "{{ certificate_name if aci_use_cert | bool else omit }}"
+      password: "{{ omit if aci_use_cert | bool else apic_password }}"
+      validate_certs: "{{ validate_certs }}"
+  tags: always
+
+# ---------- L3Out ----------
+- name: DEBUG L3Out
+  debug:
+    msg: "L3Out: {{ l3out_data.l3out_name }} | VRF: {{ l3out_data.vrf }} | Domain: {{ l3_domain }}"
+  loop: "{{ l3outs }}"
+  loop_control:
+    loop_var: l3out_data
+    label: "{{ l3out_data.l3out_name }}"
+  tags: debug
+
+- name: L3Out
+  cisco.aci.aci_l3out:
+    <<: *apic_auth
+    tenant: "{{ tenant_name }}"
+    l3out: "{{ l3out_data.l3out_name }}"
+    vrf: "{{ l3out_data.vrf }}"
+    domain: "{{ l3_domain }}"
+    state: "{{ aci_state }}"
+  delegate_to: localhost
+  loop: "{{ l3outs }}"
+  loop_control:
+    loop_var: l3out_data
+    label: "{{ l3out_data.l3out_name }}"
+
+# ---------- OSPF area (ospfExtP) ----------
+- name: DEBUG OSPF Area
+  debug:
+    msg: "L3Out: {{ l3out_data.l3out_name }} | OSPF area: {{ l3out_data.ospf_area }} (regular)"
+  loop: "{{ l3outs }}"
+  loop_control:
+    loop_var: l3out_data
+    label: "{{ l3out_data.l3out_name }}"
+  tags: debug
+
+- name: OSPF Area
+  cisco.aci.aci_rest:
+    <<: *apic_auth
+    path: "/api/mo/uni/tn-{{ tenant_name }}/out-{{ l3out_data.l3out_name }}.json"
+    method: post
+    content:
+      ospfExtP:
+        attributes:
+          areaId: "{{ l3out_data.ospf_area }}"
+          areaType: regular
+  delegate_to: localhost
+  loop: "{{ l3outs }}"
+  loop_control:
+    loop_var: l3out_data
+    label: "{{ l3out_data.l3out_name }} area {{ l3out_data.ospf_area }}"
+  when: aci_state == 'present'

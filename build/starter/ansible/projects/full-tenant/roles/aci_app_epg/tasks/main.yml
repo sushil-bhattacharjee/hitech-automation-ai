@@ -1,0 +1,63 @@
+---
+# Destroy deletes the App Profile only - APIC removes its EPGs with it.
+- name: Set APIC authentication facts
+  set_fact:
+    apic_auth: &apic_auth
+      hostname: "{{ apic_hostname }}"
+      username: "{{ apic_username }}"
+      private_key: "{{ private_key if aci_use_cert | bool else omit }}"
+      certificate_name: "{{ certificate_name if aci_use_cert | bool else omit }}"
+      password: "{{ omit if aci_use_cert | bool else apic_password }}"
+      validate_certs: "{{ validate_certs }}"
+  tags: always
+
+# ---------- Application Profiles ----------
+- name: DEBUG Application Profiles
+  debug:
+    msg: "AP: {{ ap_data.app_name }}"
+  loop: "{{ applications }}"
+  loop_control:
+    loop_var: ap_data
+    label: "{{ ap_data.app_name }}"
+  tags: debug
+
+- name: Application Profiles
+  cisco.aci.aci_ap:
+    <<: *apic_auth
+    tenant: "{{ tenant_name }}"
+    ap: "{{ ap_data.app_name }}"
+    state: "{{ aci_state }}"
+  delegate_to: localhost
+  loop: "{{ applications }}"
+  loop_control:
+    loop_var: ap_data
+    label: "{{ ap_data.app_name }}"
+
+# ---------- EPGs (epg_data.0 = app, epg_data.1 = epg) ----------
+- name: DEBUG EPGs
+  debug:
+    msg: "AP: {{ epg_data.0.app_name }} | EPG: {{ epg_data.1.epg_name }} | BD: {{ epg_data.1.bd }}"
+  with_subelements:
+    - "{{ applications }}"
+    - epgs
+  loop_control:
+    loop_var: epg_data
+    label: "{{ epg_data.0.app_name }} / {{ epg_data.1.epg_name }}"
+  tags: debug
+
+- name: EPGs
+  cisco.aci.aci_epg:
+    <<: *apic_auth
+    tenant: "{{ tenant_name }}"
+    ap: "{{ epg_data.0.app_name }}"
+    epg: "{{ epg_data.1.epg_name }}"
+    bd: "{{ epg_data.1.bd }}"
+    state: present
+  delegate_to: localhost
+  with_subelements:
+    - "{{ applications }}"
+    - epgs
+  loop_control:
+    loop_var: epg_data
+    label: "{{ epg_data.0.app_name }} / {{ epg_data.1.epg_name }}"
+  when: aci_state == 'present'

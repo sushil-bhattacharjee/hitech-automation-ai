@@ -1,0 +1,65 @@
+---
+# Destroy deletes the filter only - APIC removes its entry with it.
+- name: Set APIC authentication facts
+  set_fact:
+    apic_auth: &apic_auth
+      hostname: "{{ apic_hostname }}"
+      username: "{{ apic_username }}"
+      private_key: "{{ private_key if aci_use_cert | bool else omit }}"
+      certificate_name: "{{ certificate_name if aci_use_cert | bool else omit }}"
+      password: "{{ omit if aci_use_cert | bool else apic_password }}"
+      validate_certs: "{{ validate_certs }}"
+  tags: always
+
+# ---------- Filters ----------
+- name: DEBUG Filters
+  debug:
+    msg: "Filter: {{ filter_data.filter_name }}"
+  loop: "{{ filters }}"
+  loop_control:
+    loop_var: filter_data
+    label: "{{ filter_data.filter_name }}"
+  tags: debug
+
+- name: Filters
+  cisco.aci.aci_filter:
+    <<: *apic_auth
+    tenant: "{{ tenant_name }}"
+    filter: "{{ filter_data.filter_name }}"
+    state: "{{ aci_state }}"
+  delegate_to: localhost
+  loop: "{{ filters }}"
+  loop_control:
+    loop_var: filter_data
+    label: "{{ filter_data.filter_name }}"
+
+# ---------- Filter Entries (one per filter) ----------
+- name: DEBUG Filter Entries
+  debug:
+    msg: >-
+      Filter: {{ filter_data.filter_name }} | Entry: {{ filter_data.entry_name }} |
+      EtherType: {{ filter_data.ether_type | default('ip') }} |
+      Proto: {{ filter_data.protocol }} |
+      Port: {{ filter_data.dest_port if filter_data.dest_port != '' else 'none' }}
+  loop: "{{ filters }}"
+  loop_control:
+    loop_var: filter_data
+    label: "{{ filter_data.filter_name }}"
+  tags: debug
+
+- name: Filter Entries
+  cisco.aci.aci_filter_entry:
+    <<: *apic_auth
+    tenant: "{{ tenant_name }}"
+    filter: "{{ filter_data.filter_name }}"
+    entry: "{{ filter_data.entry_name }}"
+    ether_type: "{{ filter_data.ether_type | default('ip') }}"
+    ip_protocol: "{{ filter_data.protocol }}"
+    dst_port: "{{ filter_data.dest_port if filter_data.dest_port != '' else omit }}"
+    state: present
+  delegate_to: localhost
+  loop: "{{ filters }}"
+  loop_control:
+    loop_var: filter_data
+    label: "{{ filter_data.filter_name }} / {{ filter_data.entry_name }}"
+  when: aci_state == 'present'

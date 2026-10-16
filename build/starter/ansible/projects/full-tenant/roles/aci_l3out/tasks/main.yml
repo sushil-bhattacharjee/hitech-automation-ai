@@ -1,0 +1,21 @@
+---
+# Order: L3Out -> Node -> Interface -> External EPG
+# Destroy deletes the L3Out only - APIC removes everything under it.
+- name: L3Out + OSPF area
+  include_tasks: l3out.yml
+  tags: always
+
+- name: Node profile + leaf node
+  include_tasks: node.yml
+  when: aci_state == 'present'
+  tags: always
+
+- name: Interface profile + path + OSPF interface
+  include_tasks: interface.yml
+  when: aci_state == 'present'
+  tags: always
+
+- name: External EPG + subnets + contracts
+  include_tasks: ext_epg.yml
+  when: aci_state == 'present'
+  tags: always
