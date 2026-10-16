@@ -312,6 +312,46 @@ def delete_project(name: str) -> None:
         shutil.rmtree(p)
 
 
+# ------------------------------------------------------------------ v1.56.2: project as a .zip
+# Never in a zip: .terraform/ (providers), state + its backup / lock (Terraform's memory of
+# what it created — moving it by accident would let two projects fight over one APIC), crash.log.
+_ZIP_SKIP = re.compile(r"(^|/)(\.terraform(/|$)|terraform\.tfstate|\.terraform\.tfstate\.lock\.info$|crash\.log$|\.git(/|$))")
+
+
+def _zip_skip(rel: str) -> bool:
+    return bool(_ZIP_SKIP.search(rel))
+
+
+def export_project(name: str) -> bytes:
+    from tools import project_zip
+    try:
+        return project_zip.export_zip(existing_project(name), _zip_skip)
+    except project_zip.ZipError as e:
+        raise TfError(str(e))
+
+
+def import_project(name: str, data: bytes, overwrite: bool = False) -> dict:
+    from tools import project_zip
+    _ensure()
+    p = project_dir(name)
+    created = not p.exists()
+    if not created and busy(name):
+        raise TfError("a run is going in this project — stop it first")
+    if created:
+        p.mkdir(parents=True)
+    try:
+        out = project_zip.import_zip(data, _zip_skip, lambda rel: safe_path(name, rel).exists(),
+                                     lambda rel, body: write_bytes(name, rel, body), overwrite)
+    except Exception as e:
+        if created:
+            shutil.rmtree(p, ignore_errors=True)
+        if isinstance(e, project_zip.ZipError):
+            raise TfError(str(e))
+        raise
+    out["created"] = created
+    return out
+
+
 def tree(project: str) -> dict:
     base = existing_project(project)
     files, dirs = [], []

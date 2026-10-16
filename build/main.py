@@ -101,7 +101,7 @@ AI_AVAILABLE = LLM_AVAILABLE and RAG_AVAILABLE
 from tools import DeviceContext
 
 # ----------------------------- version ----------------------------- #
-APP_VERSION = "hitech_automation_ai.1.56.1"
+APP_VERSION = "hitech_automation_ai.1.56.2"
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from jinja2 import Environment, StrictUndefined, TemplateSyntaxError
@@ -3930,6 +3930,41 @@ async def api_ans_file_upload(project: str = Form(...), folder: str = Form(""),
         return _ans_err(e)
 
 
+from fastapi.responses import Response as _ZipResponse
+
+
+def _zip_download(data: bytes, project: str):
+    return _ZipResponse(data, media_type="application/zip",
+                    headers={"Content-Disposition": f'attachment; filename="{project}.zip"',
+                             "Cache-Control": "no-store"})
+
+
+@app.get("/api/ansible/project/export")
+def api_ans_project_export(project: str):
+    """v1.56.2: the whole project as <project>.zip (dot-files and *.retry left out)."""
+    try:
+        data = _ans.export_project(project)
+        _audit.log_event("ansible_project_export", project=project, bytes=len(data))
+        return _zip_download(data, project)
+    except Exception as e:
+        return _ans_err(e)
+
+
+@app.post("/api/ansible/project/import")
+async def api_ans_project_import(project: str = Form(...), overwrite: bool = Form(False),
+                                 file: UploadFile = File(...)):
+    """v1.56.2: unpack a .zip into a project (new or existing). Without overwrite, existing
+    files are reported back as conflicts and nothing is written."""
+    try:
+        out = _ans.import_project(project, await file.read(), overwrite)
+        if out["saved"]:
+            _audit.log_event("ansible_project_import", project=project, count=len(out["saved"]),
+                             overwrite=overwrite)
+        return out
+    except Exception as e:
+        return _ans_err(e)
+
+
 @app.post("/api/ansible/folder/create")
 def api_ans_folder_create(req: AnsPathReq):
     try:
@@ -4136,6 +4171,30 @@ async def api_tf_file_upload(project: str = Form(...), folder: str = Form(""),
             saved.append(rel)
         _audit.log_event("terraform_upload", project=project, count=len(saved))
         return {"ok": True, "saved": saved}
+    except Exception as e:
+        return _tf_err(e)
+
+
+@app.get("/api/terraform/project/export")
+def api_tf_project_export(project: str):
+    """v1.56.2: the project as <project>.zip — no state, no .terraform/."""
+    try:
+        data = _tf.export_project(project)
+        _audit.log_event("terraform_project_export", project=project, bytes=len(data))
+        return _zip_download(data, project)
+    except Exception as e:
+        return _tf_err(e)
+
+
+@app.post("/api/terraform/project/import")
+async def api_tf_project_import(project: str = Form(...), overwrite: bool = Form(False),
+                                file: UploadFile = File(...)):
+    try:
+        out = _tf.import_project(project, await file.read(), overwrite)
+        if out["saved"]:
+            _audit.log_event("terraform_project_import", project=project, count=len(out["saved"]),
+                             overwrite=overwrite)
+        return out
     except Exception as e:
         return _tf_err(e)
 

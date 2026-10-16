@@ -771,7 +771,7 @@
     </div>
   </div>
   <div class="v18-nav-footer">
-    <span id="v18-version-badge">v1.56.1</span>
+    <span id="v18-version-badge">v1.56.2</span>
   </div>
 </aside>
 <!-- v1.20.1: single drag bar on the merged sidebar's right edge -->
@@ -1498,11 +1498,14 @@ out-octets = state/counters/out-octets</textarea>
             <button type="button" id="ans-new-dir">＋ Folder</button>
             <button type="button" id="ans-new-role" style="background:#7c3aed">＋ Role</button>
             <button type="button" id="ans-upload">⬆ Upload</button>
-            <button type="button" id="ans-del" style="background:#dc2626" title="Delete selected file/folder">🗑</button>
+            <button type="button" id="ans-del" style="background:#dc2626" title="Delete the selected file or folder — select 📁 project/ at the top to delete the whole project">🗑</button>
+            <button type="button" id="ans-export" style="background:#0e7490" title="Download the whole project as a .zip">⬇ Zip</button>
+            <button type="button" id="ans-import" style="background:#0e7490" title="Upload a .zip as a new project, or into an existing one">⬆ Zip</button>
             <input type="file" id="ans-upload-in" multiple style="display:none">
+            <input type="file" id="ans-import-in" accept=".zip,application/zip" style="display:none">
           </div>
           <div class="ans-tree" id="ans-tree"><span class="ans-dim">no project yet — click ＋ Project</span></div>
-          <div class="ans-hint">Click a folder to select it (new files / uploads go there). ＋ Role runs <code>ansible-galaxy role init</code>.</div>
+          <div class="ans-hint">Click a folder to select it (new files / uploads go there). ＋ Role runs <code>ansible-galaxy role init</code>. 🗑 with 📁 project/ selected deletes the whole project.</div>
         </div>
 
         <div class="ans-card">
@@ -1672,8 +1675,11 @@ out-octets = state/counters/out-octets</textarea>
             <button type="button" id="tf-new-file">＋ File</button>
             <button type="button" id="tf-new-dir">＋ Folder</button>
             <button type="button" id="tf-upload">⬆ Upload</button>
-            <button type="button" id="tf-del" style="background:#dc2626" title="Delete selected file/folder">🗑</button>
+            <button type="button" id="tf-del" style="background:#dc2626" title="Delete the selected file or folder — select 📁 project/ at the top to delete the whole project">🗑</button>
+            <button type="button" id="tf-export" style="background:#0e7490" title="Download the whole project as a .zip">⬇ Zip</button>
+            <button type="button" id="tf-import" style="background:#0e7490" title="Upload a .zip as a new project, or into an existing one">⬆ Zip</button>
             <input type="file" id="tf-upload-in" multiple style="display:none">
+            <input type="file" id="tf-import-in" accept=".zip,application/zip" style="display:none">
           </div>
           <div class="ans-tree" id="tf-tree"><span class="ans-dim">no project yet — click ＋ Project</span></div>
           <div class="ans-hint">A new project starts with an ACI tenant + VRF example. <code>terraform.tfstate</code> appears after apply —
@@ -10688,6 +10694,41 @@ function copyOut(preId, btnId) {
   const o = document.getElementById(preId);
   copyPlain(o.dataset.fresh === '0' ? o.textContent : '', document.getElementById(btnId));
 }
+/* v1.56.2: a whole Ansible / Terraform project as a .zip */
+async function hiZipExport(url, project) {
+  if (!project) return alert('Pick a project first');
+  const r = await fetch(url + '?project=' + encodeURIComponent(project));
+  if (!r.ok || !(r.headers.get('content-type') || '').includes('zip')) {
+    let m = 'HTTP ' + r.status; try { const d = await r.json(); m = d.error || d.detail || m; } catch (e) {}
+    return alert('Download failed: ' + m);
+  }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(await r.blob()); a.download = project + '.zip';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+}
+function hiZipName(file) {
+  return file.name.replace(/\.zip$/i, '').replace(/[^A-Za-z0-9._-]+/g, '-').replace(/^[^A-Za-z0-9]+/, '').slice(0, 64) || 'imported';
+}
+async function hiZipImport(url, project, file, overwrite) {
+  const fd = new FormData(); fd.append('project', project); fd.append('overwrite', overwrite ? 'true' : 'false'); fd.append('file', file);
+  const r = await fetch(url, { method: 'POST', body: fd });
+  try { return await r.json(); } catch (e) { return { ok: false, error: 'HTTP ' + r.status + (r.status === 413 ? ' (zip too large)' : '') }; }
+}
+// upload `file` into a project the user names; asks before replacing files. Returns the result or null.
+async function hiZipImportFlow(url, project, file) {
+  let d = await hiZipImport(url, project, file, false);
+  if (!d.ok) { alert(d.error); return null; }
+  if (d.conflicts.length && !d.saved.length) {
+    const list = d.conflicts.slice(0, 15).join('\n') + (d.conflicts.length > 15 ? '\n… and ' + (d.conflicts.length - 15) + ' more' : '');
+    if (!confirm(d.conflicts.length + ' file(s) already exist in ' + project + ' and would be replaced:\n\n' + list + '\n\nReplace them?')) return null;
+    d = await hiZipImport(url, project, file, true);
+    if (!d.ok) { alert(d.error); return null; }
+  }
+  return d;
+}
+function hiZipSummary(d, project) {
+  return 'imported ' + d.saved.length + ' file(s) into ' + project + (d.created ? ' (new project)' : '') +
+    (d.skipped.length ? ' · left out: ' + d.skipped.slice(0, 8).join(', ') + (d.skipped.length > 8 ? ' …' : '') : '');
+}
 function copyPlain(text, b) {
   const label = b.dataset.label || (b.dataset.label = b.innerHTML);
   const done = (ok, msg) => { b.textContent = msg || (ok ? '✔ Copied' : '✖ Copy failed'); setTimeout(() => b.innerHTML = label, 1500); };
@@ -10715,6 +10756,7 @@ function copyPlain(text, b) {
   };
 
   let PROJ = '', TREE = { files: [], dirs: [], roles: [] }, CUR = '', SELDIR = '', dirty = false;
+  let DIRPICK = false;      // v1.56.2: last tree click was a folder -> 🗑 deletes that folder (root = project)
   let TAGS = [], tagState = {}, JOB = null, pollT = null, hist = [], hi = 0;
   let envs = [];
   try { hist = JSON.parse(LS('hitech.ans.hist') || '[]'); } catch (e) { hist = []; }
@@ -10782,7 +10824,7 @@ function copyPlain(text, b) {
   }
   async function loadTree() {
     const el = $('ans-tree');
-    const btns = ['ans-new-file', 'ans-new-dir', 'ans-new-role', 'ans-upload', 'ans-del'];
+    const btns = ['ans-new-file', 'ans-new-dir', 'ans-new-role', 'ans-upload', 'ans-del', 'ans-export'];
     btns.forEach(b => $(b).disabled = !PROJ);
     $('ans-ps').textContent = '(.vansible) ' + (PROJ || '') + ' $';
     $('ans-clicwd').textContent = (PROJ || 'project') + '/';
@@ -10825,8 +10867,8 @@ function copyPlain(text, b) {
     const tg = e.target.closest('[data-tog]');
     if (tg) { treeToggle('ans', PROJ, tg.dataset.tog); loadTree(); return; }
     const f = e.target.closest('[data-f]'), dd = e.target.closest('[data-dir]');
-    if (f) openFile(f.dataset.f);
-    else if (dd) { SELDIR = dd.dataset.dir; loadTree(); }
+    if (f) { DIRPICK = false; openFile(f.dataset.f); }
+    else if (dd) { DIRPICK = true; SELDIR = dd.dataset.dir; loadTree(); }
   });
 
   // ---------------- editor ----------------
@@ -10881,12 +10923,12 @@ function copyPlain(text, b) {
   $('ans-copyfile').onclick = () => copyPlain(CUR && !$('ans-ed').disabled ? $('ans-ed').value : '', $('ans-copyfile'));
 
   // ---------------- create / delete / upload ----------------
-  function modal(title, bodyHtml, onOk) {
+  function modal(title, bodyHtml, onOk, okLabel) {
     const m = document.createElement('div');
     m.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.45);display:grid;place-items:center;z-index:9999';
     m.innerHTML = '<div style="background:#fff;color:#0f172a;border-radius:8px;padding:18px;width:440px;font-size:13px">' +
       '<h4 style="margin:0 0 10px">' + esc(title) + '</h4>' + bodyHtml +
-      '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button type="button" class="ans-btn ans-s" data-x>Cancel</button><button type="button" class="ans-btn" data-ok>Create</button></div></div>';
+      '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button type="button" class="ans-btn ans-s" data-x>Cancel</button><button type="button" class="ans-btn" data-ok>' + esc(okLabel || 'Create') + '</button></div></div>';
     document.body.appendChild(m);
     const close = () => m.remove();
     m.querySelector('[data-x]').onclick = close;
@@ -10929,12 +10971,17 @@ function copyPlain(text, b) {
       outLine(d.output, 'o-ok'); await loadTree(); openFile((parent ? parent + '/' : '') + name + '/tasks/main.yml');
     });
   $('ans-del').onclick = async () => {
-    const target = CUR || SELDIR;
-    if (!target) return alert('Select a file or folder first');
-    if (!confirm('Delete ' + PROJ + '/' + target + (CUR ? '' : '/  (folder and everything in it)') + ' ?\nThis cannot be undone.')) return;
+    const target = DIRPICK ? SELDIR : (CUR || SELDIR), isFile = !DIRPICK && !!CUR;
+    if (!target) {           // v1.56.2: project root selected -> delete the whole project
+      if (!PROJ || !confirm('Delete the whole project ' + PROJ + ' (all its files)?\n\nTip: ⬇ Zip first if you may want it back. This cannot be undone.')) return;
+      const d = await api('/api/ansible/project/delete', { project: PROJ });
+      if (!d.ok) return outErr(d.error);
+      LS('hitech.ans.proj', ''); if (SPLIT) SPLIT.clearAll(); else setEditor(null); PROJ = ''; return loadProjects();
+    }
+    if (!confirm('Delete ' + PROJ + '/' + target + (isFile ? '' : '/  (folder and everything in it)') + ' ?\nThis cannot be undone.')) return;
     const d = await api('/api/ansible/path/delete', { project: PROJ, path: target });
     if (!d.ok) return outErr(d.error);
-    if (SPLIT) SPLIT.forget(target); else if (CUR) setEditor(null); SELDIR = ''; loadTree();
+    if (SPLIT) SPLIT.forget(target); else if (CUR && (CUR === target || CUR.startsWith(target + '/'))) setEditor(null); SELDIR = ''; DIRPICK = false; loadTree();
   };
   $('ans-upload').onclick = () => $('ans-upload-in').click();
   $('ans-upload-in').onchange = async () => {
@@ -10945,6 +10992,24 @@ function copyPlain(text, b) {
     $('ans-upload-in').value = '';
     if (!d.ok) return outErr(d.error);
     outLine('uploaded: ' + d.saved.join(', '), 'o-ok'); loadTree();
+  };
+
+  // ---------------- v1.56.2: project as .zip ----------------
+  $('ans-export').onclick = () => hiZipExport('/api/ansible/project/export', PROJ);
+  $('ans-import').onclick = () => $('ans-import-in').click();
+  $('ans-import-in').onchange = () => {
+    const f = $('ans-import-in').files[0]; $('ans-import-in').value = ''; if (!f) return;
+    modal('Import ' + f.name, '<label>Into project <span class="ans-req">*</span></label><input id="m-n" value="' + esc(hiZipName(f)) + '" ' + inpStyle + '>' +
+      '<div class="ans-dim">A new name makes a new project. An existing name adds the files to it — you are asked before any file is replaced. ' +
+      'Left out: dot-files (.git, .vault_pass …) and *.retry. Limits: 20 MB zip, 2000 files.</div>', async (m) => {
+      const n = m.querySelector('#m-n').value.trim(); if (!n) return false;
+      if ((SPLIT ? SPLIT.anyDirty() : dirty) && !confirm('Discard unsaved changes in the open files?')) return false;
+      const d = await hiZipImportFlow('/api/ansible/project/import', n, f);
+      if (!d) return false;
+      CUR = ''; SELDIR = ''; if (SPLIT) SPLIT.clearAll(); else setEditor(null);
+      LS('hitech.ans.proj', n); PROJ = ''; await loadProjects(n);
+      outLine(hiZipSummary(d, n), 'o-ok');
+    }, 'Import');
   };
 
   // ---------------- run form ----------------
@@ -11151,6 +11216,7 @@ function copyPlain(text, b) {
   };
   const WANT_TF = '1.13.3', WANT_ACI = '2.17.0';
   let PROJ = '', TREE = { files: [], dirs: [] }, CUR = '', SELDIR = '', dirty = false;
+  let DIRPICK = false;      // v1.56.2: last tree click was a folder -> 🗑 deletes that folder (root = project)
   let JOB = null, JOBACT = '', pollT = null, hist = [], hi = 0, envs = [];
   try { hist = JSON.parse(LS('hitech.tf.hist') || '[]'); } catch (e) { hist = []; }
   hi = hist.length;
@@ -11220,7 +11286,7 @@ function copyPlain(text, b) {
   }
   async function loadTree() {
     const el = $('tf-tree');
-    ['tf-new-file', 'tf-new-dir', 'tf-upload', 'tf-del'].forEach(b => $(b).disabled = !PROJ);
+    ['tf-new-file', 'tf-new-dir', 'tf-upload', 'tf-del', 'tf-export'].forEach(b => $(b).disabled = !PROJ);
     $('tf-ps').textContent = (PROJ || '') + ' $';
     $('tf-clicwd').textContent = (PROJ || 'project') + '/';
     if (!PROJ) { el.innerHTML = '<span class="ans-dim">no project yet — click ＋ Project</span>'; fillVarFiles(); return; }
@@ -11258,8 +11324,8 @@ function copyPlain(text, b) {
     const tg = e.target.closest('[data-tog]');
     if (tg) { treeToggle('tf', PROJ, tg.dataset.tog); loadTree(); return; }
     const f = e.target.closest('[data-f]'), dd = e.target.closest('[data-dir]');
-    if (f) openFile(f.dataset.f);
-    else if (dd) { SELDIR = dd.dataset.dir; loadTree(); }
+    if (f) { DIRPICK = false; openFile(f.dataset.f); }
+    else if (dd) { DIRPICK = true; SELDIR = dd.dataset.dir; loadTree(); }
   });
 
   // ---------------- editor ----------------
@@ -11341,12 +11407,12 @@ function copyPlain(text, b) {
   $('tf-copyfile').onclick = () => copyPlain(CUR && !$('tf-ed').disabled ? $('tf-ed').value : '', $('tf-copyfile'));
 
   // ---------------- create / delete / upload ----------------
-  function modal(title, bodyHtml, onOk) {
+  function modal(title, bodyHtml, onOk, okLabel) {
     const m = document.createElement('div');
     m.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.45);display:grid;place-items:center;z-index:9999';
     m.innerHTML = '<div style="background:#fff;color:#0f172a;border-radius:8px;padding:18px;width:440px;font-size:13px">' +
       '<h4 style="margin:0 0 10px">' + esc(title) + '</h4>' + bodyHtml +
-      '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button type="button" class="ans-btn ans-s" data-x>Cancel</button><button type="button" class="ans-btn" data-ok>Create</button></div></div>';
+      '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button type="button" class="ans-btn ans-s" data-x>Cancel</button><button type="button" class="ans-btn" data-ok>' + esc(okLabel || 'Create') + '</button></div></div>';
     document.body.appendChild(m);
     const close = () => m.remove();
     m.querySelector('[data-x]').onclick = close;
@@ -11382,7 +11448,7 @@ function copyPlain(text, b) {
     SELDIR = path; await loadTree();
   });
   $('tf-del').onclick = async () => {
-    const target = CUR || SELDIR;
+    const target = DIRPICK ? SELDIR : (CUR || SELDIR), isFile = !DIRPICK && !!CUR;
     if (!target) {
       if (!PROJ || !confirm('Delete the whole project ' + PROJ + ' (all files and its state)?\n\nResources it created on the APIC stay — run destroy first if you want them gone.')) return;
       const d = await api('/api/terraform/project/delete', { project: PROJ });
@@ -11390,10 +11456,10 @@ function copyPlain(text, b) {
       LS('hitech.tf.proj', ''); if (SPLIT) SPLIT.clearAll(); else setEditor(null); return loadProjects();
     }
     const stateWarn = /tfstate/.test(target) ? '\n\n⚠ Without the state Terraform forgets what it created — destroy will no longer remove it.' : '';
-    if (!confirm('Delete ' + PROJ + '/' + target + (CUR ? '' : '/  (folder and everything in it)') + ' ?\nThis cannot be undone.' + stateWarn)) return;
+    if (!confirm('Delete ' + PROJ + '/' + target + (isFile ? '' : '/  (folder and everything in it)') + ' ?\nThis cannot be undone.' + stateWarn)) return;
     const d = await api('/api/terraform/path/delete', { project: PROJ, path: target });
     if (!d.ok) return outErr(d.error);
-    if (SPLIT) SPLIT.forget(target); else if (CUR) setEditor(null); SELDIR = ''; loadTree();
+    if (SPLIT) SPLIT.forget(target); else if (CUR && (CUR === target || CUR.startsWith(target + '/'))) setEditor(null); SELDIR = ''; DIRPICK = false; loadTree();
   };
   $('tf-upload').onclick = () => $('tf-upload-in').click();
   $('tf-upload-in').onchange = async () => {
@@ -11404,6 +11470,24 @@ function copyPlain(text, b) {
     $('tf-upload-in').value = '';
     if (!d.ok) return outErr(d.error);
     outLine('uploaded: ' + d.saved.join(', '), 'o-ok'); loadTree();
+  };
+
+  // ---------------- v1.56.2: project as .zip ----------------
+  $('tf-export').onclick = () => hiZipExport('/api/terraform/project/export', PROJ);
+  $('tf-import').onclick = () => $('tf-import-in').click();
+  $('tf-import-in').onchange = () => {
+    const f = $('tf-import-in').files[0]; $('tf-import-in').value = ''; if (!f) return;
+    modal('Import ' + f.name, '<label>Into project <span class="ans-req">*</span></label><input id="m-n" value="' + esc(hiZipName(f)) + '" ' + inpStyle + '>' +
+      '<div class="ans-dim">A new name makes a new project. An existing name adds the files to it — you are asked before any file is replaced. ' +
+      'Left out: terraform.tfstate*, .terraform/, crash.log (run init after importing). Limits: 20 MB zip, 2000 files.</div>', async (m) => {
+      const n = m.querySelector('#m-n').value.trim(); if (!n) return false;
+      if ((SPLIT ? SPLIT.anyDirty() : dirty) && !confirm('Discard unsaved changes in the open files?')) return false;
+      const d = await hiZipImportFlow('/api/terraform/project/import', n, f);
+      if (!d) return false;
+      CUR = ''; SELDIR = ''; if (SPLIT) SPLIT.clearAll(); else setEditor(null);
+      LS('hitech.tf.proj', n); PROJ = ''; await loadProjects(n);
+      outLine(hiZipSummary(d, n), 'o-ok');
+    }, 'Import');
   };
 
   // ---------------- actions ----------------

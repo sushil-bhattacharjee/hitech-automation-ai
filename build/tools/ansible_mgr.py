@@ -258,6 +258,43 @@ def delete_project(name: str) -> None:
     shutil.rmtree(_existing_project(name))
 
 
+# ------------------------------------------------------------------ v1.56.2: project as a .zip
+# Same files the tree shows: dot-files/folders (.git, .vault_pass …), *.retry and caches stay out.
+
+def _zip_skip(rel: str) -> bool:
+    return any(seg.startswith(".") and seg != ".keep" for seg in rel.split("/")) or rel.endswith(".retry")
+
+
+def export_project(name: str) -> bytes:
+    from tools import project_zip
+    try:
+        return project_zip.export_zip(_existing_project(name), _zip_skip)
+    except project_zip.ZipError as e:
+        raise AnsError(str(e))
+
+
+def import_project(name: str, data: bytes, overwrite: bool = False) -> dict:
+    """Unpack a zip into project `name` (created when missing). Existing files are only
+    replaced with overwrite=True; otherwise the conflicts come back and nothing is written."""
+    from tools import project_zip
+    _ensure()
+    p = project_dir(name)
+    created = not p.exists()
+    if created:
+        p.mkdir(parents=True)
+    try:
+        out = project_zip.import_zip(data, _zip_skip, lambda rel: safe_path(name, rel).exists(),
+                                     lambda rel, body: write_bytes(name, rel, body), overwrite)
+    except Exception as e:
+        if created:
+            shutil.rmtree(p, ignore_errors=True)
+        if isinstance(e, project_zip.ZipError):
+            raise AnsError(str(e))
+        raise
+    out["created"] = created
+    return out
+
+
 def _is_role_dir(d: Path) -> bool:
     return any((d / s / "main.yml").exists() or (d / s / "main.yaml").exists()
                for s in ("tasks", "meta", "defaults", "handlers"))

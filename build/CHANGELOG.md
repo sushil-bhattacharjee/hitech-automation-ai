@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## hitech_automation_ai.1.56.2 — 2026-10-17
+
+### Added
+- Ansible and Terraform: **⬇ Zip** downloads the whole project as `<project>.zip`; **⬆ Zip** uploads a
+  .zip as a new project or into an existing one (asks before replacing any file; a single top folder in
+  the zip is dropped). Ansible leaves out dot-files and `*.retry`; Terraform leaves out
+  `terraform.tfstate*`, `.terraform/` and `crash.log`. Limits: 20 MB zip, 50 MB unpacked, 2000 files,
+  10 MB per file; symlinks and `__MACOSX/` are ignored.
+- Ansible: 🗑 with `📁 project/` selected deletes the whole project (as on Terraform).
+
+### Fixed
+- Ansible / Terraform 🗑: a folder clicked in the tree is what gets deleted, even while a file is open
+  (before, 🗑 offered to delete the open file instead).
+
 ## hitech_automation_ai.1.56.1 — 2026-10-16
 
 ### Added
