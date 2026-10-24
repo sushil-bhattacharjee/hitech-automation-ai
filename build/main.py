@@ -101,7 +101,7 @@ AI_AVAILABLE = LLM_AVAILABLE and RAG_AVAILABLE
 from tools import DeviceContext
 
 # ----------------------------- version ----------------------------- #
-APP_VERSION = "hitech_automation_ai.1.56.2"
+APP_VERSION = "hitech_automation_ai.1.57.4"
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from jinja2 import Environment, StrictUndefined, TemplateSyntaxError
@@ -1760,8 +1760,9 @@ def _build_export_snippets(method: str, url: str, headers: dict,
         sep = "&" if ("?" in full_url) else "?"
         full_url = full_url + sep + urlencode(params)
 
-    # ---- curl (runnable as-is: -s always, -k when verify is off -> normally -sk) ----
-    flags = "-s" + ("k" if not verify else "")
+    # ---- curl (runnable as-is: -s always, -k when verify is off -> normally -sk;
+    #      -i prints the status line + response headers, e.g. "HTTP/1.1 204 No Content")
+    flags = "-s" + ("k" if not verify else "") + " -i"
     curl_lines = [f"curl {flags} -X {method} '{full_url}'"]
     for k, v in headers.items():
         curl_lines.append(f'  -H "{k}: {v}"')
@@ -1784,7 +1785,11 @@ def _build_export_snippets(method: str, url: str, headers: dict,
         data_arg = ", data=data"
     rq.append("")
     rq.append(f"resp = requests.request({_json.dumps(method)}, url, headers=headers{data_arg}, verify={verify})")
-    rq.append("print(resp.status_code)")
+    # status line + response headers + body, like curl -i
+    rq.append("print(resp.status_code, resp.reason)")
+    rq.append("for name, value in resp.headers.items():")
+    rq.append("    print(f\"{name}: {value}\")")
+    rq.append("print()")
     rq.append("print(resp.text)")
     requests_code = "\n".join(rq)
 
@@ -1806,6 +1811,9 @@ def _build_export_snippets(method: str, url: str, headers: dict,
     hc.append(f"conn.request({_json.dumps(method)}, path, {body_arg}headers=headers)")
     hc.append("resp = conn.getresponse()")
     hc.append("print(resp.status, resp.reason)")
+    hc.append("for name, value in resp.getheaders():")
+    hc.append("    print(f\"{name}: {value}\")")
+    hc.append("print()")
     hc.append("print(resp.read().decode())")
     httpclient_code = "\n".join(hc)
 

@@ -1,5 +1,52 @@
 # CHANGELOG
 
+## hitech_automation_ai.1.57.4 — 2026-10-24
+
+### Changed
+- RESTCONF "Export request → code": the **curl** export now uses `curl -sk -i`, so it prints the
+  status line and response headers (e.g. `HTTP/1.1 204 No Content` for a successful PUT, which has no
+  body). The **Python requests** and **http.client** exports print the same: status + reason, every
+  response header, a blank line, then the body. The YANG tab's saved-API curl also gets `-i`.
+
+## hitech_automation_ai.1.57.3 — 2026-10-23
+
+### Added
+- CCNP workstation: the tools here (RESTCONF, REST, Python checks) may reach the student's own apps on
+  their workstation — ports 5000-5010, 6000-6010, 7000-7010, 8000-8010 (`TERM_APP_PORTS`), e.g.
+  `http://<workstation ip>:5000/add/10.0/4.0`. Needs the orchestrator's term2.patch (firewall).
+
+### Changed
+- Terminal: just after "ready" (key not installed yet / sshd starting) the page says "finishing its
+  setup — retrying…" and connects by itself, instead of "did not accept the terminal".
+
+## hitech_automation_ai.1.57.2 — 2026-10-22
+
+### Added
+- *Lab devices* (CCNP lab accounts only): **Workstation — terminal here**. Start a whole lab (workstation,
+  optionally with routers/switches and/or ACI) or **Add** a workstation to devices already running, without
+  going to lab-automation. While it builds (~3 min) the panel says so and updates itself; when ready,
+  *Open terminal*. *Stop lab* ends it. The workstation's firewall lets in the browser's address. Needs the
+  portal's `ws-from-software` change (software/devices.js `attach`, `start` with `workstation`).
+- Terminal page: "still being built — reconnect in a minute" instead of "no workstation" while it builds.
+
+## hitech_automation_ai.1.57.1 — 2026-10-22
+
+### Added
+- Web terminal: **split into up to 4 panes** (＋ Split, or Ctrl+Shift+Enter). Each pane is its own SSH
+  session and tmux session (`web`, `web2`, `web3`, `web4`), so all four survive a closed page; the pane
+  set, layout (grid / columns / rows) and font size are remembered in the browser. Ctrl+Shift+←/→
+  moves between panes; ✕ closes a pane (its tmux session keeps running).
+
+## hitech_automation_ai.1.57.0 — 2026-10-22
+
+### Added
+- Public site: **web terminal** for CCNP lab workstations (`/_gw/terminal`, linked from *Lab devices* →
+  *Open terminal*). A shell on the user's own running CCNP workstation as `expert`, in tmux session
+  `web` (a closed page keeps the shell), over short requests only — for company networks that block
+  the browser desktop. The gateway holds the SSH key (`LAB_TERM_KEY`); workers and the runner never do.
+  CCIE workstations are never reachable. Off while `LAB_TERM_KEY` is unset. xterm.js 5.5.0 is served
+  from the gateway (`gw_static/term/`), not a CDN.
+
 ## hitech_automation_ai.1.56.2 — 2026-10-17
 
 ### Added

@@ -9885,7 +9885,7 @@ function initV18Yang() {
       const uri = (item.querySelector('.yang-api-uri') || {}).value || a.uri || '';
       const pl = item.querySelector('.yang-api-payload');
       const full = 'https://' + host + uri;
-      let c = `curl -sk -X ${a.method || 'GET'} \\\n`;
+      let c = `curl -sk -i -X ${a.method || 'GET'} \\\n`;
       c += `  '${full}' \\\n`;
       c += `  -u '<user>:<pass>' \\\n`;
       c += `  -H 'Accept: ${rcMedia()}'`;
