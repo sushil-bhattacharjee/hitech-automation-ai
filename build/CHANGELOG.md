@@ -1,5 +1,73 @@
 # CHANGELOG
 
+## hitech_automation_ai.1.58.5 — 2026-10-26
+
+### Added
+- RESTCONF **Params**: pick-or-type lists. The key offers APIC / NX-OS DME query params (`query-target`,
+  `target-subtree-class`, `query-target-filter`, `rsp-subtree`, `rsp-subtree-class`, `rsp-subtree-include`,
+  `rsp-subtree-filter`, `rsp-prop-include`, `order-by`, `page`, `page-size`) and RESTCONF ones (`depth`,
+  `content`, `with-defaults`, `fields`); the value list follows the key (e.g. `children`/`subtree`, `fvBD`/`fvSubnet`,
+  `eq(fvSubnet.ip,"10.1.7.1/24")`). Anything typed is still accepted and remembered for next time (this browser).
+
+## hitech_automation_ai.1.58.4 — 2026-10-26
+
+### Changed
+- RESTCONF "Export request → code": when the response pane has a **jq filter**, the curl export ends in
+  `| jq '<filter>'` (with `-r` when ticked), and prints the response headers with `-D /dev/stderr`
+  instead of `-i`, so only the JSON body reaches jq. The Python exports show the filter as a comment.
+  The export follows the filter box as you type.
+
+## hitech_automation_ai.1.58.3 — 2026-10-25
+
+### Changed
+- Public site: **curl-restconf (paste)** works. It was switched off ("runs code on the server") because the
+  installable app hands the text to `bash`. The public site now reads the pasted curl command(s) itself
+  (`build/curl_safe.py`) and runs the curl binary with an argument list — no shell: only curl (several
+  with new lines, `;` or `&&`), no pipes / `$( )` / redirection, no options that read or write files or
+  pick a proxy, every URL checked by the network guard (public addresses or the user's own lab devices)
+  and pinned with `--resolve`, no redirects. `$VAR` from the active Environment still works; response
+  headers are shown as before.
+
+## hitech_automation_ai.1.58.2 — 2026-10-25
+
+### Changed
+- *Lab devices*: the routers/switches line shows the CML address and each device's SSH / NETCONF /
+  RESTCONF address:port (and the login), the APIC line its https address and login — "not 192.168.89.x",
+  so students can check what their tools should use.
+- `ios-xe-env` gets every IOS-XE lab device as a variable (`cat8Kv72` was missing); re-checked once for
+  every user (mark v3).
+
+## hitech_automation_ai.1.58.1 — 2026-10-25
+
+### Fixed
+- Lab devices → RESTCONF environments: after one lab ended, the environments (ios-xe-env, nxos-env,
+  APIC) kept that lab's CML/APIC address, so the next lab's requests went to an address the network
+  guard refuses (`ConnectError: All connection attempts failed (1 ms)`). They now follow the running
+  lab by pattern (`<any CML>:14431-14433`, `192.168.89.71-73`, the APIC host) and go back to the lab
+  addresses when the devices stop. Every user's environments are re-checked once (mark v2).
+- An empty `APIC_PASSWORD` / `APIC_USERNAME` (older starter sets) is filled with the lab APIC login,
+  like the router login already was.
+
+## hitech_automation_ai.1.58.0 — 2026-10-24
+
+### Added
+- **Practice terminal** (public site, *Lab devices* → *Open practice terminal*): a shell with Python
+  (`.pvnv`), Ansible, Terraform, git and the internet, **without a lab workstation**. It runs on the
+  "slim runner" VM (hitech-lab-infra/tools/slim-runner), one Linux account per user, files kept (1 GB),
+  up to 4 panes like the workstation terminal. Without a running lab: one free hour per opening; with
+  one, until the lab ends, and it reaches that lab's routers/switches/APIC (and nothing else private).
+  The VM is started on the first opening and powers itself off 15 minutes after the last user leaves.
+  Settings: `SLIM_HOST`, `SLIM_INSTANCE`, `SLIM_ZONE`, `SLIM_PROJECT`; uses `LAB_TERM_KEY`. Off while
+  `SLIM_HOST` is empty.
+
+## hitech_automation_ai.1.57.5 — 2026-10-24
+
+### Added
+- *Lab devices* (CCIE accounts): **Add Practice workstation (CCNP)** to a running CCIE lab, or **Add CCIE
+  workstation** to a running practice lab — a second workstation on the same routers/APIC, billed as its own
+  line, **Remove** on its own. The web terminal always opens the CCNP one. Needs the portal's `ws2` change
+  (software/devices.js `add-ws2` / `remove-ws2`) and the orchestrator's ws2.patch.
+
 ## hitech_automation_ai.1.57.4 — 2026-10-24
 
 ### Changed

@@ -1070,6 +1070,8 @@ pre.result-pane.pane-expanded { height: auto !important; }
             <table class="kv-table"><thead><tr><th>Key</th><th>Value</th><th width="30"></th></tr></thead>
               <tbody id="rc-params-rows"></tbody></table>
             <button class="small" id="rc-params-add">+ row</button>
+            <!-- v1.58.5: pick-or-type lists for query params (APIC, NX-OS DME, RESTCONF); values follow the key; new entries are remembered -->
+            <datalist id="prm-key-list"></datalist>
           </div>
           <div class="rc-subtab-pane" id="rc-pane-headers">
             <table class="kv-table"><thead><tr><th>Header</th><th>Value</th><th width="30"></th></tr></thead>
@@ -4641,6 +4643,16 @@ function addKvRow(tbodyId) {
     tr.innerHTML = '<td><input type="text" list="hdr-key-list" placeholder="header"></td>' +
                    '<td><input type="text" list="hdr-val-list" placeholder="value"></td>' +
                    '<td><button class="small" onclick="this.closest(\'tr\').remove();">×</button></td>';
+  } else if (tbodyId === 'rc-params-rows') {
+    // v1.58.5: pick-or-type: the key from a list, the value from the list for that key
+    tr.innerHTML = '<td><input type="text" list="prm-key-list" placeholder="key (pick or type)"></td>' +
+                   '<td><input type="text" placeholder="value (pick or type)"></td>' +
+                   '<td><button class="small" onclick="this.closest(\'tr\').remove();">×</button></td>';
+    const ins = tr.querySelectorAll('input');
+    const follow = () => ins[1].setAttribute('list', prmValList(ins[0].value.trim()));
+    ins[0].addEventListener('input', follow); ins[0].addEventListener('change', follow);
+    tb.appendChild(tr); follow();
+    return;
   } else {
     tr.innerHTML = '<td><input type="text" placeholder="key"></td>' +
                    '<td><input type="text" placeholder="value"></td>' +
@@ -4671,7 +4683,62 @@ function _dlAdd(listId, v) {
   if (!dl || !v) return;
   if (![...dl.options].some(o => o.value === v)) { const o = document.createElement('option'); o.value = v; dl.appendChild(o); }
 }
+// v1.58.5: query-param keys and values to pick from (still free to type); typed ones are remembered.
+const PRM_LS = 'hitech.prmPairs';
+const PRM_SEED = {
+  // APIC / NX-OS DME
+  'query-target': ['self', 'children', 'subtree'],
+  'target-subtree-class': ['fvTenant', 'fvBD', 'fvSubnet', 'fvAp', 'fvAEPg', 'fvCtx', 'fvRsBd', 'fvRsCtx', 'fvRsPathAtt',
+                           'vzBrCP', 'vzSubj', 'vzFilter', 'vzEntry', 'l3extOut', 'fabricNode', 'topSystem', 'aaaUser',
+                           'l2BD', 'l1PhysIf', 'ipv4Addr', 'bgpPeer', 'ospfAdjEp'],
+  'query-target-filter': ['eq(fvSubnet.ip,"10.1.7.1/24")', 'wcard(fvSubnet.dn,"10.1.7.1/")', 'wcard(fvBD.dn,"tn-p4-challenge-b6/")',
+                          'eq(fvTenant.name,"p4-challenge-b6")', 'ne(fvBD.name,"default")',
+                          'and(eq(fvBD.arpFlood,"yes"),eq(fvBD.unicastRoute,"yes"))', 'or(eq(fvBD.name,"HR-BD"),eq(fvBD.name,"DevOps-BD"))',
+                          'eq(l2BD.id,"100")', 'eq(l1PhysIf.adminSt,"up")', 'ge(l1PhysIf.mtu,"9000")'],
+  'rsp-subtree': ['no', 'children', 'full'],
+  'rsp-subtree-class': ['fvSubnet', 'fvBD', 'fvAEPg', 'fvRsBd', 'fvRsCtx', 'fvCtx'],
+  'rsp-subtree-include': ['required', 'count', 'faults', 'health', 'relations', 'stats', 'no-scoped'],
+  'rsp-subtree-filter': ['eq(fvSubnet.ip,"10.1.7.1/24")', 'wcard(fvSubnet.dn,"10.1.7.1/")'],
+  'rsp-prop-include': ['all', 'naming-only', 'config-only'],
+  'order-by': ['fvBD.name|asc', 'fvBD.name|desc', 'fvTenant.name|asc'],
+  'page': ['0', '1'], 'page-size': ['10', '50', '100'],
+  // RESTCONF (RFC 8040)
+  'depth': ['1', '2', '3', 'unbounded'], 'content': ['config', 'nonconfig', 'all'],
+  'with-defaults': ['report-all', 'trim', 'explicit', 'report-all-tagged'], 'fields': [],
+};
+function _prmStore() { try { return JSON.parse(localStorage.getItem(PRM_LS) || '{}'); } catch (e) { return {}; } }
+function prmValList(key) {
+  const id = 'prm-val-' + (key || '_').replace(/[^\w-]/g, '_');
+  if (!document.getElementById(id)) {
+    const dl = document.createElement('datalist'); dl.id = id; document.body.appendChild(dl);
+    const st = _prmStore();
+    [...(PRM_SEED[key] || []), ...((st[key]) || [])].forEach(v => _dlAdd(id, v));
+  }
+  return id;
+}
+function seedParamDatalists() {
+  const st = _prmStore();
+  [...Object.keys(PRM_SEED), ...Object.keys(st)].forEach(k => _dlAdd('prm-key-list', k));
+}
+function rememberParamEntries() {
+  const tb = document.getElementById('rc-params-rows');
+  if (!tb) return;
+  const st = _prmStore(); let changed = false;
+  tb.querySelectorAll('tr').forEach(tr => {
+    const ins = tr.querySelectorAll('input');
+    if (ins.length < 2) return;
+    const k = ins[0].value.trim(), v = ins[1].value.trim();
+    if (!k) return;
+    _dlAdd('prm-key-list', k);
+    if (v) {
+      st[k] = st[k] || [];
+      if (!st[k].includes(v) && !(PRM_SEED[k] || []).includes(v)) { st[k].push(v); changed = true; _dlAdd(prmValList(k), v); }
+    } else if (!st[k] && !PRM_SEED[k]) { st[k] = []; changed = true; }
+  });
+  if (changed) { try { localStorage.setItem(PRM_LS, JSON.stringify(st)); } catch (e) {} }
+}
 function seedHeaderDatalists() {
+  seedParamDatalists();
   _lsGetArr(HDR_KEY_LS).forEach(v => _dlAdd('hdr-key-list', v));
   _lsGetArr(HDR_VAL_LS).forEach(v => _dlAdd('hdr-val-list', v));
 }
@@ -4862,11 +4929,14 @@ function initV18RestconfHttpsPane() {
   // v1.8.1: remember newly typed header keys/values (datalist + localStorage)
   const hdrRows = document.getElementById('rc-headers-rows');
   if (hdrRows) hdrRows.addEventListener('change', rememberHeaderEntries);
+  const prmRows = document.getElementById('rc-params-rows');
+  if (prmRows) prmRows.addEventListener('change', rememberParamEntries);
 
   const sendBtn = document.getElementById('rc-send');
   if (!sendBtn) return;
   sendBtn.addEventListener('click', async () => {
     rememberHeaderEntries();  // v1.8.1: persist any newly typed header keys/values
+    rememberParamEntries();   // v1.58.5: and query params
     const statusEl = document.getElementById('rc-resp-status');
     const bodyEl = document.getElementById('rc-resp-body');
     const headersEl = document.getElementById('rc-resp-headers');
@@ -4974,7 +5044,7 @@ function rcLoadRows(tbodyId, pairs) {
   (pairs || []).forEach(([k, v]) => {
     addKvRow(tbodyId);
     const i = tb.lastElementChild.querySelectorAll('input');
-    if (i[0]) i[0].value = k;
+    if (i[0]) { i[0].value = k; i[0].dispatchEvent(new Event('input')); }   // v1.58.5: value list follows the key
     if (i[1]) i[1].value = v;
   });
 }
@@ -5394,11 +5464,26 @@ function rcRenderExport() {
   if (!pre) return;
   const req = (typeof rcGet === 'function') ? rcGet(RC_ACTIVE) : null;
   const exp = req && req.exportCode;
-  pre.textContent = exp ? (exp[RC_EXPORT_FMT] || '(n/a)') : 'Run a successful query to generate code.';
+  let code = exp ? (exp[RC_EXPORT_FMT] || '(n/a)') : 'Run a successful query to generate code.';
+  // v1.58.4: the jq filter of the response pane goes into the export too
+  const jq = ((document.getElementById('rc-jq-filter') || {}).value || '').trim();
+  if (exp && jq) {
+    const raw = !!(document.getElementById('rc-jq-raw') || {}).checked;
+    if (RC_EXPORT_FMT === 'curl') {
+      // headers to stderr (-D /dev/stderr) instead of -i, so only the JSON body reaches jq
+      code = code.replace(/^curl (-\w+) -i /, 'curl $1 -D /dev/stderr ')
+             + " \\\n  | jq " + (raw ? '-r ' : '') + "'" + jq.replace(/'/g, "'\\''") + "'";
+    } else {
+      code += '\n\n# jq filter used on the response:  jq ' + (raw ? '-r ' : '') + "'" + jq + "'";
+    }
+  }
+  pre.textContent = code;
 }
 function initV18RestconfExport() {
   const tabs = document.querySelectorAll('.rc-export-tab');
   if (!tabs.length) return;
+  ['rc-jq-filter', 'rc-jq-raw'].forEach(id => { const el = document.getElementById(id);
+    if (el) { el.addEventListener('input', rcRenderExport); el.addEventListener('change', rcRenderExport); } });
   tabs.forEach(t => t.addEventListener('click', () => {
     RC_EXPORT_FMT = t.dataset.fmt;
     tabs.forEach(x => x.classList.toggle('active', x === t));

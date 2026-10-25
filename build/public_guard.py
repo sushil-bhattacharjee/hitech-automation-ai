@@ -156,7 +156,8 @@ install()
 DENIED_PATHS = frozenset({
     "/api/python-execute",      # runs a pasted Python script
     "/api/python-run",          # runs Python
-    "/api/curl-execute",        # runs a pasted curl command line
+    # "/api/curl-execute": since 1.58.3 the public site runs pasted curl itself (curl_safe.py),
+    # without a shell and through this guard — no longer denied.
     "/api/rag-rebuild",         # rebuilds the local vector DB
     "/api/process-memory",      # host process list
     "/api/jq",                  # runs the jq binary (its env/$ENV would show settings)

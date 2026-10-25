@@ -101,7 +101,7 @@ AI_AVAILABLE = LLM_AVAILABLE and RAG_AVAILABLE
 from tools import DeviceContext
 
 # ----------------------------- version ----------------------------- #
-APP_VERSION = "hitech_automation_ai.1.57.4"
+APP_VERSION = "hitech_automation_ai.1.58.5"
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from jinja2 import Environment, StrictUndefined, TemplateSyntaxError
@@ -1996,6 +1996,13 @@ async def api_curl_execute(req: CurlExecuteRequest):
     cmd_text = req.curl_command.strip()
     if not cmd_text:
         raise HTTPException(400, "command is empty")
+
+    # v1.58.3: the public site has no shell for its users — curl_safe reads the pasted
+    # curl command(s) and runs the curl binary itself, through the network guard.
+    if _pg.PUBLIC_MODE:
+        import curl_safe as _cs
+        _audit.log_event("curl_execute_ui", shell="curl_safe", first_token="curl", length=len(cmd_text))
+        return await _cs.run(cmd_text, dict(req.env_vars or {}), req.timeout_seconds)
 
     # v1.18.0 (issue-1): capture response headers per curl invocation. We append
     # `-D <tmpfile>` to each `curl ...` so headers are dumped to a file without

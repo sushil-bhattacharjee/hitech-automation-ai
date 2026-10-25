@@ -299,7 +299,7 @@
             "name": "access-list-seq-rule=10",
             "request": {
               "name": "access-list-seq-rule=10",
-              "method": "PUT",
+              "method": "PATCH",
               "uri": "https://{{cat8Kv71}}/restconf/data/Cisco-IOS-XE-native:native/ip/access-list/extended=challenge-207-pod-10/access-list-seq-rule=10",
               "params": {},
               "headers": {
@@ -433,6 +433,35 @@
               "auth_token": "",
               "device_name": "",
               "payload": null,
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": "",
+                "jq_raw": false,
+                "jq_engine": "browser"
+              }
+            }
+          },
+          {
+            "id": "ncbda4bcd866e",
+            "type": "request",
+            "name": "access-list-seq-rule=10",
+            "request": {
+              "name": "access-list-seq-rule=10",
+              "method": "PUT",
+              "uri": "https://{{cat8Kv71}}/restconf/data/Cisco-IOS-XE-native:native/ip/access-list/extended=challenge-207-pod-10/access-list-seq-rule=10",
+              "params": {},
+              "headers": {
+                "Accept": "application/yang-data+json",
+                "Content-Type": "application/yang-data+json"
+              },
+              "auth_type": "basic",
+              "auth_username": "expert",
+              "auth_password": "1234QWer!",
+              "auth_token": "",
+              "device_name": "",
+              "payload": "{\n  \"Cisco-IOS-XE-acl:access-list-seq-rule\": {\n    \"sequence\": \"10\",\n    \"ace-rule\": {\n      \"action\": \"permit\",\n      \"protocol\": \"tcp\",\n      \"any\": [\n        null\n      ],\n      \"src-gt\": 10,\n      \"dest-ipv4-address\": \"203.36.36.32\",\n      \"dest-mask\": \"0.0.0.15\",\n      \"dst-eq\": 636\n    }\n  }\n}",
               "verify_tls": false,
               "variables": {},
               "kind": "https",
@@ -637,12 +666,56 @@
             "type": "request",
             "name": "tn | bd_dn",
             "request": {
-              "name": "Subnet-dn copy",
+              "name": "tn | bd_dn",
               "method": "GET",
               "uri": "https://{{APIC_HOST}}/api/mo/uni/tn-p4-challenge-b6.json",
               "params": {
                 "query-target": "children",
                 "target-subtree-class": "fvBD"
+              },
+              "headers": {
+                "Cookie": ""
+              },
+              "auth_type": "basic",
+              "auth_username": "",
+              "auth_password": "",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": ".imdata[].fvBD.attributes.dn",
+                "jq_raw": true,
+                "jq_engine": "browser"
+              }
+            }
+          },
+          {
+            "id": "n9f2c89779f4b",
+            "type": "request",
+            "name": "fvBD-subnetDn",
+            "request": {
+              "name": "fvBD-subnetDn",
+              "kind": "curl",
+              "curl": {
+                "command": "APIC=192.168.89.95\nCOOKIE=$(curl -sk \"https://$APIC/api/aaaLogin.json\" \\\n  -d '{\"aaaUser\":{\"attributes\":{\"name\":\"admin\",\"pwd\":\"1234QWer!\"}}}' \\\n  | jq -r '.imdata[0].aaaLogin.attributes.token')\n\ncurl -sk \"https://$APIC/api/class/fvBD.json?query-target=subtree&target-subtree-class=fvSubnet&query-target-filter=eq(fvSubnet.ip,\\\"10.1.7.1/24\\\")\" \\\n  -H \"Cookie: APIC-cookie=$COOKIE\" \\\n  | jq -r '.imdata[].fvSubnet.attributes.dn'"
+              }
+            }
+          },
+          {
+            "id": "n13f56bbdd922",
+            "type": "request",
+            "name": "matching subnet",
+            "request": {
+              "name": "matching subnet",
+              "method": "GET",
+              "uri": "https://{{APIC_HOST}}/api/mo/uni/tn-p4-challenge-b6/BD-Finance-BD.json",
+              "params": {
+                "query-target": "children",
+                "target-subtree-class": "fvSubnet",
+                "query-target-filter": "eq(fvSubnet.ip,\"10.1.7.1/24\")"
               },
               "headers": {
                 "Cookie": ""
@@ -664,14 +737,99 @@
             }
           },
           {
-            "id": "n9f2c89779f4b",
+            "id": "n221c59f165a2",
             "type": "request",
-            "name": "fvBD-subnetDn",
+            "name": "bd | fvSubnet",
             "request": {
-              "name": "fvBD-subnetDn",
-              "kind": "curl",
-              "curl": {
-                "command": "APIC=192.168.89.95\nCOOKIE=$(curl -sk \"https://$APIC/api/aaaLogin.json\" \\\n  -d '{\"aaaUser\":{\"attributes\":{\"name\":\"admin\",\"pwd\":\"1234QWer!\"}}}' \\\n  | jq -r '.imdata[0].aaaLogin.attributes.token')\n\ncurl -sk \"https://$APIC/api/class/fvBD.json?query-target=subtree&target-subtree-class=fvSubnet&query-target-filter=eq(fvSubnet.ip,\\\"10.1.7.1/24\\\")\" \\\n  -H \"Cookie: APIC-cookie=$COOKIE\" \\\n  | jq -r '.imdata[].fvSubnet.attributes.dn'"
+              "name": "matching subnet copy",
+              "method": "GET",
+              "uri": "https://{{APIC_HOST}}/api/mo/uni/tn-p4-challenge-b6/BD-Finance-BD.json",
+              "params": {
+                "query-target": "children",
+                "target-subtree-class": "fvSubnet"
+              },
+              "headers": {
+                "Cookie": ""
+              },
+              "auth_type": "basic",
+              "auth_username": "",
+              "auth_password": "",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": ".imdata[].fvSubnet.attributes.dn",
+                "jq_raw": true,
+                "jq_engine": "browser"
+              }
+            }
+          },
+          {
+            "id": "nb37459524083",
+            "type": "request",
+            "name": "matching 10.1.7.1",
+            "request": {
+              "name": "matching 10.1.7.1",
+              "method": "GET",
+              "uri": "https://{{APIC_HOST}}/api/mo/uni/tn-p4-challenge-b6/BD-Finance-BD.json",
+              "params": {
+                "query-target": "children",
+                "target-subtree-class": "fvSubnet",
+                "query-target-filter": "wcard(fvSubnet.dn,\"10.1.7.1/\")"
+              },
+              "headers": {
+                "Cookie": ""
+              },
+              "auth_type": "basic",
+              "auth_username": "",
+              "auth_password": "",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": ".imdata[].fvSubnet.attributes.dn",
+                "jq_raw": true,
+                "jq_engine": "browser"
+              }
+            }
+          },
+          {
+            "id": "n45c5c543c09a",
+            "type": "request",
+            "name": "all bd got fvSubnet",
+            "request": {
+              "name": "all bd got fvSubnet",
+              "method": "GET",
+              "uri": "https://{{APIC_HOST}}/api/mo/uni/tn-p4-challenge-b6.json",
+              "params": {
+                "query-target": "children",
+                "target-subtree-class": "fvBD",
+                "rsp-subtree": "children",
+                "rsp-subtree-class": "fvSubnet",
+                "rsp-subtree-include": "required"
+              },
+              "headers": {
+                "Cookie": ""
+              },
+              "auth_type": "basic",
+              "auth_username": "",
+              "auth_password": "",
+              "auth_token": "",
+              "device_name": "",
+              "payload": null,
+              "verify_tls": false,
+              "variables": {},
+              "kind": "https",
+              "filters": {
+                "jq_expr": ".imdata[].fvBD | {bd: .attributes.dn, subnet: .children[].fvSubnet.attributes.rn}",
+                "jq_raw": true,
+                "jq_engine": "browser"
               }
             }
           }
