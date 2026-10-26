@@ -580,7 +580,7 @@
               "uri": "https://{{APIC_HOST}}/api/aaaLogin.json",
               "params": {},
               "headers": {
-                "Cookie": ""
+                "Cookie": "APIC-cookie={{APIC_COOKIE}}"
               },
               "auth_type": "basic",
               "auth_username": "admin",
@@ -611,7 +611,7 @@
                 "target-subtree-class": "fvSubnet"
               },
               "headers": {
-                "Cookie": ""
+                "Cookie": "APIC-cookie={{APIC_COOKIE}}"
               },
               "auth_type": "basic",
               "auth_username": "",
@@ -643,7 +643,7 @@
                 "query-target-filter": "eq(fvSubnet.ip,\"10.1.7.1/24\")"
               },
               "headers": {
-                "Cookie": ""
+                "Cookie": "APIC-cookie={{APIC_COOKIE}}"
               },
               "auth_type": "basic",
               "auth_username": "",
@@ -674,7 +674,7 @@
                 "target-subtree-class": "fvBD"
               },
               "headers": {
-                "Cookie": ""
+                "Cookie": "APIC-cookie={{APIC_COOKIE}}"
               },
               "auth_type": "basic",
               "auth_username": "",
@@ -718,7 +718,7 @@
                 "query-target-filter": "eq(fvSubnet.ip,\"10.1.7.1/24\")"
               },
               "headers": {
-                "Cookie": ""
+                "Cookie": "APIC-cookie={{APIC_COOKIE}}"
               },
               "auth_type": "basic",
               "auth_username": "",
@@ -749,7 +749,7 @@
                 "target-subtree-class": "fvSubnet"
               },
               "headers": {
-                "Cookie": ""
+                "Cookie": "APIC-cookie={{APIC_COOKIE}}"
               },
               "auth_type": "basic",
               "auth_username": "",
@@ -781,7 +781,7 @@
                 "query-target-filter": "wcard(fvSubnet.dn,\"10.1.7.1/\")"
               },
               "headers": {
-                "Cookie": ""
+                "Cookie": "APIC-cookie={{APIC_COOKIE}}"
               },
               "auth_type": "basic",
               "auth_username": "",
@@ -815,7 +815,7 @@
                 "rsp-subtree-include": "required"
               },
               "headers": {
-                "Cookie": ""
+                "Cookie": "APIC-cookie={{APIC_COOKIE}}"
               },
               "auth_type": "basic",
               "auth_username": "",
@@ -830,6 +830,128 @@
                 "jq_expr": ".imdata[].fvBD | {bd: .attributes.dn, subnet: .children[].fvSubnet.attributes.rn}",
                 "jq_raw": true,
                 "jq_engine": "browser"
+              }
+            }
+          },
+          {
+            "id": "n7766217a6b86",
+            "type": "request",
+            "name": "all BD",
+            "request": {
+              "name": "all BD",
+              "kind": "curl",
+              "curl": {
+                "command": "curl -sk \"$APIC_BASEURL/api/node/class/fvBD.json\" -b \"APIC-cookie=$TOKEN\" \\\n  | jq -r '.imdata[].fvBD.attributes.dn'"
+              }
+            }
+          },
+          {
+            "id": "nba98e22afa03",
+            "type": "request",
+            "name": "bd@tn",
+            "request": {
+              "name": "bd@tn",
+              "kind": "curl",
+              "curl": {
+                "command": "curl -sk \"$APIC_BASEURL/api/mo/uni/tn-p4-challenge-b6.json?query-target=children&target-subtree-class=fvBD\" \\\n  -b \"APIC-cookie=$TOKEN\" | jq -r '.imdata[].fvBD.attributes.dn'"
+              }
+            }
+          },
+          {
+            "id": "n9ab3ed3ed247",
+            "type": "request",
+            "name": "subnet-[10.1.7.1/24]",
+            "request": {
+              "name": "subnet-[10.1.7.1/24]",
+              "kind": "curl",
+              "curl": {
+                "command": "curl -sk -G \"$APIC_BASEURL/api/mo/uni/tn-p4-challenge-b6/BD-Finance-BD.json\" -b \"APIC-cookie=$TOKEN\" \\\n  -d query-target=children \\\n  -d target-subtree-class=fvSubnet \\\n  --data-urlencode 'query-target-filter=eq(fvSubnet.ip,\"10.1.7.1/24\")' \\\n  | jq -r '.imdata[].fvSubnet.attributes.dn'"
+              }
+            }
+          },
+          {
+            "id": "n168500b05247",
+            "type": "request",
+            "name": "10.1.7.1*",
+            "request": {
+              "name": "10.1.7.1*",
+              "kind": "curl",
+              "curl": {
+                "command": "curl -sk -G \"$APIC_BASEURL/api/class/fvSubnet.json\" -b \"APIC-cookie=$TOKEN\" \\\n  --data-urlencode 'query-target-filter=wcard(fvSubnet.dn,\"10.1.7.1/\")' \\\n  | jq -r '.imdata[].fvSubnet.attributes.dn'"
+              }
+            }
+          },
+          {
+            "id": "na235d512ab85",
+            "type": "request",
+            "name": "BD-Staging-BD/subnet-[10.1.10.1/24]",
+            "request": {
+              "name": "BD-Staging-BD/subnet-[10.1.10.1/24]",
+              "kind": "curl",
+              "curl": {
+                "command": "curl -sk \"$APIC_BASEURL/api/mo/uni/tn-p4-challenge-b6/BD-Staging-BD.json?query-target=children&target-subtree-class=fvSubnet\" \\\n  -b \"APIC-cookie=$TOKEN\" | jq -r '.imdata[].fvSubnet.attributes.dn'"
+              }
+            }
+          },
+          {
+            "id": "nd007d0047bf1",
+            "type": "request",
+            "name": "all bd@subnet",
+            "request": {
+              "name": "all bd@subnet",
+              "kind": "curl",
+              "curl": {
+                "command": "curl -sk -G \"$APIC_BASEURL/api/mo/uni/tn-p4-challenge-b6.json\" -b \"APIC-cookie=$TOKEN\" \\\n  -d query-target=children -d target-subtree-class=fvBD \\\n  -d rsp-subtree=children  -d rsp-subtree-class=fvSubnet \\\n  -d rsp-subtree-include=required \\\n  | jq '.imdata[].fvBD | {bd: .attributes.dn, subnet: .children[].fvSubnet.attributes.rn}'"
+              }
+            }
+          },
+          {
+            "id": "n6da15345f377",
+            "type": "request",
+            "name": "fvBD@subnet",
+            "request": {
+              "name": "fvBD@subnet",
+              "kind": "curl",
+              "curl": {
+                "command": "curl -sk \"$APIC_BASEURL/api/class/fvBD.json?rsp-subtree=children&rsp-subtree-class=fvSubnet&rsp-subtree-include=required\" \\\n  -b \"APIC-cookie=$TOKEN\" | jq -r '.imdata[].fvBD.attributes.dn'"
+              }
+            }
+          },
+          {
+            "id": "nccb9f4e02565",
+            "type": "request",
+            "name": "applicationEPGs",
+            "request": {
+              "name": "applicationEPGs",
+              "kind": "curl",
+              "curl": {
+                "command": "curl -sk \"$APIC_BASEURL/api/class/fvAEPg.json?rsp-subtree=children&rsp-subtree-class=fvRsBd\" \\\n  -b \"APIC-cookie=$TOKEN\" \\\n  | jq '.imdata[].fvAEPg | {epg: .attributes.dn, bd: .children[].fvRsBd.attributes.tnFvBDName}'"
+              }
+            }
+          },
+          {
+            "id": "nf97d74ad73b2",
+            "type": "request",
+            "name": "contracts",
+            "request": {
+              "name": "contracts",
+              "kind": "python",
+              "python": {
+                "code": "import os, requests, urllib3\nurllib3.disable_warnings()\napic = os.environ[\"APIC_BASEURL\"]\ns = requests.Session()            # keeps the APIC-cookie from the login\ns.post(f\"{apic}/api/aaaLogin.json\", json={\"aaaUser\": {\"attributes\": {\n    \"name\": os.environ[\"APIC_USERNAME\"], \"pwd\": os.environ[\"APIC_PASSWORD\"]}}}, verify=False)\ntenant = \"SB_LAB-Tenant_APP\"\n\n# the tenant's contracts\nr = s.get(f\"{apic}/api/mo/uni/tn-{tenant}.json\", verify=False,\n          params={\"query-target\": \"children\", \"target-subtree-class\": \"vzBrCP\"})\n\nfor c in r.json()[\"imdata\"]:\n    name = c[\"vzBrCP\"][\"attributes\"][\"name\"]\n    print(name)\n    # who uses it: the relation objects inside EPGs, found by the contract's name (this tenant only)\n    for rel, word in ((\"fvRsProv\", \"provided by\"), (\"fvRsCons\", \"consumed by\")):\n        flt = f'and(eq({rel}.tnVzBrCPName,\"{name}\"),wcard({rel}.dn,\"tn-{tenant}/\"))'\n        rows = s.get(f\"{apic}/api/class/{rel}.json\", params={\"query-target-filter\": flt},\n                     verify=False).json()[\"imdata\"]\n        for row in rows:\n            user = row[rel][\"attributes\"][\"dn\"].split(\"/rs\")[0]       # \u2026/epg-X/rsprov-CON-Web \u2192 \u2026/epg-X\n            print(\"    \", word, user.replace(f\"uni/tn-{tenant}/\", \"\"))",
+                "env_text": ""
+              }
+            }
+          },
+          {
+            "id": "n33a647469825",
+            "type": "request",
+            "name": "prints-bd@subnet",
+            "request": {
+              "name": "prints-bd@subnet",
+              "kind": "python",
+              "python": {
+                "code": "import os, requests, urllib3\nurllib3.disable_warnings()\napic = os.environ[\"APIC_BASEURL\"]\ns = requests.Session()            # keeps the APIC-cookie from the login\ns.post(f\"{apic}/api/aaaLogin.json\", json={\"aaaUser\": {\"attributes\": {\n    \"name\": os.environ[\"APIC_USERNAME\"], \"pwd\": os.environ[\"APIC_PASSWORD\"]}}}, verify=False)\ntenant = \"p4-challenge-b6\"\n\nr = s.get(f\"{apic}/api/mo/uni/tn-{tenant}.json?query-target=children&target-subtree-class=fvBD\", verify=False)\ntn_bd_dn = [e[\"fvBD\"][\"attributes\"][\"dn\"] for e in r.json()[\"imdata\"]]\n\n# does each BD have any subnet?\nwith_subnets = []\nfor dn in tn_bd_dn:\n    query = \"query-target=children&target-subtree-class=fvSubnet\"\n    rows = s.get(f\"{apic}/api/mo/{dn}.json?{query}\", verify=False).json()[\"imdata\"]\n    for entry in rows:\n        print(f\"    BD:     {dn}\")\n        print(f\"    Subnet: {entry['fvSubnet']['attributes']['dn']}\")\n    if rows:\n        with_subnets.append(dn)\n\nprint(f\"\\nBDs in tenant {tenant} that have at least one subnet: {len(with_subnets)}\")\nfor dn in with_subnets:\n    print(f\"    {dn}\")",
+                "env_text": ""
               }
             }
           }
@@ -898,7 +1020,7 @@
               "uri": "https://{{host}}/api/v0/labs",
               "params": {},
               "headers": {
-                "Authorization": ""
+                "Authorization": "Bearer {{token}}"
               },
               "auth_type": "basic",
               "auth_username": "",
@@ -926,7 +1048,7 @@
               "uri": "https://{{host}}/api/v0/labs/39e77d83-b22e-4c67-9910-a57b877ce447/download",
               "params": {},
               "headers": {
-                "Authorization": ""
+                "Authorization": "Bearer {{token}}"
               },
               "auth_type": "basic",
               "auth_username": "",
@@ -990,7 +1112,7 @@
               "uri": "https://{{host}}/api/v0/labs/39e77d83-b22e-4c67-9910-a57b877ce447/nodes",
               "params": {},
               "headers": {
-                "Authorization": ""
+                "Authorization": "Bearer {{token}}"
               },
               "auth_type": "basic",
               "auth_username": "",
@@ -1018,7 +1140,7 @@
               "uri": "https://{{host}}/api/v0/labs/39e77d83-b22e-4c67-9910-a57b877ce447/nodes/f7b597f7-7e5d-40ec-89ef-57bd9a1b4c93",
               "params": {},
               "headers": {
-                "Authorization": ""
+                "Authorization": "Bearer {{token}}"
               },
               "auth_type": "basic",
               "auth_username": "",
