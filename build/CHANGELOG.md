@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## hitech_automation_ai.1.58.6 — 2026-10-26
+
+### Added
+- **The APIC token refreshes itself.** When a RESTCONF request, curl or Python run uses the token of the
+  active Environment (`{{APIC_COOKIE}}`, `$APIC_COOKIE`, `${TOKEN}`, `os.environ["APIC_COOKIE"]`, … — keys
+  `APIC_COOKIE`, `TOKEN`, `APIC_TOKEN`) and it is missing or expires within a minute, the page logs in with
+  the Environment's `APIC_BASEURL` (or `APIC_HOST`), `APIC_USERNAME`, `APIC_PASSWORD` (new `/api/apic-token`),
+  writes the new token into every one of those keys that the Environment has, saves it, and runs with it.
+  Shell quotes typed around a value (`'1234QWer!'`) are ignored; `https://` is added when missing. On the
+  public site the login goes through the network guard like every request.
+
 ## hitech_automation_ai.1.58.5 — 2026-10-26
 
 ### Added

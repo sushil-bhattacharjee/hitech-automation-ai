@@ -101,7 +101,7 @@ AI_AVAILABLE = LLM_AVAILABLE and RAG_AVAILABLE
 from tools import DeviceContext
 
 # ----------------------------- version ----------------------------- #
-APP_VERSION = "hitech_automation_ai.1.58.5"
+APP_VERSION = "hitech_automation_ai.1.58.6"
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from jinja2 import Environment, StrictUndefined, TemplateSyntaxError
@@ -1971,6 +1971,56 @@ class PythonExecuteRequest(BaseModel):
     env_text: str = ""
     timeout_seconds: int = Field(default=30, ge=1, le=300)
     env_vars: dict = Field(default_factory=dict)   # v1.28.0 issue-2: Environment vars → os.environ
+
+
+class ApicTokenReq(BaseModel):
+    vars: dict = Field(default_factory=dict)
+
+
+def _unquote(v) -> str:
+    """'1234QWer!' typed with its shell quotes into an Environment → 1234QWer!"""
+    s = str(v or "").strip()
+    return s[1:-1] if len(s) >= 2 and s[0] == s[-1] and s[0] in "'\"" else s
+
+
+@app.post("/api/apic-token")
+async def api_apic_token(req: ApicTokenReq):
+    """v1.58.6: log in to the APIC of an Environment (APIC_BASEURL or APIC_HOST, APIC_USERNAME,
+    APIC_PASSWORD) and return a fresh token. The page calls this before running a request,
+    curl or Python that uses {{APIC_COOKIE}} / $APIC_COOKIE / $TOKEN when the stored token is
+    missing or about to expire, and saves the new one into the Environment. Values are never
+    logged; on the public site the address goes through the network guard."""
+    import httpx
+    v = req.vars or {}
+    base = _unquote(v.get("APIC_BASEURL") or v.get("APIC_HOST") or "").rstrip("/")
+    user, pwd = _unquote(v.get("APIC_USERNAME")), _unquote(v.get("APIC_PASSWORD"))
+    if not (base and user and pwd):
+        return {"ok": False, "error": "the Environment needs APIC_BASEURL (or APIC_HOST), APIC_USERNAME and APIC_PASSWORD"}
+    if not base.startswith(("http://", "https://")):
+        base = "https://" + base
+    url = base + "/api/aaaLogin.json"
+    if _pg.PUBLIC_MODE:
+        try:
+            _pg.check_url(url)
+        except _pg.BlockedAddress as e:
+            return {"ok": False, "error": str(e)}
+    _audit.log_event("apic_token", host=base.split("//", 1)[-1].split("/", 1)[0])
+    try:
+        async with httpx.AsyncClient(verify=False, timeout=15.0) as client:
+            r = await client.post(url, json={"aaaUser": {"attributes": {"name": user, "pwd": pwd}}})
+        d = r.json()
+    except Exception as e:
+        return {"ok": False, "error": f"APIC login failed: {type(e).__name__}: {str(e)[:200]}"}
+    try:
+        a = d["imdata"][0]["aaaLogin"]["attributes"]
+        return {"ok": True, "token": a["token"],
+                "refreshTimeoutSeconds": int(a.get("refreshTimeoutSeconds") or 600)}
+    except (KeyError, IndexError, TypeError, ValueError):
+        try:
+            text = d["imdata"][0]["error"]["attributes"]["text"]
+        except Exception:
+            text = f"HTTP {r.status_code}"
+        return {"ok": False, "error": f"APIC login refused: {text}"}
 
 
 @app.post("/api/curl-execute")

@@ -4962,6 +4962,10 @@ function initV18RestconfHttpsPane() {
       }
     }
 
+    // v1.58.6: a fresh APIC token first, if this request uses it
+    await rcEnsureApicToken([document.getElementById('rc-uri').value,
+      document.getElementById('rc-payload').value, document.getElementById('rc-auth-token').value,
+      JSON.stringify(readKvRows('rc-headers-rows')), JSON.stringify(readKvRows('rc-params-rows'))]);
     // v1.12.0: merge active environment vars (request-level vars win on conflict)
     varsObj = Object.assign({}, RC_ENV_VARS, varsObj);
 
@@ -6158,6 +6162,54 @@ async function rcSelectEnv(name) {
   rcEnvHint();
 }
 
+// v1.58.6: the APIC token of the active Environment refreshes itself. Before a request, curl
+// or Python that uses APIC_COOKIE / TOKEN / APIC_TOKEN (as a {{ '{{' }}X}} placeholder, $X, ${X} or "X") runs, a missing
+// or expiring token (JWT exp, or the time the APIC gave) is replaced by a fresh login with
+// APIC_USERNAME / APIC_PASSWORD, saved into the Environment, and the run goes on with it.
+const APIC_TOKEN_KEYS = ['APIC_COOKIE', 'TOKEN', 'APIC_TOKEN'];
+function apicTokenExp (tok) {
+  try {
+    const p = JSON.parse(atob(String(tok).split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    if (p && p.exp) return p.exp * 1000;
+  } catch (e) {}
+  try { const m = JSON.parse(localStorage.getItem('hitech.apicTokExp') || '{}'); return m[tok] || 0; } catch (e) { return 0; }
+}
+async function rcEnsureApicToken (texts) {
+  const env = (document.getElementById('rc-env-sel') || {}).value;
+  const v = RC_ENV_VARS || {};
+  if (!env || !v.APIC_USERNAME || !v.APIC_PASSWORD || !(v.APIC_BASEURL || v.APIC_HOST)) return;
+  const keys = APIC_TOKEN_KEYS.filter(k => Object.prototype.hasOwnProperty.call(v, k));
+  const used = keys.filter(k => texts.some(t => t && new RegExp(
+    '\\{\\{\\s*' + k + '\\s*\\}\\}|\\$\\{?' + k + '\\b|["\']' + k + '["\']').test(t)));
+  if (!used.length) return;
+  if (used.every(k => v[k] && apicTokenExp(v[k]) - Date.now() > 60000)) return;
+  const note = msg => ['rc-env-hint', 'curl-env-hint', 'py-env-hint'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.textContent = msg; });
+  note('APIC token expired — logging in…');
+  const d = await rcStoreApi('/api/apic-token', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ vars: v }) });
+  if (!d.ok || !d.token) { note('APIC token: ' + (d.error || 'login failed')); return; }
+  try {
+    const m = JSON.parse(localStorage.getItem('hitech.apicTokExp') || '{}');
+    m[d.token] = Date.now() + (d.refreshTimeoutSeconds || 600) * 1000;
+    const ks = Object.keys(m); if (ks.length > 20) ks.slice(0, ks.length - 20).forEach(k => delete m[k]);
+    localStorage.setItem('hitech.apicTokExp', JSON.stringify(m));
+  } catch (e) {}
+  const nv = Object.assign({}, v);
+  keys.forEach(k => { nv[k] = d.token; });
+  await rcStoreApi('/api/rc-env-save', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: env, vars: nv }) });
+  RC_ENV_VARS = nv;
+  rcEnvHint();
+  // an open Environment editor shows the new token too (and Save there does not put the old one back)
+  const ed = document.getElementById('rc-env-editor'), ta = document.getElementById('rc-env-vars');
+  if (ed && ta && ed.style.display === 'block') {
+    ta.value = Object.entries(nv).map(([k, x]) => `${k} = ${x}`).join('\n');
+  }
+  note('APIC token refreshed in "' + env + '" (' + keys.join(', ') + ') — valid ' +
+       Math.round((d.refreshTimeoutSeconds || 600) / 60) + ' min');
+}
+
 // v1.28.0 issue-2: substitute {{VAR}} from the active environment into arbitrary text.
 function rcApplyEnvVars(text) {
   if (!text) return text;
@@ -6864,6 +6916,8 @@ function initV18PythonPane() {
     err.textContent = '';
     meta.textContent = '';
     try {
+      await rcEnsureApicToken([document.getElementById('py-code').value,
+                               (document.getElementById('py-env') || {}).value || '']);   // v1.58.6
       const r = await fetch('/api/python-execute', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -6903,6 +6957,7 @@ function initV18CurlPane() {
     err.textContent = '';
     meta.textContent = '';
     try {
+      await rcEnsureApicToken([document.getElementById('curl-command').value]);   // v1.58.6
       const r = await fetch('/api/curl-execute', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
