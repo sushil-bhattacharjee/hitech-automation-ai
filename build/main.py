@@ -101,7 +101,7 @@ AI_AVAILABLE = LLM_AVAILABLE and RAG_AVAILABLE
 from tools import DeviceContext
 
 # ----------------------------- version ----------------------------- #
-APP_VERSION = "hitech_automation_ai.1.58.6"
+APP_VERSION = "hitech_automation_ai.1.60.5"
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from jinja2 import Environment, StrictUndefined, TemplateSyntaxError

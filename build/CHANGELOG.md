@@ -1,5 +1,79 @@
 # CHANGELOG
 
+## hitech_automation_ai.1.60.5 — 2026-10-27
+
+### Added
+- **Add routers/switches or ACI to a running lab** from Lab devices (as on the lab page): "Add Router/Switch
+  Lab" / "Add ACI" with its hourly rate, billed per minute until the lab ends; the panel shows it "being
+  created" and updates itself until it is up. Routers/switches need the lab's workstation.
+
+## hitech_automation_ai.1.60.4 — 2026-10-27
+
+### Added
+- **Extend the lab from software-automation.** Lab devices shows "Extend by 15 min … 4 h" while a lab or
+  devices run — the same as the lab page: the end time moves out, billing stays per minute, and it needs
+  enough credit for the extra time.
+
+### Changed
+- VS Code websockets are no longer compressed (per-message deflate off): on some company networks the
+  proxy passed compressed frames badly and VS Code dropped the connection every 10 s ("status code 1006").
+
+## hitech_automation_ai.1.60.3 — 2026-10-27
+
+### Changed
+- **📁 Files on the CCNP workstation shows the course folder `~/pro` only** (no Desktop, Documents,
+  Downloads, …). The practice terminal still shows its home folder.
+- VS Code: the gateway logs why each websocket closed (browser / workstation code, error, seconds open).
+
+## hitech_automation_ai.1.60.2 — 2026-10-27
+
+### Fixed
+- **The APIC token refreshes itself on the public site too.** The APIC Environment's `APIC_BASEURL`
+  (`https://<ip>`) was not pointed at the running lab APIC — only `APIC_HOST` was — so the token login
+  went to 192.168.89.95, which the network guard refuses, and no token was saved. Both now follow the lab
+  APIC while it runs (and go back to 192.168.89.95 when it stops). New or merged environments are pointed
+  at the lab right away.
+
+## hitech_automation_ai.1.60.1 — 2026-10-27
+
+### Changed
+- **A new starter set now reaches existing accounts too** (public site). Before, only files a user did
+  not have yet were copied, so new and revised saved requests never arrived for anyone who already had a
+  RESTCONF tree. Now the saved-request trees are merged: new requests and folders are added, a request
+  the user never changed gets the new version, and where the user changed it their version stays beside
+  it as "… (your copy)"; what a user deleted is not brought back. Environments get new keys; a user's own
+  values stay (an empty value is filled). The given files are kept in `.template-base/` for the next merge.
+
+## hitech_automation_ai.1.60.0 — 2026-10-27
+
+### Added
+- **VS Code ↗ on the lab terminal (CCNP workstation).** The full VS Code (code-server) running on your own
+  workstation, in a new tab: Python with IntelliSense (basedpyright), Ruff, debugger, YAML, Ansible, Jinja,
+  YANG, Terraform, XML, REST Client, Docker, GitLens and more; its own terminal; install more extensions
+  from Open VSX. It opens `~/pro`, starts when you open it and stops by itself after an hour unused.
+  Needs a lab started on the newest workstation image (v30); 📁 Files stays as the quick editor.
+
+## hitech_automation_ai.1.59.1 — 2026-10-26
+
+### Added
+- **Problems and Fix in the terminal's editor.** While you type, Python is checked by ruff (syntax errors,
+  undefined names, unused imports, …), YAML by yamllint (syntax, duplicate keys, indentation and spacing)
+  and shell scripts by shellcheck: red / yellow underlines with the message on hover, a ⛔ / ⚠ count, and a
+  list that jumps to the line. **🔧 Fix** (Python) applies ruff's safe fixes and formats the file (unused
+  imports are left for you); Ctrl+Z undoes it. The checkers only read the text; nothing is run.
+
+## hitech_automation_ai.1.59.0 — 2026-10-26
+
+### Added
+- **Files and editor beside the lab terminal** (📁 Files, on the CCNP workstation terminal and the practice
+  terminal). An explorer of your home folder (the course folder `pro` opens first; dotfiles behind `.*`):
+  open, new file / folder, rename, delete, upload (up to 20 MB each), download (up to 20 MB). Files open in
+  tabs in the VS Code editor (Monaco: colours, find, multi-cursor; a plain text box if it cannot load),
+  Ctrl+S saves, ● marks unsaved changes, and a file changed in the terminal since you opened it is not
+  overwritten without asking. ▶ Run saves a `.py` / `.sh` and runs it in the active terminal pane.
+  It uses the same account and machine as the terminal (SFTP), only inside your home folder; open the
+  terminal first.
+
 ## hitech_automation_ai.1.58.6 — 2026-10-26
 
 ### Added
