@@ -693,6 +693,7 @@
 <aside id="v18-sidebar" class="v18-sidebar">
   <button id="v18-nav-toggle" class="v18-nav-toggle" title="Collapse / expand navigation">≡</button>
   <div class="v18-nav-items">
+    <div class="v18-nav-links">
     <div class="v18-nav-group">Config Mgmt</div>
     <a href="#" class="v18-nav-item active" data-target="netconf"  title="Direct NETCONF transport">📡 NETCONF</a>
     <a href="#" class="v18-nav-item"        data-target="restconf" title="Direct RESTCONF transport">🌐 RESTCONF</a>
@@ -707,6 +708,7 @@
     <div class="v18-nav-group">Assistant</div>
     <a href="#" class="v18-nav-item"        data-target="aichat"    title="Agentic chat with AI">💬 AI Chat</a>
     <a href="#" class="v18-nav-item"        data-target="docs"      title="Inline docs and references">📖 Docs</a>
+    </div>
 
     <!-- v1.21.0: per-transport collection trees (shown for the active nav transport) -->
     <div class="rc-coll-section" id="rc-coll-netconf" data-scope="netconf" style="display:flex; flex-direction:column; flex:1; min-height:80px;">
@@ -832,6 +834,19 @@ body.v18-nav-collapsed { --nav-w: 38px; }
 .v18-nav-footer {
   padding: 8px 14px; color: #64748b; font-size: 11px;
   border-top: 1px solid #1e293b;
+}
+/* 1.60.6: the collections tree gets at least half the height (laptop screens); the menu
+   above it is more compact on short screens. A hidden tree (▸) gives the space back. */
+.v18-nav-items { overflow: hidden !important; min-height: 0; }
+.v18-nav-links { flex: 0 1 auto; max-height: 40%; overflow-y: auto; min-height: 0; }
+/* no tree shown on this page (Ansible, YANG, …): the menu may use the whole height */
+.v18-nav-items:not(:has(.rc-coll-section:not(.rc-tree-hidden):is([style*="display: flex"], [style*="display:flex"]))) .v18-nav-links { max-height: none; }
+.rc-coll-section { min-height: 0 !important; }
+.rc-coll-section.rc-tree-hidden { flex: 0 0 auto !important; }
+@media (max-height: 1000px) {
+  .v18-nav-item { padding: 5px 14px; }
+  .v18-nav-group { padding: 7px 14px 2px; }
+  .v18-nav-toggle { padding: 3px 10px; margin-bottom: 2px; }
 }
 /* Shift main content to make room for the single merged sidebar */
 body { margin-left: var(--nav-w); transition: margin-left 0.12s ease; }

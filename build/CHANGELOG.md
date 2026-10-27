@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## hitech_automation_ai.1.60.6 — 2026-10-27
+
+### Changed
+- **More room for the collections** in the left sidebar: the menu (NETCONF … Docs) takes at most 40% of
+  the height and scrolls on its own when it needs more, so the collections tree gets the rest — about
+  60% on a laptop screen. Short screens get a more compact menu. Pages without a tree use the whole height.
+
 ## hitech_automation_ai.1.60.5 — 2026-10-27
 
 ### Added
