@@ -101,7 +101,7 @@ AI_AVAILABLE = LLM_AVAILABLE and RAG_AVAILABLE
 from tools import DeviceContext
 
 # ----------------------------- version ----------------------------- #
-APP_VERSION = "hitech_automation_ai.1.60.6"
+APP_VERSION = "hitech_automation_ai.1.61.0"
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from jinja2 import Environment, StrictUndefined, TemplateSyntaxError
@@ -3108,6 +3108,8 @@ async def api_netconf_xpath(req: NetconfXpathRequest):
         from tools.ui_results import set_last_result
         set_last_result("netconf-xpath", pretty, device=d.name,
                         query=req.xpath, source=req.source, kind="xml")
+        # v1.61.0: say which prefixes were declared, so the user sees how it was sent
+        _pc = _nctools._PREFIX_CACHE.get(d.host, {})
         return {
             "ok": True,
             "result_xml": pretty,
@@ -3115,6 +3117,7 @@ async def api_netconf_xpath(req: NetconfXpathRequest):
             "device": d.name,
             "source": req.source,
             "xpath": req.xpath,
+            "namespaces": {p: _pc[p] for p in _nctools.xpath_prefixes(req.xpath) if p in _pc},
         }
     except Exception as e:
         elapsed_ms = int((time.monotonic() - t0) * 1000)
@@ -3666,7 +3669,13 @@ def api_export_python(req: PyExportReq):
         d = _inventory.get_device(req.device_name)
         host = d.host if d else req.device_name
         port = getattr(d, "port_netconf", 830) if d else 830
-        code = py_export.generate(
+        # v1.61.0: a prefixed XPath needs its namespaces in the script too
+        xpath_ns = {}
+        if d and req.filter_type == "xpath":
+            from tools import netconf_tools as _nct
+            if _nct.xpath_prefixes(py_export.normalize_xpath(req.xpath)):
+                xpath_ns = _nct.xpath_ns_for_device(d, py_export.normalize_xpath(req.xpath))
+        code = py_export.generate(xpath_ns=xpath_ns,
             device_name=req.device_name, host=host, port=port,
             source=req.source, filter_type=req.filter_type,
             xpath=req.xpath, subtree_xml=req.subtree_xml, config_xml=req.config_xml,

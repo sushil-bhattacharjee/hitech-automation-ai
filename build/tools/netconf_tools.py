@@ -461,17 +461,102 @@ def _ncclient_device_name(device_type: str) -> str:
     return mapping.get(device_type, "default")
 
 
-def _build_filter(filter_type: str, subtree_xml: str, xpath: str):
+# v1.61.0: XPath prefixes. A NETCONF <filter type="xpath" select="..."> may use
+# prefixes only if the request also declares them (xmlns:pfx="namespace").
+# Without that IOS-XE answers "Invalid namespace prefix: bgp-ios-xe-oper".
+# Both forms are accepted:
+#   /bgp-state-data/...                         no prefix  -> sent as before
+#   /bgp-ios-xe-oper:bgp-state-data/...         YANG prefix (from the module)
+#   /Cisco-IOS-XE-bgp-oper:bgp-state-data/...   module name (RESTCONF style)
+# The namespace comes from the device itself: the module list in its <hello>,
+# and for a YANG prefix, the "prefix" line of the module (<get-schema>).
+_XP_PREFIX_RE = re.compile(r"(?<![\w.:-])([A-Za-z_][\w.-]*):(?=[A-Za-z_*])")
+_PREFIX_CACHE: dict[str, dict[str, str]] = {}      # device host -> {prefix: namespace}
+
+
+def xpath_prefixes(xpath: str) -> list[str]:
+    """Prefixes used in an XPath, ignoring quoted literals and axes (child::)."""
+    if not xpath:
+        return []
+    bare = re.sub(r'"[^"]*"|\'[^\']*\'', '""', xpath)
+    out = []
+    for p in _XP_PREFIX_RE.findall(bare):
+        if p not in out:
+            out.append(p)
+    return out
+
+
+def _caps_modules(caps) -> dict[str, str]:
+    """{module name: namespace} from the device's <hello> capabilities."""
+    mods = {}
+    for c in caps or []:
+        m = re.match(r"([^?]+)\?(?:.*&)?module=([^&]+)", str(c))
+        if m:
+            mods[m.group(2)] = m.group(1)
+    return mods
+
+
+def _schema_prefix(m, module: str) -> str:
+    try:
+        txt = m.get_schema(module).data
+    except Exception as e:  # noqa: BLE001
+        log.debug("netconf: get-schema %s failed: %s", module, e)
+        return ""
+    hit = re.search(r'^\s*prefix\s+"?([\w.-]+)"?\s*;', str(txt), re.M)
+    return hit.group(1) if hit else ""
+
+
+def resolve_xpath_ns(m, host: str, xpath: str) -> dict[str, str]:
+    """{prefix: namespace} for every prefix in `xpath`. Raises ValueError for a
+    prefix the device has no module for."""
+    want = xpath_prefixes(xpath)
+    if not want:
+        return {}
+    cache = _PREFIX_CACHE.setdefault(host, {})
+    missing = [p for p in want if p not in cache]
+    if missing:
+        mods = _caps_modules(getattr(m, "server_capabilities", []))
+        for p in missing:
+            if p in mods:                                   # module-name form
+                cache[p] = mods[p]
+                continue
+            # YANG prefix: try the modules whose names contain the prefix's words
+            # (bgp-ios-xe-oper -> Cisco-IOS-XE-bgp-oper), read their prefix line.
+            words = [w for w in p.lower().split("-") if w not in ("ios", "xe", "cisco")]
+            if words:
+                cands = [n for n in mods if all(w in n.lower().split("-") for w in words)]
+            else:
+                cands = [n for n in mods if n == "Cisco-IOS-XE-native"]
+            cands.sort(key=len)
+            for name in cands[:8]:
+                pf = _schema_prefix(m, name)
+                if pf:
+                    cache.setdefault(pf, mods[name])
+                if pf == p:
+                    break
+    unknown = [p for p in want if p not in cache]
+    if unknown:
+        raise ValueError(
+            f"unknown XPath prefix {', '.join(unknown)}: the device has no module with that "
+            "prefix. Use the YANG prefix (e.g. bgp-ios-xe-oper), the module name "
+            "(e.g. Cisco-IOS-XE-bgp-oper), or no prefix at all.")
+    return {p: cache[p] for p in want}
+
+
+def _build_filter(filter_type: str, subtree_xml: str, xpath: str, m=None, host: str = ""):
     """Convert v1.7.0 filter_type + payload into ncclient's filter tuple.
 
     Returns None when filter_type='none' (or no filter supplied), in which case
     the caller should NOT pass a filter argument at all.
+    v1.61.0: an XPath with prefixes is sent with their namespaces declared.
     """
     if filter_type == "none":
         return None
     if filter_type == "xpath":
         if not xpath:
             return None
+        if m is not None and xpath_prefixes(xpath):
+            return ("xpath", (resolve_xpath_ns(m, host, xpath), xpath))
         return ("xpath", xpath)
     # Default: subtree
     if subtree_xml:
@@ -513,7 +598,7 @@ def _with_retry(d: inventory.Device, fn, *args, **kwargs):
 
 def _sync_get_config(d: inventory.Device, filter_type: str, subtree_xml: str, xpath: str) -> str:
     def _op(m):
-        f = _build_filter(filter_type, subtree_xml, xpath)
+        f = _build_filter(filter_type, subtree_xml, xpath, m, d.host)
         if f is None:
             reply = m.get_config(source="running")
         else:
@@ -524,7 +609,7 @@ def _sync_get_config(d: inventory.Device, filter_type: str, subtree_xml: str, xp
 
 def _sync_get_state(d: inventory.Device, filter_type: str, subtree_xml: str, xpath: str) -> str:
     def _op(m):
-        f = _build_filter(filter_type, subtree_xml, xpath)
+        f = _build_filter(filter_type, subtree_xml, xpath, m, d.host)
         if f is None:
             reply = m.get()
         else:
@@ -820,3 +905,10 @@ NETCONF_HANDLERS = {
     "propose_edit_config":   tool_propose_edit_config,
     "apply_edit_config":     tool_apply_edit_config,
 }
+
+
+def xpath_ns_for_device(d: inventory.Device, xpath: str) -> dict[str, str]:
+    """v1.61.0: {prefix: namespace} for an XPath (used by the Python export)."""
+    if not xpath_prefixes(xpath):
+        return {}
+    return _with_retry(d, lambda m: resolve_xpath_ns(m, d.host, xpath))

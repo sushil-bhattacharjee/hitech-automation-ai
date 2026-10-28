@@ -1336,6 +1336,7 @@ pre.result-pane.pane-expanded { height: auto !important; }
         </div>
         <textarea id="xpath-expr" rows="3" class="resizable-v" style="width:100%; font-family:monospace; padding:6px;" placeholder="/bgp-state-data/neighbors/neighbor[neighbor-id='10.44.10.1']"></textarea>
         <div id="xpath-decoded-note" style="display:none; font-size:12px; color:#b45309; margin-top:2px;"></div>
+        <div style="font-size:11px; color:#64748b; margin-top:2px;">Both forms work: <b>without prefix</b> <code>/bgp-state-data/…</code>, or <b>with the YANG prefix</b> <code>/bgp-ios-xe-oper:bgp-state-data/…</code> (the module name <code>Cisco-IOS-XE-bgp-oper:</code> works too). With a prefix, its namespace is read from the device and sent as <code>xmlns:prefix="…"</code> on the filter — the form a telemetry subscription uses.</div>
         <div style="margin-top:8px;">
           <button id="xpath-send" class="small" style="background:#2563eb; color:white; border-color:#2563eb;">Run XPath query</button>
           <button id="xpath-export-py" class="small" style="background:#3776ab; color:white; border-color:#3776ab;"
@@ -2201,7 +2202,7 @@ out-octets = state/counters/out-octets</textarea>
         <div id="yang-split-handle" title="Drag to resize" style="width:8px; margin:0 4px; cursor:col-resize; flex:0 0 auto; border-radius:4px; background:#e2e8f0;"></div>
         <div id="yang-detail-pane" style="width:420px; min-width:260px; flex:0 0 auto; display:flex; flex-direction:column; gap:10px;">
           <div style="border:1px solid #e2e8f0; border-radius:8px; padding:10px; background:#fff;">
-            <h3 style="font-size:13px; margin:0 0 6px;">Node detail</h3>
+            <div style="display:flex; align-items:center; gap:8px; margin:0 0 6px;"><h3 style="font-size:13px; margin:0;">Node detail</h3><button class="small" id="yang-detail-copy" type="button" title="Copy all of Node detail as text">📋 Copy</button></div>
             <div id="yang-node-detail" style="font-size:12px; color:#475569;">Click a node in the tree to see its properties, RFC reference and generated paths.</div>
             <div id="yang-rfc"></div>
           </div>
@@ -2216,6 +2217,11 @@ out-octets = state/counters/out-octets</textarea>
             <div style="display:flex; gap:6px;">
               <input id="yang-gen-xpath" readonly style="flex:1; font-family:ui-monospace,monospace; font-size:12px; padding:6px; background:#f8fafc;">
               <button class="small yang-copy" data-src="yang-gen-xpath">📋</button>
+            </div>
+            <label style="font-size:11px; color:#64748b; display:block; margin-top:8px;">XPath with prefix (telemetry subscription / prefixed NETCONF filter)</label>
+            <div style="display:flex; gap:6px;">
+              <input id="yang-gen-xpath-px" readonly style="flex:1; font-family:ui-monospace,monospace; font-size:12px; padding:6px; background:#f8fafc;">
+              <button class="small yang-copy" data-src="yang-gen-xpath-px">📋</button>
             </div>
             <div id="yang-warnings" style="margin-top:8px; font-size:11px; color:#b45309;"></div>
             <!-- v1.34.0: API operations for the selected node -->
@@ -7402,7 +7408,8 @@ function initV18XpathPane() {
       const data = await r.json();
       if (data.ok) {
         setResult(out, data.result_xml || '(empty)', true);
-        meta.textContent = `${data.elapsed_ms}ms · source=${data.source}`;
+        const _ns = Object.entries(data.namespaces || {}).map(([p, u]) => `xmlns:${p}="${u}"`).join(' ');
+        meta.textContent = `${data.elapsed_ms}ms · source=${data.source}` + (_ns ? ` · prefix sent as ${_ns}` : ' · no prefix');
       } else {
         out.textContent = '[error] ' + (data.error || 'unknown');
         meta.textContent = `failed · ${data.elapsed_ms || 0}ms`;
@@ -8670,6 +8677,7 @@ function initV18Yang() {
   }
 
   let lastSelRow = null;
+  let detailText = '';      // v1.61.0: Node detail as text, for its 📋 Copy
   let lastSelNode = null;   // v1.38.0: node backing Generate API(s)
   function selectNode(node, row) {
     lastSelNode = node;
@@ -8695,8 +8703,10 @@ function initV18Yang() {
       ['Module', node.augmented_from || treeMeta.module], ['Prefix', treeMeta.prefix],
       ['Namespace', treeMeta.namespace],
       ['Schema Node Id', xpathOf(node)],
-      ['XPath', xpathOf(node)], ['Description', node.description || '\u2014'],
+      ['XPath', xpathOf(node)], ['XPath with prefix', xpathPxOf(node)],
+      ['Description', node.description || '\u2014'],
     ];
+    detailText = rows.map(([k, v]) => k + '\t' + v).join('\n');   // v1.61.0: for 📋 Copy
     detailEl.innerHTML = rows.map(([k,v]) => `<div style="display:flex; gap:6px; margin-bottom:2px;"><span style="min-width:80px; color:#94a3b8;">${k}</span><span style="color:#0f172a; word-break:break-all;">${escapeHtml(String(v))}</span></div>`).join('');
     // v1.34.3: paths derived client-side from the parent chain (compact JSON)
     // v1.39.1: only data nodes have a RESTCONF data URI
@@ -8704,6 +8714,8 @@ function initV18Yang() {
     genRc.value = rc ? ('/restconf/data/' + rc)
                      : '\u2014 (no RESTCONF data path for a ' + node.keyword + ')';
     genXp.value = xpathOf(node);
+    const _gpx = document.getElementById('yang-gen-xpath-px');
+    if (_gpx) _gpx.value = xpathPxOf(node);
     renderApiOps(node);   // v1.34.0
     renderRfc(node.keyword);   // v1.39.0
   }
@@ -9802,6 +9814,20 @@ function initV18Yang() {
     const chain = schemaChain(node);
     return chain.length ? '/' + chain.map(n => n.name).join('/') : '/';
   }
+  // v1.61.0: XPath with the module PREFIX on the first node, as in a telemetry
+  // subscription: /bgp-ios-xe-oper:bgp-state-data/address-families/...
+  // A node augmented in from another module gets that module's prefix.
+  function xpathPxOf(node) {
+    const chain = schemaChain(node);
+    if (!chain.length) return '/';
+    let cur = '';
+    return '/' + chain.map((n, i) => {
+      const px = n.augmented_from ? (n.augmented_prefix || n.augmented_from) : treeMeta.prefix;
+      const seg = (px && (i === 0 || px !== cur)) ? `${px}:${n.name}` : n.name;
+      cur = px || cur;
+      return seg;
+    }).join('/');
+  }
   function rcOf(node) {
     // RESTCONF data path: data nodes only (correct — RPCs/notifications have no data URI)
     const chain = dataChain(node);
@@ -10404,12 +10430,29 @@ function initV18Yang() {
   });
 
   // copy buttons
+  // v1.61.0: navigator.clipboard exists only on https:// (and localhost), so on
+  // http://<ip>:7071 these buttons did nothing. Fall back to execCommand('copy').
+  function yangCopy(txt, b, label) {
+    const done = (ok) => { b.textContent = ok ? '✓' : '✕'; setTimeout(() => b.textContent = label, 900); };
+    const legacy = () => {
+      const ta = document.createElement('textarea');
+      ta.value = txt; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.top = '-1000px';
+      document.body.appendChild(ta); ta.select();
+      let ok = false; try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      ta.remove(); done(ok);
+    };
+    if (!txt) { done(false); return; }
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(txt).then(() => done(true), legacy);
+    else legacy();
+  }
   document.querySelectorAll('.yang-copy').forEach(b => {
     b.addEventListener('click', () => {
       const el = document.getElementById(b.dataset.src);
-      if (el && el.value) { navigator.clipboard.writeText(el.value); b.textContent = '✓'; setTimeout(()=>b.textContent='📋', 900); }
+      yangCopy(el ? el.value : '', b, '📋');
     });
   });
+  const _dc = document.getElementById('yang-detail-copy');
+  if (_dc) _dc.addEventListener('click', () => yangCopy(detailText, _dc, '📋 Copy'));
 
   document.getElementById('yang-sec-collapse').addEventListener('click', () => setAllSections(true));
   document.getElementById('yang-sec-expand').addEventListener('click', () => setAllSections(false));

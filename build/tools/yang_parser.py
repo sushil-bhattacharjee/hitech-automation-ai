@@ -386,7 +386,11 @@ def build_tree_resolved(module, depth_limit: int = 0):
         if musts: node["must"] = musts
         if when: node["when"] = when
         if tinfo.get("leafref_path"): node["leafref"] = tinfo["leafref_path"]
-        if owner_name != modname: node["augmented_from"] = owner_name
+        if owner_name != modname:
+            node["augmented_from"] = owner_name
+            # v1.61.0: the augmenting module's own prefix, for "XPath (with prefix)"
+            opx = owner.search_one("prefix") if owner is not None else None
+            if opx is not None: node["augmented_prefix"] = opx.arg
         desc = _desc(s)[:200]
         if desc: node["description"] = desc
         kids = getattr(s, "i_children", None) or []

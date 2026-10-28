@@ -1,5 +1,22 @@
 # CHANGELOG
 
+## hitech_automation_ai.1.61.0 — 2026-10-29
+
+### Added
+- **XPath with or without a prefix** (XPath query, NETCONF tools, Python export). Both now work:
+  `/bgp-state-data/...` (no prefix, as before) and `/bgp-ios-xe-oper:bgp-state-data/...` (the YANG prefix,
+  as a telemetry subscription uses; the module name `Cisco-IOS-XE-bgp-oper:` works too). With a prefix, its
+  namespace is read from the device (module list in its hello + the module's `prefix` line via get-schema,
+  cached per device) and sent as `xmlns:prefix="..."` on the filter. Before, IOS-XE answered
+  "Invalid namespace prefix". The result line says how it was sent; the Python export declares `xpath_ns`.
+- **YANG Explorer → Node detail:** a 📋 Copy button (all lines as text) and a new line, **XPath with prefix**
+  (`/bgp-ios-xe-oper:bgp-state-data/...`; a node augmented from another module gets that module's prefix).
+  The same value is under Generated, with its own copy button.
+
+### Fixed
+- The 📋 buttons for the generated RESTCONF path / XPath did nothing on `http://<ip>:7071` (the browser
+  clipboard API exists only on https/localhost). They now fall back to the classic copy.
+
 ## hitech_automation_ai.1.60.6 — 2026-10-27
 
 ### Changed

@@ -152,6 +152,7 @@ def generate(
     row_element: str = "",
     columns: list[dict] | None = None,
     port: int = _NC_PORT_DEFAULT,
+    xpath_ns: dict | None = None,
 ) -> str:
     columns = columns or []
     xpath = normalize_xpath(xpath)          # v1.48.1
@@ -251,14 +252,21 @@ xml_rsp = fromstring(reply.data_xml.encode())
 
 '''
     else:
-        call = ('session.get(filter=("xpath", xpath_filter))' if source == "get"
-                else 'session.get_config(source="running", filter=("xpath", xpath_filter))')
+        flt = '("xpath", (xpath_ns, xpath_filter))' if xpath_ns else '("xpath", xpath_filter)'
+        call = (f'session.get(filter={flt})' if source == "get"
+                else f'session.get_config(source="running", filter={flt})')
+        ns_block = ""
+        if xpath_ns:   # v1.61.0: prefixes in the XPath must be declared in the request
+            ns_block = ("\n# The XPath uses prefixes, so the request must declare them\n"
+                        "# (sent as xmlns:<prefix>=\"<namespace>\" on <filter>).\n"
+                        "xpath_ns = {\n" + "".join(f"    {_py_str(k)}: {_py_str(v)},\n"
+                                                   for k, v in xpath_ns.items()) + "}\n")
         query = f'''
 # ---------------------------------------------------------------------------
 # QUERY \u2014 XPath filter (evaluated on the device)
 # ---------------------------------------------------------------------------
 xpath_filter = {_wrap_expr(xpath)}
-
+{ns_block}
 reply = {call}
 xml_rsp = fromstring(reply.data_xml.encode())
 
