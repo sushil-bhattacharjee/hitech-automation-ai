@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## hitech_automation_ai.1.62.1 — 2026-10-29
+
+### Added
+- **Split editor:** ⫽ Split in the editor bar shows a second open file beside the current one (pick it from the
+  list at its top); both halves edit the same files, Ctrl+S in either saves its own file; drag the line between them.
+- **Markdown preview:** 👁 Preview (or Ctrl+Shift+V) on a .md file shows it rendered; ✎ Edit goes back. It renders
+  in a sandboxed frame, so HTML in a README cannot run anything on the page.
+
+### Fixed
+- The 📁 Files explorer could open on your home folder (nso, mock3, …) instead of ~/pro until the next click —
+  when it asked before the terminal had connected. It now waits and opens on ~/pro.
+
 ## hitech_automation_ai.1.62.0 — 2026-10-29
 
 ### Added
