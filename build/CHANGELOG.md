@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## hitech_automation_ai.1.62.0 — 2026-10-29
+
+### Added
+- **Lab terminal: put the editor where you want it, like VS Code.** The 📁 Files editor is no longer stuck above
+  the terminals: the editor bar has ▀ ▄ ▌ ▐ (editor above / below / left / right of the terminals) and ⛶ (editor
+  only). The header's **View** button cycles both → editor only → terminals only (hidden terminals stay
+  connected). The splitter between them drags in either direction; everything is remembered in the browser.
+
 ## hitech_automation_ai.1.61.0 — 2026-10-29
 
 ### Added
