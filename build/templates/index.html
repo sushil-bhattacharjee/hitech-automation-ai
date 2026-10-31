@@ -97,6 +97,14 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
   header h1 { margin: 0; font-size: 18px; font-weight: 600; }
+  /* 1.62.2: keys to the other hiTech sites, one colour each */
+  .site-keys { display:flex; gap:8px; margin-right:6px; }
+  .site-keys a.sk { font-weight:800; font-size:13px; color:#0d1117; text-decoration:none; border-radius:999px;
+                    padding:4px 13px; transition:transform .15s, filter .15s; }
+  .site-keys a.sk:hover { transform:translateY(-1px); filter:brightness(1.12); }
+  .site-keys .sk-theory { background:linear-gradient(90deg,#1f6feb,#79c0ff); }
+  .site-keys .sk-lab    { background:linear-gradient(90deg,#2ea043,#56d364); }
+  .site-keys .sk-docs   { background:linear-gradient(90deg,#f0883e,#ffc66b); }
 
   main { padding: 16px; width: 100%; margin: 0; } /* v1.16.0 issue-2: fill available width */
 
@@ -944,6 +952,11 @@ pre.result-pane.pane-expanded { height: auto !important; }
 <header>
   <h1>🔧 hiTech Automation AI</h1>
   <div style="display:flex; gap:10px; align-items:center;">
+    <nav class="site-keys" aria-label="hiTech sites">
+      <a class="sk sk-theory" href="https://automation.hitech007.ai/" target="_blank" rel="noopener">Theory</a>
+      <a class="sk sk-lab" href="https://lab-automation.hitech007.ai/" target="_blank" rel="noopener">Lab</a>
+      <a class="sk sk-docs" href="https://ccie-docs.hitech007.ai/" target="_blank" rel="noopener">CCIE Docs</a>
+    </nav>
     <button id="theme-toggle-btn" class="small" title="Toggle Default / Inverted theme">🌓 Theme</button>
     <button id="open-chat-btn" class="small" style="background:#2563eb; color:white; border-color:#2563eb;">💬 Chat with AI</button>
   </div>

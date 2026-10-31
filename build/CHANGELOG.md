@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## hitech_automation_ai.1.62.2 — 2026-11-01
+
+### Added
+- **Header keys to the other hiTech sites:** **Theory** (automation.hitech007.ai), **Lab** (lab-automation.hitech007.ai)
+  and **CCIE Docs** (ccie-docs.hitech007.ai), each in its own colour, open in a new tab.
+
 ## hitech_automation_ai.1.62.1 — 2026-10-29
 
 ### Added
